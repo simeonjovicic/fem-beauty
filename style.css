@@ -698,6 +698,23 @@ nav.scrolled .nav-links a {
     background: var(--line);
 }
 
+.services-link {
+    font-size: .62rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--black);
+    border: 1px solid var(--line);
+    padding: .75rem 1.8rem;
+    text-decoration: none;
+    transition: border-color .3s, color .3s;
+    white-space: nowrap;
+}
+
+.services-link:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
 .svc-row {
     background: var(--white);
     display: grid;
@@ -756,6 +773,85 @@ nav.scrolled .nav-links a {
 .svc-row:hover .svc-arrow {
     color: var(--gold);
     transform: translateX(4px);
+}
+
+/* ── LOADING SCREEN ─────────────────────────────────────── */
+#loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.8rem;
+    opacity: 1;
+    transition: opacity .7s ease;
+}
+
+#loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* SVG face drawing */
+.loader-face {
+    width: 120px;
+    height: 140px;
+    opacity: 0;
+    animation: loaderFadeIn .4s .1s ease forwards;
+}
+
+.loader-face path {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: drawLine 1.8s .3s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+@keyframes drawLine {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Logo text under face */
+.loader-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: .7em;
+    color: var(--black);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: loaderFadeIn .7s 1.2s ease forwards;
+}
+
+.loader-tagline {
+    font-size: .55rem;
+    letter-spacing: .42em;
+    text-transform: uppercase;
+    color: var(--soft);
+    margin-top: -.8rem;
+    opacity: 0;
+    animation: loaderFadeIn .7s 1.5s ease forwards;
+}
+
+@keyframes loaderFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── PRODUCTS ───────────────────────────────────────────── */
@@ -1092,9 +1188,12 @@ footer {
         height: 50vw;
     }
 
-    .services,
-    .products {
-        padding: 6rem 2rem;
+    .gitem {
+        width: 75vw;
+    }
+
+    .gallery-hd {
+        padding: 0 2rem 3rem;
     }
 
     .services-head {

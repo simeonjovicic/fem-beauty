@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FEM Beauty Wien — Kosmetik & Head Spa, 1050</title>
+    <title>FEM Beauty Wien — Kosmetik &amp; Head Spa, 1050</title>
     <meta name="description"
-        content="FEM – Kosmetiksalon im Herzen von Wien 1050. Head Spa, Gesichtsbehandlungen, Laser & mehr. Inhaberin Jenny verbindet modernste Kosmetik mit chinesischer Medizin." />
+        content="FEM – Kosmetiksalon im Herzen von Wien 1050. Head Spa, Gesichtsbehandlungen, Laser und mehr." />
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap"
         rel="stylesheet" />
@@ -14,6 +14,27 @@
 </head>
 
 <body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loader">
+        <svg class="loader-face" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M 75 8 C 90 10, 105 25, 100 45 C 97 58, 88 65, 82 72 C 76 79, 72 85, 70 92 C 68 99, 68 108, 62 115 C 58 120, 52 124, 50 130 M 82 72 C 78 70, 72 68, 68 65 C 58 60, 50 52, 46 42 C 42 32, 44 20, 52 14 C 60 8, 72 10, 78 18 M 55 50 C 53 47, 50 46, 48 48 C 46 50, 47 54, 50 55 M 72 46 C 70 43, 67 43, 65 45 C 63 47, 64 51, 67 51 M 56 68 C 58 66, 62 65, 65 66 C 68 67, 70 70, 68 73 C 66 76, 62 76, 60 74 C 58 72, 58 70, 60 69 M 62 76 C 62 80, 64 85, 60 90" />
+        </svg>
+        <div class="loader-logo">Fem</div>
+        <div class="loader-tagline">all about beauty</div>
+    </div>
+
+    <!-- INLINE LOADER DISMISS — runs immediately, no external dependency -->
+    <script>
+        setTimeout(function () {
+            var l = document.getElementById('loader');
+            if (!l) return;
+            l.style.opacity = '0';
+            l.style.pointerEvents = 'none';
+            setTimeout(function () { l.style.display = 'none'; }, 700);
+        }, 2400);
+    </script>
 
     <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="fbtn">Buchen</a>
 
@@ -37,10 +58,7 @@
         <div class="hero-body">
             <div class="hero-left">
                 <div class="hero-tag">Kosmetik · Head Spa · Wien 1050</div>
-                <h1>
-                    All about<br>
-                    <em>Beauty.</em>
-                </h1>
+                <h1>All about<br><em>Beauty.</em></h1>
                 <div class="hero-actions">
                     <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="btn-g">Termin buchen</a>
                     <a href="#services" class="btn-w">Services entdecken</a>
@@ -58,26 +76,17 @@
     <!-- MARQUEE -->
     <div class="strip" aria-hidden="true">
         <div class="strip-track">
-            <span>Head Spa</span><span class="dot"> · </span>
-            <span>Carbon Laser</span><span class="dot"> · </span>
-            <span>HIFU</span><span class="dot"> · </span>
-            <span>Radiofrequenz</span><span class="dot"> · </span>
-            <span>iS Clinical</span><span class="dot"> · </span>
-            <span>Babor</span><span class="dot"> · </span>
-            <span>Fillmed</span><span class="dot"> · </span>
-            <span>NewSha</span><span class="dot"> · </span>
-            <span>Laser-Haarentfernung</span><span class="dot"> · </span>
-            <span>Wimpernstyling</span><span class="dot"> · </span>
-            <span>Head Spa</span><span class="dot"> · </span>
-            <span>Carbon Laser</span><span class="dot"> · </span>
-            <span>HIFU</span><span class="dot"> · </span>
-            <span>Radiofrequenz</span><span class="dot"> · </span>
-            <span>iS Clinical</span><span class="dot"> · </span>
-            <span>Babor</span><span class="dot"> · </span>
-            <span>Fillmed</span><span class="dot"> · </span>
-            <span>NewSha</span><span class="dot"> · </span>
-            <span>Laser-Haarentfernung</span><span class="dot"> · </span>
-            <span>Wimpernstyling</span><span class="dot"> · </span>
+            <span>Head Spa</span><span class="dot"> · </span><span>Carbon Laser</span><span class="dot"> ·
+            </span><span>HIFU</span><span class="dot"> · </span><span>Radiofrequenz</span><span class="dot"> ·
+            </span><span>iS Clinical</span><span class="dot"> · </span><span>Babor</span><span class="dot"> ·
+            </span><span>Fillmed</span><span class="dot"> · </span><span>NewSha</span><span class="dot"> ·
+            </span><span>Laser-Haarentfernung</span><span class="dot"> · </span><span>Wimpernstyling</span><span
+                class="dot"> · </span><span>Head Spa</span><span class="dot"> · </span><span>Carbon Laser</span><span
+                class="dot"> · </span><span>HIFU</span><span class="dot"> · </span><span>Radiofrequenz</span><span
+                class="dot"> · </span><span>iS Clinical</span><span class="dot"> · </span><span>Babor</span><span
+                class="dot"> · </span><span>Fillmed</span><span class="dot"> · </span><span>NewSha</span><span
+                class="dot"> · </span><span>Laser-Haarentfernung</span><span class="dot"> ·
+            </span><span>Wimpernstyling</span><span class="dot"> · </span>
         </div>
     </div>
 
@@ -94,11 +103,9 @@
             <span class="label">Über uns</span>
             <h2 class="heading">Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
             <div class="hr"></div>
-            <p class="body-text">
-                Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine stilvolle
-                Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit Entspannung und
-                individueller Betreuung.
-            </p>
+            <p class="body-text">Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine
+                stilvolle Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit
+                Entspannung und individueller Betreuung.</p>
             <div class="intro-features">
                 <div class="feat">Ramperstorffergasse 51 · U4 Pilgramgasse, Bus 59A / 12A / 14A</div>
                 <div class="feat">Wir sprechen Deutsch, Englisch &amp; Chinesisch</div>
@@ -108,7 +115,7 @@
         </div>
     </section>
 
-    <!-- WHY SO GOOD / VALUE PROP -->
+    <!-- WHY FEM -->
     <section class="why" id="why">
         <div class="why-inner">
             <div class="why-head rv">
@@ -155,8 +162,8 @@
                 <div class="why-card rv d2">
                     <div class="why-icon">🌐</div>
                     <div class="why-title">Internationales Team</div>
-                    <div class="why-desc">Deutsch, Englisch und Chinesisch — wir können dir auf deiner Sprache erklären,
-                        was wir tun und warum. Vertrauen durch Verständnis.</div>
+                    <div class="why-desc">Deutsch, Englisch und Chinesisch — wir erklären dir auf deiner Sprache, was
+                        wir tun und warum. Vertrauen durch Verständnis.</div>
                 </div>
             </div>
         </div>
@@ -170,12 +177,10 @@
             <div class="hr"></div>
         </div>
         <div class="team-grid">
-
-            <!-- Jenny featured -->
             <div class="team-featured rv">
                 <div class="team-featured-img">
                     <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80"
-                        alt="Jenny – Inhaberin FEM" loading="lazy" />
+                        alt="Jenny Inhaberin FEM" loading="lazy" />
                 </div>
                 <div class="team-featured-text">
                     <div class="team-name">Jenny</div>
@@ -186,58 +191,41 @@
                         Intuition und jahrelange Erfahrung — damit du den Salon strahlend verlässt.</p>
                 </div>
             </div>
-
-            <!-- Yang -->
             <div class="team-card rv d1">
-                <div class="team-avatar">
-                    <img src="https://cdn1.treatwell.net/images/view/v2.i14282638.w256.h256.x7E9F09A2/" alt="Yang"
-                        loading="lazy" />
-                </div>
+                <div class="team-avatar"><img
+                        src="https://cdn1.treatwell.net/images/view/v2.i14282638.w256.h256.x7E9F09A2/" alt="Yang"
+                        loading="lazy" /></div>
                 <div class="team-name">Yang</div>
                 <div class="team-role">Kosmetikerin</div>
             </div>
-
-            <!-- Najmeh -->
             <div class="team-card rv d2">
-                <div class="team-avatar">
-                    <img src="https://cdn1.treatwell.net/images/view/v2.i15899653.w256.h256.x7CD469ED/" alt="Najmeh"
-                        loading="lazy" />
-                </div>
+                <div class="team-avatar"><img
+                        src="https://cdn1.treatwell.net/images/view/v2.i15899653.w256.h256.x7CD469ED/" alt="Najmeh"
+                        loading="lazy" /></div>
                 <div class="team-name">Najmeh</div>
                 <div class="team-role">Kosmetikerin · Nageldesign · Fußpflege</div>
             </div>
-
-            <!-- Timea -->
             <div class="team-card rv">
-                <div class="team-avatar">
-                    <img src="https://cdn1.treatwell.net/images/view/v2.i12712269.w256.h256.x4FADB2FA/" alt="Timea"
-                        loading="lazy" />
-                </div>
+                <div class="team-avatar"><img
+                        src="https://cdn1.treatwell.net/images/view/v2.i12712269.w256.h256.x4FADB2FA/" alt="Timea"
+                        loading="lazy" /></div>
                 <div class="team-name">Timea</div>
                 <div class="team-role">Nageldesignerin</div>
             </div>
-
-            <!-- Vicky -->
             <div class="team-card rv d1">
-                <div class="team-avatar">
-                    <img src="https://cdn1.treatwell.net/images/view/v2.i10905137.w256.h256.x69D3E476/" alt="Vicky"
-                        loading="lazy" />
-                </div>
+                <div class="team-avatar"><img
+                        src="https://cdn1.treatwell.net/images/view/v2.i10905137.w256.h256.x69D3E476/" alt="Vicky"
+                        loading="lazy" /></div>
                 <div class="team-name">Vicky</div>
                 <div class="team-role">Nageldesignerin</div>
             </div>
-
-            <!-- Jing -->
             <div class="team-card rv d2">
-                <div class="team-avatar">
-                    <img src="https://cdn1.treatwell.net/images/view/v2.i15312424.w128.h170.x89A5E736/" alt="Jing"
-                        loading="lazy" />
-                </div>
+                <div class="team-avatar"><img
+                        src="https://cdn1.treatwell.net/images/view/v2.i15312424.w128.h170.x89A5E736/" alt="Jing"
+                        loading="lazy" /></div>
                 <div class="team-name">Jing</div>
                 <div class="team-role">Nageldesignerin</div>
             </div>
-
-            <!-- Krina -->
             <div class="team-card rv">
                 <div class="team-avatar">
                     <div class="team-avatar-init">K</div>
@@ -245,8 +233,6 @@
                 <div class="team-name">Krina</div>
                 <div class="team-role">Nageldesign · Fußpflege</div>
             </div>
-
-            <!-- Nasim -->
             <div class="team-card rv d1">
                 <div class="team-avatar">
                     <div class="team-avatar-init">N</div>
@@ -254,7 +240,6 @@
                 <div class="team-name">Nasim</div>
                 <div class="team-role">Nageldesign · Fußpflege</div>
             </div>
-
         </div>
     </section>
 
@@ -265,10 +250,7 @@
                 <span class="label">Behandlungen</span>
                 <h2 class="heading">Für jeden<br><em>ist etwas dabei.</em></h2>
             </div>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank"
-                style="font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--black);border:1px solid var(--line);padding:.75rem 1.8rem;text-decoration:none;transition:border-color .3s,color .3s;"
-                onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-                onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--black)'">Alle Preise ansehen
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="services-link">Alle Preise ansehen
                 →</a>
         </div>
         <div class="services-list">
@@ -378,7 +360,7 @@
         </div>
     </section>
 
-    <!-- CONTACT / BOOKING -->
+    <!-- CONTACT -->
     <section class="booking" id="contact">
         <div class="booking-info rv">
             <span class="label" style="color:rgba(184,151,90,.8);">Kontakt &amp; Buchung</span>
@@ -431,7 +413,8 @@
             </div>
             <div class="frow">
                 <div class="fg"><label>Datum</label><input type="date" /></div>
-                <div class="fg"><label>Uhrzeit</label>
+                <div class="fg">
+                    <label>Uhrzeit</label>
                     <select>
                         <option>09:00</option>
                         <option>10:00</option>
