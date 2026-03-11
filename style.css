@@ -399,16 +399,15 @@ h2 em {
     color: var(--sand)
 }
 
-/* ═══ HERO: Full-bleed background ═══════ */
+/* ═══ HERO: Editorial left-aligned ══════ */
 .hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
     height: 100vh;
     height: 100dvh;
-    min-height: 600px;
-    overflow: hidden
+    min-height: 650px;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch
 }
 
 .hero-bg {
@@ -426,92 +425,167 @@ h2 em {
     animation: slowZoom 20s ease-in-out infinite alternate
 }
 
-@keyframes slowZoom {
-    from {
-        transform: scale(1.05)
-    }
-    to {
-        transform: scale(1)
-    }
-}
-
 .hero-bg::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg,
-        rgba(0, 0, 0, .40) 0%,
-        rgba(0, 0, 0, .08) 35%,
-        rgba(0, 0, 0, .06) 55%,
-        rgba(0, 0, 0, .50) 100%);
+    background:
+        linear-gradient(90deg,
+            rgba(0, 0, 0, .62) 0%,
+            rgba(0, 0, 0, .38) 40%,
+            rgba(0, 0, 0, .08) 75%,
+            rgba(0, 0, 0, .03) 100%),
+        linear-gradient(180deg,
+            rgba(0, 0, 0, .20) 0%,
+            transparent 30%,
+            transparent 70%,
+            rgba(0, 0, 0, .35) 100%);
     z-index: 1
 }
 
-.hero-content {
+.hero-inner {
     position: relative;
     z-index: 2;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 3.5rem 5rem
+}
+
+.hero-content {
+    max-width: 600px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 2rem;
-    max-width: 700px;
-    gap: 1.2rem
+    gap: 0
 }
 
-.hero-logo {
-    width: 120px;
-    border-radius: 14px;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, .30);
+/* Gold vertical accent line */
+.hero-accent {
+    width: 1px;
+    height: 60px;
+    background: var(--sand);
+    margin-bottom: 1.8rem;
     opacity: 0;
-    animation: fadeIn 1s .4s ease forwards
+    animation: growDown .8s .3s var(--ease) forwards
 }
 
-.hero-sub {
-    font-size: .68rem;
-    font-weight: 300;
-    letter-spacing: .35em;
+@keyframes growDown {
+    from {
+        opacity: 0;
+        height: 0
+    }
+    to {
+        opacity: 1;
+        height: 60px
+    }
+}
+
+.hero-tag {
+    font-family: 'Outfit', sans-serif;
+    font-size: .55rem;
+    font-weight: 400;
+    letter-spacing: .4em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, .80);
+    color: var(--sand-lt);
+    margin-bottom: 1.2rem;
     opacity: 0;
-    animation: fadeIn .8s .8s ease forwards
+    animation: fadeSlideUp .7s .5s var(--ease) forwards
+}
+
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.02;
+    color: #fff;
+    letter-spacing: -.02em;
+    margin-bottom: 1.6rem;
+    opacity: 0;
+    animation: fadeSlideUp .8s .7s var(--ease) forwards
+}
+
+.hero-title em {
+    font-style: italic;
+    color: var(--sand-lt);
+    display: inline-block
+}
+
+.hero-desc {
+    font-family: 'Outfit', sans-serif;
+    font-size: .82rem;
+    font-weight: 300;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, .60);
+    margin-bottom: 2.2rem;
+    opacity: 0;
+    animation: fadeSlideUp .7s .95s var(--ease) forwards
 }
 
 .hero-btns {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
-    justify-content: center;
     opacity: 0;
-    animation: slideUp .8s 1.1s var(--ease) forwards
+    animation: fadeSlideUp .7s 1.15s var(--ease) forwards
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px)
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
 }
 
 .hero-btns .btn-p {
-    background: #fff;
-    color: var(--warm);
-    border-radius: 50px;
-    padding: .9rem 2.4rem;
+    background: var(--sand);
+    color: #fff;
+    padding: .95rem 2.6rem;
+    border-radius: 0;
+    font-size: .6rem;
+    letter-spacing: .2em;
     transition: background .3s, transform .3s
 }
 
 .hero-btns .btn-p:hover {
-    background: var(--sand-lt);
+    background: #fff;
+    color: var(--warm);
     transform: translateY(-2px)
 }
 
 .hero-btns .btn-o {
-    border: 1px solid rgba(255, 255, 255, .50);
-    color: #fff;
-    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, .30);
+    color: rgba(255, 255, 255, .80);
+    padding: .95rem 2.2rem;
+    border-radius: 0;
+    font-size: .6rem;
+    letter-spacing: .2em;
     transition: all .3s
 }
 
 .hero-btns .btn-o:hover {
-    background: rgba(255, 255, 255, .12);
-    border-color: #fff;
+    border-color: var(--sand);
+    color: var(--sand);
     transform: translateY(-2px)
 }
 
+/* Logo badge — bottom right */
+.hero-badge {
+    opacity: 0;
+    animation: fadeIn 1s 1.4s ease forwards
+}
+
+.hero-logo {
+    width: 80px;
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, .30)
+}
+
+/* Scroll indicator */
 .hero-scroll {
     position: absolute;
     bottom: 2.5rem;
@@ -528,17 +602,17 @@ h2 em {
 
 .hero-scroll span {
     font-family: 'Outfit', sans-serif;
-    font-size: .58rem;
+    font-size: .55rem;
     font-weight: 300;
     letter-spacing: .25em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, .5)
+    color: rgba(255, 255, 255, .4)
 }
 
 .hero-scroll-line {
     width: 1px;
     height: 36px;
-    background: rgba(255, 255, 255, .25);
+    background: rgba(255, 255, 255, .20);
     position: relative;
     overflow: hidden
 }
@@ -550,7 +624,7 @@ h2 em {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, .7);
+    background: rgba(255, 255, 255, .6);
     animation: scrollPulse 2.2s ease-in-out infinite
 }
 
