@@ -87,34 +87,31 @@ a {
     bottom: 2.2rem;
     right: 2.2rem;
     z-index: 300;
-    background: #c4935a;
-    background: linear-gradient(135deg, #d4a96a 0%, #b8784a 100%);
+    background: linear-gradient(135deg, #e8a84a 0%, #c4703a 100%);
     color: #fff;
     font-size: .58rem;
-    font-weight: 600;
-    letter-spacing: .28em;
+    font-weight: 700;
+    letter-spacing: .3em;
     text-transform: uppercase;
-    padding: 1.05rem 2rem 1.05rem 2.4rem;
+    padding: 1.1rem 2.2rem 1.1rem 2.6rem;
     text-decoration: none;
     border-radius: 60px;
     display: flex;
     align-items: center;
     gap: .7rem;
     opacity: 0;
-    transform: translateY(14px);
-    animation: slideUp .6s 2.2s var(--ease) forwards;
     box-shadow:
-        0 8px 32px rgba(184, 120, 74, .50),
-        0 0 0 0 rgba(212, 169, 106, .50);
+        0 10px 36px rgba(200, 100, 40, .55),
+        0 0 0 0 rgba(232, 168, 74, .5);
     transition: transform .3s, box-shadow .3s;
-    animation: slideUp .6s 2.2s var(--ease) forwards, ctaGlow 2.5s 3s ease-in-out infinite
+    animation: slideUp .6s 2.2s var(--ease) forwards, ctaGlow 2.8s 3s ease-in-out infinite
 }
 
 .float-cta:hover {
     transform: translateY(-4px);
     box-shadow:
-        0 16px 48px rgba(184, 120, 74, .55),
-        0 0 0 8px rgba(212, 169, 106, .15)
+        0 18px 52px rgba(200, 100, 40, .65),
+        0 0 0 10px rgba(232, 168, 74, .12)
 }
 
 @keyframes ctaGlow {
@@ -664,6 +661,62 @@ h2 em {
     }
 }
 
+/* ═══ USP STRIP (below hero) ════════════ */
+.usp-strip {
+    display: flex;
+    align-items: stretch;
+    background: var(--white);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line)
+}
+
+.usp-strip-item {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.4rem;
+    padding: 2.6rem 3rem;
+    transition: background .3s
+}
+
+.usp-strip-item:hover {
+    background: var(--cream)
+}
+
+.usp-divider {
+    width: 1px;
+    background: var(--line);
+    align-self: stretch;
+    flex-shrink: 0
+}
+
+.usp-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--sand);
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: .15rem
+}
+
+.usp-strip-item strong {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--warm);
+    margin-bottom: .45rem;
+    letter-spacing: -.01em
+}
+
+.usp-strip-item p {
+    font-size: .78rem;
+    line-height: 1.75;
+    color: var(--taupe);
+    margin: 0
+}
+
 /* ═══ MARQUEE ════════════════════════════ */
 .mq {
     overflow: hidden;
@@ -892,9 +945,115 @@ h2 em {
     color: var(--sand-lt)
 }
 
-/* ═══ TREATMENTS: Horizontal scroll ══════ */
+/* ═══ BRANDS BAR — full width above services ═══ */
+.brands-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 3.5rem;
+    background: var(--cream);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line)
+}
+
+.brands-bar-label {
+    font-size: .48rem;
+    font-weight: 400;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--soft);
+    flex-shrink: 0
+}
+
+.brands-bar-items {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 1rem
+}
+
+.brands-bar-items>span {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 400;
+    color: var(--taupe);
+    letter-spacing: .02em;
+    transition: color .2s
+}
+
+.brands-bar-items>span:hover {
+    color: var(--sand)
+}
+
+.brands-bar-dot {
+    font-size: .5rem !important;
+    color: var(--sand) !important;
+    font-family: sans-serif !important
+}
+
+/* ═══ tc-more card ═══ */
+.tc-more {
+    background: var(--warm) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 260px
+}
+
+.tc-more:hover {
+    background: var(--sand) !important
+}
+
+.tc-more-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    padding: 2rem
+}
+
+.tc-more-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 300;
+    color: var(--sand-lt);
+    line-height: 1
+}
+
+.tc-more:hover .tc-more-count {
+    color: #fff
+}
+
+.tc-more-label {
+    font-size: .55rem;
+    font-weight: 400;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .65)
+}
+
+.tc-more-arrow {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, .5);
+    margin-top: .4rem
+}
+
+.brands-mini-row span {
+    font-family: 'Playfair Display', serif;
+    font-size: .78rem;
+    color: var(--taupe)
+}
+
+.bm-dot {
+    color: var(--sand);
+    font-family: sans-serif !important;
+    font-size: 1rem !important
+}
+
+/* ═══ TREATMENTS: Grid layout ════════════ */
 .treats {
-    padding: 7rem 0 5rem
+    padding: 4rem 0 5rem
 }
 
 .treats-head {
@@ -902,7 +1061,7 @@ h2 em {
     justify-content: space-between;
     align-items: flex-end;
     padding: 0 3.5rem;
-    margin-bottom: 3rem
+    margin-bottom: 2.5rem
 }
 
 .link-arrow {
@@ -924,6 +1083,101 @@ h2 em {
     color: var(--sand)
 }
 
+/* 3-column grid */
+.treats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    margin: 0 3.5rem
+}
+
+.tg {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--white);
+    overflow: hidden;
+    transition: background .3s
+}
+
+.tg:hover {
+    background: var(--cream)
+}
+
+.tg-thumb {
+    height: 160px;
+    background: var(--cream) center/cover no-repeat;
+    transition: transform .6s var(--ease)
+}
+
+.tg:hover .tg-thumb {
+    transform: scale(1.04)
+}
+
+.tg-thumb-plain {
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.tg-thumb-plain::after {
+    content: '✦';
+    font-size: 1.4rem;
+    color: var(--sand);
+    opacity: .4
+}
+
+.tg-body {
+    padding: 1.2rem 1.4rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    flex: 1
+}
+
+.tg-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: .75rem;
+    color: var(--sand)
+}
+
+.tg h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--warm);
+    margin: .1rem 0
+}
+
+.tg p {
+    font-size: .76rem;
+    line-height: 1.7;
+    color: var(--taupe);
+    margin: 0
+}
+
+.tg-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    margin-top: .6rem
+}
+
+.tg-tags span {
+    font-size: .5rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--soft);
+    background: var(--cream);
+    padding: .2rem .6rem;
+    border-radius: 50px
+}
+
+/* keep old .tc styles for safety */
 .treats-track {
     display: flex;
     gap: 1.2rem;
@@ -931,7 +1185,8 @@ h2 em {
     padding: 0 3.5rem 2rem;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none
+    scrollbar-width: none;
+    justify-content: center
 }
 
 .treats-track::-webkit-scrollbar {
@@ -951,8 +1206,8 @@ h2 em {
 }
 
 .tc:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(201, 153, 94, .12)
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 20px 50px rgba(180, 110, 60, .22)
 }
 
 .tc-img {
@@ -999,6 +1254,7 @@ h2 em {
     border-radius: 50px
 }
 
+
 /* ═══ BRANDS ═════════════════════════════ */
 .brands {
     padding: 5rem 3.5rem;
@@ -1043,162 +1299,127 @@ h2 em {
     margin-top: .4rem
 }
 
-/* ═══ TEAM ═══════════════════════════════ */
+/* ═══ TEAM — compact strip ═══════════════ */
 .team {
-    padding: 7rem 3.5rem
+    background: var(--bg);
+    padding: 5rem 0
 }
 
-.team-head {
-    margin-bottom: 3.5rem
+.team-inner {
+    padding: 0 3.5rem
 }
 
-.team-hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    overflow: hidden;
-    border-radius: 6px;
-    margin-bottom: 3rem
+.team-top {
+    margin-bottom: 2.5rem
 }
 
-.team-hero-img {
-    overflow: hidden;
-    max-height: 420px
-}
-
-.team-hero-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 1s var(--ease)
-}
-
-.team-hero:hover .team-hero-img img {
-    transform: scale(1.03)
-}
-
-.team-hero-info {
-    background: var(--cream);
-    padding: 3rem;
+/* Horizontal scroll strip */
+.team-strip {
     display: flex;
-    flex-direction: column;
-    justify-content: center
-}
-
-.badge {
-    display: inline-block;
-    font-size: .5rem;
-    font-weight: 500;
-    letter-spacing: .25em;
-    text-transform: uppercase;
-    color: var(--sand);
-    border: 1px solid var(--line);
-    padding: .25rem .7rem;
-    border-radius: 50px;
-    margin-bottom: 1rem;
-    width: fit-content
-}
-
-.team-hero-info h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 400;
-    color: var(--warm)
-}
-
-.role {
-    font-size: .6rem;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--taupe);
-    margin-top: .3rem
-}
-
-.bio {
-    font-size: .88rem;
-    line-height: 1.9;
-    color: var(--warm-lt);
-    margin-top: 1rem
-}
-
-.team-row {
-    display: flex;
-    gap: 1px;
-    background: var(--line);
+    gap: .8rem;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch
+    padding-bottom: 1rem
 }
 
-.team-row::-webkit-scrollbar {
+.team-strip::-webkit-scrollbar {
     display: none
 }
 
-.tm {
+/* Each card */
+.tcard {
     flex-shrink: 0;
-    width: 140px;
-    background: var(--white);
-    padding: 2rem 1rem;
-    text-align: center;
-    transition: background .3s
-}
-
-.tm:hover {
-    background: var(--cream)
-}
-
-.tm-av {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    margin: 0 auto 1rem;
+    width: 160px;
+    border-radius: 10px;
     overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--line);
+    transition: transform .35s var(--ease), box-shadow .35s
+}
+
+.tcard:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(180, 110, 60, .15)
+}
+
+.tcard-img {
+    width: 100%;
+    height: 140px;
+    background: var(--cream) center/cover no-repeat;
+    transition: transform .5s var(--ease)
+}
+
+.tcard:hover .tcard-img {
+    transform: scale(1.05)
+}
+
+.tcard-init {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--cream);
-    transition: border-color .3s
+    background: var(--cream)
 }
 
-.tm:hover .tm-av {
-    border-color: var(--sand)
-}
-
-.tm-av img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover
-}
-
-.tm-i {
+.tcard-init span {
     font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
+    font-size: 2rem;
+    font-style: italic;
     color: var(--sand)
 }
 
-.tm-n {
-    display: block;
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    color: var(--warm)
+.tcard-info {
+    padding: .9rem 1rem 1.1rem
 }
 
-.tm-r {
-    display: block;
-    font-size: .55rem;
-    letter-spacing: .16em;
+.tcard-badge {
+    display: inline-block;
+    font-size: .44rem;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--sand);
+    border: 1px solid var(--line);
+    padding: .15rem .55rem;
+    border-radius: 50px;
+    margin-bottom: .5rem
+}
+
+.tcard h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 400;
+    color: var(--warm);
+    margin: 0
+}
+
+.tcard-role {
+    font-size: .5rem;
+    letter-spacing: .14em;
     text-transform: uppercase;
     color: var(--soft);
     margin-top: .2rem
 }
 
+/* ═══ GOOGLE MAPS ════════════════════════ */
 /* ═══ CONTACT ════════════════════════════ */
 .contact {
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 70vh
 }
+
+.contact-map {
+    overflow: hidden
+}
+
+.contact-map iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    display: block;
+    border: 0
+}
+
 
 .contact-info {
     padding: 6rem 4.5rem;
@@ -1380,6 +1601,17 @@ footer {
         gap: 1rem
     }
 
+    .treats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        margin: 0 2rem
+    }
+
+    .brands-mini {
+        padding: .7rem 2rem;
+        flex-wrap: wrap;
+        gap: .8rem
+    }
+
     .treats-track {
         padding: 0 2rem 1.5rem;
         gap: 1rem
@@ -1467,6 +1699,11 @@ footer {
 
     .tc {
         width: 240px
+    }
+
+    .treats-grid {
+        grid-template-columns: 1fr;
+        margin: 0 2rem
     }
 
     .contact-details {
