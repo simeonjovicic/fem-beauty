@@ -15,476 +15,277 @@
 
 <body>
 
-    <!-- LOADING SCREEN -->
-    <div id="loader">
-        <div class="loader-inner">
-            <div class="loader-line"></div>
-            <img src="img-logo.jpg" alt="FEM" class="loader-logo-img" />
-            <div class="loader-line"></div>
-        </div>
-    </div>
-
+    <!-- LOADER -->
+    <div id="loader"><img src="img-logo.jpg" alt="FEM" class="loader-logo" /></div>
     <script>
-        setTimeout(function () {
-            var l = document.getElementById('loader');
-            if (!l) return;
-            l.classList.add('done');
-            setTimeout(function () { l.style.display = 'none'; }, 900);
-        }, 2200);
+        setTimeout(function () { var l = document.getElementById('loader'); if (!l) return; l.classList.add('done'); setTimeout(function () { l.style.display = 'none' }, 900) }, 2000);
     </script>
 
-    <!-- FLOATING BOOK BUTTON -->
-    <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="fbtn">
-        <span class="fbtn-dot"></span>
-        Buchen
-    </a>
+    <!-- FLOAT CTA -->
+    <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="float-cta"><span
+            class="float-dot"></span>Termin buchen</a>
 
     <!-- NAV -->
     <nav id="nav">
         <a href="#" class="nav-logo">Fem</a>
         <ul class="nav-links">
-            <li><a href="#about">Salon</a></li>
-            <li><a href="#why">Expertise</a></li>
+            <li><a href="#story">Salon</a></li>
+            <li><a href="#philosophy">Expertise</a></li>
+            <li><a href="#treatments">Services</a></li>
             <li><a href="#team">Team</a></li>
-            <li><a href="#services">Services</a></li>
             <li><a href="#contact">Kontakt</a></li>
         </ul>
-        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="nav-book">Termin buchen</a>
-        <button class="nav-burger" id="burger" aria-label="Menü öffnen">
-            <span></span><span></span><span></span>
-        </button>
+        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="nav-cta">Buchen</a>
+        <button class="burger" id="burger" aria-label="Menü"><span></span><span></span></button>
     </nav>
 
     <!-- MOBILE MENU -->
-    <div class="mobile-menu" id="mobileMenu">
+    <div class="mob" id="mobileMenu">
         <ul>
-            <li><a href="#about">Salon</a></li>
-            <li><a href="#why">Expertise</a></li>
+            <li><a href="#story">Salon</a></li>
+            <li><a href="#philosophy">Expertise</a></li>
+            <li><a href="#treatments">Services</a></li>
             <li><a href="#team">Team</a></li>
-            <li><a href="#services">Services</a></li>
             <li><a href="#contact">Kontakt</a></li>
         </ul>
-        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="mobile-menu-book">Termin buchen</a>
+        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="mob-book">Termin buchen</a>
     </div>
 
-    <!-- HERO -->
-    <section class="hero" id="home">
-        <div class="hero-bg"></div>
-        <div class="hero-overlay"></div>
-        <div class="hero-body">
-            <div class="hero-tag">
-                <span class="hero-tag-line"></span>
-                Kosmetik · Head Spa · Wien 1050
+    <!-- ═══ HERO: Split screen lookbook ═══ -->
+    <section class="hero">
+        <div class="hero-img"><img src="img-welcome.jpeg" alt="FEM Beauty Wien" /></div>
+        <div class="hero-content">
+            <img src="img-logo.jpg" alt="FEM" class="hero-logo" />
+            <p class="hero-sub">Kosmetik · Head Spa · Wien 1050</p>
+            <div class="hero-btns">
+                <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="btn-p">Termin buchen</a>
+                <a href="#treatments" class="btn-o">Entdecken</a>
             </div>
-            <h1>All about<br><em>Beauty.</em></h1>
-            <p class="hero-quote">"Modernste Kosmetiktechniken treffen auf<br>klassische chinesische Medizin."
-                <span>— Jenny, Inhaberin</span>
-            </p>
-            <div class="hero-actions">
-                <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="btn-g">Termin buchen</a>
-                <a href="#services" class="btn-w">Services entdecken</a>
-            </div>
-        </div>
-        <div class="hero-scroll">
-            <span>Scroll</span>
-            <div class="hero-scroll-line"></div>
         </div>
     </section>
 
-    <!-- MARQUEE -->
-    <div class="strip" aria-hidden="true">
-        <div class="strip-track">
-            <span>Head Spa</span><span class="dot">✦</span>
-            <span>Carbon Laser</span><span class="dot">✦</span>
-            <span>HIFU</span><span class="dot">✦</span>
-            <span>Radiofrequenz</span><span class="dot">✦</span>
-            <span>iS Clinical</span><span class="dot">✦</span>
-            <span>Babor</span><span class="dot">✦</span>
-            <span>Fillmed</span><span class="dot">✦</span>
-            <span>NewSha</span><span class="dot">✦</span>
-            <span>Laser-Haarentfernung</span><span class="dot">✦</span>
-            <span>Wimpernstyling</span><span class="dot">✦</span>
-            <span>Head Spa</span><span class="dot">✦</span>
-            <span>Carbon Laser</span><span class="dot">✦</span>
-            <span>HIFU</span><span class="dot">✦</span>
-            <span>Radiofrequenz</span><span class="dot">✦</span>
-            <span>iS Clinical</span><span class="dot">✦</span>
-            <span>Babor</span><span class="dot">✦</span>
-            <span>Fillmed</span><span class="dot">✦</span>
-            <span>NewSha</span><span class="dot">✦</span>
-            <span>Laser-Haarentfernung</span><span class="dot">✦</span>
-            <span>Wimpernstyling</span><span class="dot">✦</span>
+    <!-- ═══ MARQUEE ═══ -->
+    <div class="mq" aria-hidden="true">
+        <div class="mq-track">
+            <span>Head Spa</span><span class="dot">✦</span><span>Carbon Laser</span><span
+                class="dot">✦</span><span>HIFU</span><span class="dot">✦</span><span>Radiofrequenz</span><span
+                class="dot">✦</span><span>iS Clinical</span><span class="dot">✦</span><span>Babor</span><span
+                class="dot">✦</span><span>Fillmed</span><span class="dot">✦</span><span>NewSha</span><span
+                class="dot">✦</span><span>Wimpernstyling</span><span class="dot">✦</span><span>Laser</span><span
+                class="dot">✦</span>
+            <span>Head Spa</span><span class="dot">✦</span><span>Carbon Laser</span><span
+                class="dot">✦</span><span>HIFU</span><span class="dot">✦</span><span>Radiofrequenz</span><span
+                class="dot">✦</span><span>iS Clinical</span><span class="dot">✦</span><span>Babor</span><span
+                class="dot">✦</span><span>Fillmed</span><span class="dot">✦</span><span>NewSha</span><span
+                class="dot">✦</span><span>Wimpernstyling</span><span class="dot">✦</span><span>Laser</span><span
+                class="dot">✦</span>
         </div>
     </div>
 
-    <!-- ABOUT -->
-    <section class="intro" id="about">
-        <div class="intro-img rv">
-            <img src="img-nailpolish.jpg" alt="Kosmetiksalon FEM Wien" loading="lazy" />
-        </div>
-        <div class="intro-content rv d2">
-            <span class="label">Über uns</span>
-            <h2 class="heading">Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
-            <div class="hr"></div>
-            <p class="body-text">Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine
-                stilvolle Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit
-                Entspannung und individueller Betreuung.</p>
-            <div class="intro-features">
-                <div class="feat"><span class="feat-icon">📍</span> Ramperstorffergasse 51 · U4 Pilgramgasse</div>
-                <div class="feat"><span class="feat-icon">🌐</span> Deutsch, Englisch &amp; Chinesisch</div>
-                <div class="feat"><span class="feat-icon">☕</span> Gratis WLAN · Kaffee &amp; Tee</div>
-                <div class="feat"><span class="feat-icon">✓</span> Höchste Hygiene- &amp; Qualitätsstandards</div>
+    <!-- ═══ STORY: Offset editorial ═══ -->
+    <section class="story" id="story">
+        <div class="story-img rv"><img src="img-nailpolish.jpg" alt="FEM Salon" loading="lazy" /></div>
+        <div class="story-text rv d1">
+            <span class="tag">Über uns</span>
+            <h2>Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
+            <div class="line"></div>
+            <p>Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine stilvolle
+                Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit Entspannung und
+                individueller Betreuung.</p>
+            <div class="story-pills">
+                <span>📍 U4 Pilgramgasse</span>
+                <span>🌐 DE · EN · 中文</span>
+                <span>☕ WLAN · Kaffee</span>
             </div>
         </div>
     </section>
 
-    <!-- WHY FEM -->
-    <section class="why" id="why">
-        <div class="why-inner">
-            <div class="why-head rv">
-                <span class="label">Warum FEM</span>
-                <h2 class="heading">Was uns<br><em>unterscheidet.</em></h2>
-                <div class="hr"></div>
-                <p class="why-sub">Medizinisch fundierte Technologien, internationale Marken und ein einzigartiger
-                    Ansatz, der klassische chinesische Medizin mit moderner Kosmetikwissenschaft verbindet.</p>
+    <!-- ═══ PHILOSOPHY: Full bleed immersive ═══ -->
+    <section class="phil" id="philosophy">
+        <div class="phil-img"><img src="img-facial.jpg" alt="Gesichtsbehandlung" loading="lazy" /></div>
+        <div class="phil-content rv">
+            <span class="tag tag-light">Philosophie</span>
+            <blockquote>Modernste Kosmetiktechniken<br>treffen auf klassische<br><em>chinesische Medizin.</em>
+            </blockquote>
+            <cite>— Jenny, Inhaberin</cite>
+        </div>
+    </section>
+
+    <!-- ═══ USP: Asymmetric bento grid ═══ -->
+    <section class="usp">
+        <div class="usp-head rv">
+            <span class="tag">Warum FEM</span>
+            <h2>Was uns<br><em>unterscheidet.</em></h2>
+        </div>
+        <div class="bento">
+            <div class="bento-card rv"><span class="bn">01</span>
+                <h3>High-Tech Geräte</h3>
+                <p>HIFU, Radiofrequenz, Carbon Laser — Geräte auf medizinischem Niveau.</p>
             </div>
-            <div class="why-grid">
-                <div class="why-card rv">
-                    <div class="why-num">01</div>
-                    <div class="why-title">High-Tech Geräte</div>
-                    <div class="why-desc">HIFU, Radiofrequenz, Carbon Laser und Hydro Peel — Geräte auf medizinischem
-                        Niveau für sichtbare Ergebnisse nach der ersten Behandlung.</div>
-                </div>
-                <div class="why-card rv d1">
-                    <div class="why-num">02</div>
-                    <div class="why-title">Chinesische Medizin</div>
-                    <div class="why-desc">Jenny kombiniert jahrtausendealtes Wissen über Druckpunkte und
-                        Energie-Meridiane mit moderner Kosmetik — ein einzigartiger Ansatz in Wien.</div>
-                </div>
-                <div class="why-card rv d2">
-                    <div class="why-num">03</div>
-                    <div class="why-title">Premium Produkte</div>
-                    <div class="why-desc">iS Clinical, Babor, Fillmed für Haut und NewSha für Head Spa —
-                        international anerkannte Profi-Marken.</div>
-                </div>
-                <div class="why-card rv">
-                    <div class="why-num">04</div>
-                    <div class="why-title">Japanische Head Spa</div>
-                    <div class="why-desc">Das Original aus Japan: Tiefenreinigung, Kopfhautanalyse und meditative
-                        Massage — weit mehr als eine Haarbehandlung.</div>
-                </div>
-                <div class="why-card rv d1">
-                    <div class="why-num">05</div>
-                    <div class="why-title">Individuelle Beratung</div>
-                    <div class="why-desc">Keine Pauschallösungen. Jede Behandlung beginnt mit einer persönlichen
-                        Analyse — damit das Ergebnis zu dir passt.</div>
-                </div>
-                <div class="why-card rv d2">
-                    <div class="why-num">06</div>
-                    <div class="why-title">Internationales Team</div>
-                    <div class="why-desc">Deutsch, Englisch und Chinesisch — wir erklären dir auf deiner Sprache,
-                        was wir tun und warum.</div>
-                </div>
+            <div class="bento-card rv d1"><span class="bn">02</span>
+                <h3>Chinesische Medizin</h3>
+                <p>Druckpunkte und Meridiane vereint mit moderner Kosmetik.</p>
+            </div>
+            <div class="bento-card rv d2"><span class="bn">03</span>
+                <h3>Premium Marken</h3>
+                <p>iS Clinical · Babor · Fillmed · NewSha</p>
+            </div>
+            <div class="bento-img rv"><img src="img-headspa.jpeg" alt="Head Spa" loading="lazy" />
+                <div class="bento-img-label">Head Spa<br><em>Das Original aus Japan</em></div>
+            </div>
+            <div class="bento-card rv"><span class="bn">04</span>
+                <h3>Individuelle Beratung</h3>
+                <p>Jede Behandlung beginnt mit persönlicher Analyse.</p>
+            </div>
+            <div class="bento-card rv d1"><span class="bn">05</span>
+                <h3>Internationales Team</h3>
+                <p>Drei Sprachen — Vertrauen durch Verständnis.</p>
             </div>
         </div>
     </section>
 
-    <!-- TEAM -->
+    <!-- ═══ TREATMENTS: Horizontal scroll cards ═══ -->
+    <section class="treats" id="treatments">
+        <div class="treats-head rv">
+            <div><span class="tag">Behandlungen</span>
+                <h2>Unsere <em>Services.</em></h2>
+            </div>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="link-arrow">Alle Preise →</a>
+        </div>
+        <div class="treats-track">
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv">
+                <div class="tc-img" style="background-image:url('img-headspa.jpeg')"></div>
+                <span class="tc-num">01</span>
+                <h3>Japanische Head Spa</h3>
+                <div class="tc-tags"><span>NewSha</span><span>Massage</span></div>
+            </a>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv d1">
+                <div class="tc-img" style="background-image:url('img-facial.jpg')"></div>
+                <span class="tc-num">02</span>
+                <h3>Gesichtsbehandlungen</h3>
+                <div class="tc-tags"><span>iS Clinical</span><span>Babor</span></div>
+            </a>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv d2">
+                <div class="tc-img" style="background-image:url('img-tools.jpg')"></div>
+                <span class="tc-num">03</span>
+                <h3>Carbon Laser · HIFU</h3>
+                <div class="tc-tags"><span>Anti-Aging</span><span>Straffung</span></div>
+            </a>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv">
+                <div class="tc-img" style="background-image:url('img-nailpolish.jpg')"></div>
+                <span class="tc-num">04</span>
+                <h3>Maniküre &amp; Pediküre</h3>
+                <div class="tc-tags"><span>Gel</span><span>Klassisch</span></div>
+            </a>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv d1">
+                <div class="tc-img"></div>
+                <span class="tc-num">05</span>
+                <h3>Laser-Haarentfernung</h3>
+                <div class="tc-tags"><span>Dauerhaft</span></div>
+            </a>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc rv d2">
+                <div class="tc-img"></div>
+                <span class="tc-num">06</span>
+                <h3>Wimpern · Brauen</h3>
+                <div class="tc-tags"><span>Lifting</span><span>Färbung</span></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ═══ BRANDS ═══ -->
+    <section class="brands">
+        <span class="tag">Unsere Marken</span>
+        <div class="brands-row">
+            <div class="br rv">iS Clinical<small>Klinische Hautpflege</small></div>
+            <div class="br rv d1">Babor<small>Professionelle Kosmetik</small></div>
+            <div class="br rv d2">Fillmed<small>Ästhetische Medizin</small></div>
+            <div class="br rv d3">NewSha<small>Haar &amp; Head Spa</small></div>
+        </div>
+    </section>
+
+    <!-- ═══ TEAM ═══ -->
     <section class="team" id="team">
-        <div class="team-head rv">
-            <span class="label">Unser Team</span>
-            <h2 class="heading">Expertise &amp;<br><em>Leidenschaft.</em></h2>
-            <div class="hr"></div>
+        <div class="team-head rv"><span class="tag">Unser Team</span>
+            <h2>Expertise &amp;<br><em>Leidenschaft.</em></h2>
         </div>
-
-        <!-- Jenny featured -->
-        <div class="team-featured rv">
-            <div class="team-featured-img">
-                <img src="img-facial.jpg" alt="Gesichtsbehandlung bei FEM" loading="lazy" />
-            </div>
-            <div class="team-featured-text">
-                <span class="team-owner-badge">Inhaberin</span>
-                <div class="team-name-lg">Jenny</div>
-                <div class="team-role">Kosmetikerin &amp; Inhaberin</div>
-                <p>Jenny arbeitet mit Leidenschaft nach der Devise: <em>„Modernste Kosmetiktechniken treffen auf
-                        klassische chinesische Medizin."</em> Ihr ganzheitlicher Ansatz verbindet Wissenschaft,
-                    Intuition und jahrelange Erfahrung.</p>
+        <div class="team-hero rv">
+            <div class="team-hero-img"><img src="img-facial.jpg" alt="Behandlung" loading="lazy" /></div>
+            <div class="team-hero-info">
+                <span class="badge">Inhaberin</span>
+                <h3>Jenny</h3>
+                <p class="role">Kosmetikerin &amp; Inhaberin</p>
+                <p class="bio">Ihr ganzheitlicher Ansatz verbindet moderne Kosmetiktechniken mit klassischer
+                    chinesischer Medizin — Wissenschaft, Intuition und jahrelange Erfahrung.</p>
             </div>
         </div>
-
-        <!-- Team grid -->
-        <div class="team-grid">
-            <div class="team-card rv">
-                <div class="team-avatar"><img
-                        src="https://cdn1.treatwell.net/images/view/v2.i14282638.w256.h256.x7E9F09A2/" alt="Yang"
-                        loading="lazy" /></div>
-                <div class="team-name">Yang</div>
-                <div class="team-role">Kosmetikerin</div>
+        <div class="team-row">
+            <div class="tm rv">
+                <div class="tm-av"><img src="https://cdn1.treatwell.net/images/view/v2.i14282638.w256.h256.x7E9F09A2/"
+                        alt="Yang" loading="lazy" /></div><span class="tm-n">Yang</span><span
+                    class="tm-r">Kosmetikerin</span>
             </div>
-            <div class="team-card rv d1">
-                <div class="team-avatar"><img
-                        src="https://cdn1.treatwell.net/images/view/v2.i15899653.w256.h256.x7CD469ED/" alt="Najmeh"
-                        loading="lazy" /></div>
-                <div class="team-name">Najmeh</div>
-                <div class="team-role">Kosmetikerin · Nageldesign · Fußpflege</div>
+            <div class="tm rv d1">
+                <div class="tm-av"><img src="https://cdn1.treatwell.net/images/view/v2.i15899653.w256.h256.x7CD469ED/"
+                        alt="Najmeh" loading="lazy" /></div><span class="tm-n">Najmeh</span><span
+                    class="tm-r">Kosmetikerin · Nägel</span>
             </div>
-            <div class="team-card rv d2">
-                <div class="team-avatar"><img
-                        src="https://cdn1.treatwell.net/images/view/v2.i12712269.w256.h256.x4FADB2FA/" alt="Timea"
-                        loading="lazy" /></div>
-                <div class="team-name">Timea</div>
-                <div class="team-role">Nageldesignerin</div>
+            <div class="tm rv d2">
+                <div class="tm-av"><img src="https://cdn1.treatwell.net/images/view/v2.i12712269.w256.h256.x4FADB2FA/"
+                        alt="Timea" loading="lazy" /></div><span class="tm-n">Timea</span><span
+                    class="tm-r">Nageldesignerin</span>
             </div>
-            <div class="team-card rv">
-                <div class="team-avatar"><img
-                        src="https://cdn1.treatwell.net/images/view/v2.i10905137.w256.h256.x69D3E476/" alt="Vicky"
-                        loading="lazy" /></div>
-                <div class="team-name">Vicky</div>
-                <div class="team-role">Nageldesignerin</div>
+            <div class="tm rv">
+                <div class="tm-av"><img src="https://cdn1.treatwell.net/images/view/v2.i10905137.w256.h256.x69D3E476/"
+                        alt="Vicky" loading="lazy" /></div><span class="tm-n">Vicky</span><span
+                    class="tm-r">Nageldesignerin</span>
             </div>
-            <div class="team-card rv d1">
-                <div class="team-avatar"><img
-                        src="https://cdn1.treatwell.net/images/view/v2.i15312424.w128.h170.x89A5E736/" alt="Jing"
-                        loading="lazy" /></div>
-                <div class="team-name">Jing</div>
-                <div class="team-role">Nageldesignerin</div>
+            <div class="tm rv d1">
+                <div class="tm-av"><img src="https://cdn1.treatwell.net/images/view/v2.i15312424.w128.h170.x89A5E736/"
+                        alt="Jing" loading="lazy" /></div><span class="tm-n">Jing</span><span
+                    class="tm-r">Nageldesignerin</span>
             </div>
-            <div class="team-card rv d2">
-                <div class="team-avatar">
-                    <div class="team-avatar-init">K</div>
-                </div>
-                <div class="team-name">Krina</div>
-                <div class="team-role">Nageldesign · Fußpflege</div>
+            <div class="tm rv d2">
+                <div class="tm-av"><span class="tm-i">K</span></div><span class="tm-n">Krina</span><span
+                    class="tm-r">Nägel · Fußpflege</span>
             </div>
-            <div class="team-card rv">
-                <div class="team-avatar">
-                    <div class="team-avatar-init">N</div>
-                </div>
-                <div class="team-name">Nasim</div>
-                <div class="team-role">Nageldesign · Fußpflege</div>
+            <div class="tm rv">
+                <div class="tm-av"><span class="tm-i">N</span></div><span class="tm-n">Nasim</span><span
+                    class="tm-r">Nägel · Fußpflege</span>
             </div>
         </div>
     </section>
 
-    <!-- SERVICES -->
-    <section class="services" id="services">
-        <div class="services-head rv">
-            <div>
-                <span class="label">Behandlungen</span>
-                <h2 class="heading">Unsere<br><em>Services.</em></h2>
-            </div>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="services-link">Alle Preise →</a>
-        </div>
-        <div class="services-list">
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv">
-                <span class="svc-n">01</span>
-                <div class="svc-info">
-                    <div class="svc-name">Japanische Head Spa</div>
-                    <div class="svc-tags-inline"><span class="stag">NewSha</span><span
-                            class="stag">Kopfhaut-Analyse</span><span class="stag">Massage</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv d1">
-                <span class="svc-n">02</span>
-                <div class="svc-info">
-                    <div class="svc-name">Gesichtsbehandlungen</div>
-                    <div class="svc-tags-inline"><span class="stag">iS Clinical</span><span
-                            class="stag">Babor</span><span class="stag">Fillmed</span><span class="stag">Hydro
-                            Peel</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv d2">
-                <span class="svc-n">03</span>
-                <div class="svc-info">
-                    <div class="svc-name">Carbon Laser · HIFU · Radiofrequenz</div>
-                    <div class="svc-tags-inline"><span class="stag">High-Tech</span><span
-                            class="stag">Anti-Aging</span><span class="stag">Straffung</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv">
-                <span class="svc-n">04</span>
-                <div class="svc-info">
-                    <div class="svc-name">Laser-Haarentfernung</div>
-                    <div class="svc-tags-inline"><span class="stag">Dauerhaft</span><span class="stag">Alle
-                            Körperstellen</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv d1">
-                <span class="svc-n">05</span>
-                <div class="svc-info">
-                    <div class="svc-name">Körperbehandlungen</div>
-                    <div class="svc-tags-inline"><span class="stag">Entspannung</span><span
-                            class="stag">Straffung</span><span class="stag">Peeling</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv d2">
-                <span class="svc-n">06</span>
-                <div class="svc-info">
-                    <div class="svc-name">Maniküre &amp; Pediküre</div>
-                    <div class="svc-tags-inline"><span class="stag">Klassisch</span><span class="stag">Gel</span><span
-                            class="stag">Fußpflege</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="svc-row rv">
-                <span class="svc-n">07</span>
-                <div class="svc-info">
-                    <div class="svc-name">Augenbrauen · Wimpern · Waxing</div>
-                    <div class="svc-tags-inline"><span class="stag">Laminierung</span><span
-                            class="stag">Lifting</span><span class="stag">Färbung</span></div>
-                </div>
-                <span class="svc-arrow">→</span>
-            </a>
-        </div>
-    </section>
-
-    <!-- GALLERY -->
-    <section class="gallery">
-        <div class="gallery-head rv">
-            <span class="label">Einblicke</span>
-            <h2 class="heading">Unser <em>Salon.</em></h2>
-        </div>
-        <div class="gallery-grid">
-            <div class="gallery-item rv">
-                <img src="img-headspa.jpeg" alt="Head Spa bei FEM Wien" loading="lazy" />
-                <div class="gallery-caption">Head Spa</div>
-            </div>
-            <div class="gallery-item tall rv d1">
-                <img src="img-welcome.jpeg" alt="Willkommen bei FEM" loading="lazy" />
-                <div class="gallery-caption">Willkommen</div>
-            </div>
-            <div class="gallery-item rv d2">
-                <img src="img-tools.jpg" alt="Professionelle Werkzeuge FEM" loading="lazy" />
-                <div class="gallery-caption">Präzision</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PRODUCTS -->
-    <section class="products" id="products">
-        <div class="products-head rv">
-            <span class="label">Unsere Marken</span>
-            <h2 class="heading">Premium<br><em>Produkte.</em></h2>
-            <div class="hr"></div>
-        </div>
-        <div class="products-row">
-            <div class="prod rv">
-                <div class="prod-num">01</div>
-                <div class="prod-name">iS Clinical</div>
-                <div class="prod-cat">Klinische Hautpflege</div>
-            </div>
-            <div class="prod rv d1">
-                <div class="prod-num">02</div>
-                <div class="prod-name">Babor</div>
-                <div class="prod-cat">Professionelle Kosmetik</div>
-            </div>
-            <div class="prod rv d2">
-                <div class="prod-num">03</div>
-                <div class="prod-name">Fillmed</div>
-                <div class="prod-cat">Ästhetische Medizin</div>
-            </div>
-            <div class="prod rv d3">
-                <div class="prod-num">04</div>
-                <div class="prod-name">NewSha</div>
-                <div class="prod-cat">Haar &amp; Head Spa</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="booking" id="contact">
-        <div class="booking-info rv">
-            <span class="label" style="color:#c9995e;">Kontakt &amp; Buchung</span>
-            <h2 class="heading">Bereit für<br><em>dein Erlebnis?</em></h2>
-            <div class="hr"></div>
-            <p>Alle Behandlungen beginnen mit einer persönlichen Beratung. Buche direkt online über Treatwell oder
-                melde dich gerne bei uns.</p>
-            <div class="clist">
-                <div class="ci"><span class="ci-k">A</span><span>Ramperstorffergasse 51<br>1050 Wien, 5.
-                        Bezirk</span></div>
-                <div class="ci"><span class="ci-k">T</span><a href="tel:+436608866068">+43 660 8866068</a></div>
-                <div class="ci"><span class="ci-k">E</span><a href="mailto:info@fembeauty.at">info@fembeauty.at</a>
-                </div>
-                <div class="ci"><span class="ci-k">W</span><a href="http://www.fembeauty.at"
-                        target="_blank">www.fembeauty.at</a></div>
-                <div class="ci"><span class="ci-k">I</span><a href="https://instagram.com/fem.vienna"
+    <!-- ═══ CONTACT ═══ -->
+    <section class="contact" id="contact">
+        <div class="contact-info rv">
+            <span class="tag">Kontakt &amp; Buchung</span>
+            <h2>Bereit für<br><em>dein Erlebnis?</em></h2>
+            <div class="line"></div>
+            <p>Alle Behandlungen beginnen mit einer persönlichen Beratung.</p>
+            <div class="contact-details">
+                <div><strong>Adresse</strong><span>Ramperstorffergasse 51, 1050 Wien</span></div>
+                <div><strong>Telefon</strong><a href="tel:+436608866068">+43 660 8866068</a></div>
+                <div><strong>E-Mail</strong><a href="mailto:info@fembeauty.at">info@fembeauty.at</a></div>
+                <div><strong>Instagram</strong><a href="https://instagram.com/fem.vienna"
                         target="_blank">@fem.vienna</a></div>
-                <div class="ci">
-                    <span class="ci-k">🕐</span>
-                    <div class="hours-block">
-                        <div class="hrow"><span class="day">Mo – Fr</span><span>09:00 – 19:00</span></div>
-                        <div class="hrow"><span class="day">Samstag</span><span>09:00 – 18:00</span></div>
-                        <div class="hrow"><span class="day">Sonntag</span><span class="closed">Geschlossen</span>
-                        </div>
-                    </div>
-                </div>
+                <div><strong>Zeiten</strong><span>Mo–Fr 09–19 · Sa 09–18</span></div>
             </div>
+            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="btn-p"
+                style="margin-top:2.5rem">Jetzt über Treatwell buchen →</a>
         </div>
-        <div class="booking-form rv d2">
-            <h2 class="heading">Termin<br><em>anfragen.</em></h2>
-            <div class="hr"></div>
-            <div class="frow">
-                <div class="fg"><label>Vorname</label><input type="text" placeholder="Maria" /></div>
-                <div class="fg"><label>Nachname</label><input type="text" placeholder="Müller" /></div>
-            </div>
-            <div class="fg"><label>E-Mail</label><input type="email" placeholder="maria@beispiel.at" /></div>
-            <div class="fg">
-                <label>Behandlung</label>
-                <select>
-                    <option>Japanische Head Spa</option>
-                    <option>Gesichtsbehandlung</option>
-                    <option>Carbon Laser</option>
-                    <option>HIFU</option>
-                    <option>Radiofrequenz</option>
-                    <option>Laser-Haarentfernung</option>
-                    <option>Körperbehandlung</option>
-                    <option>Maniküre / Pediküre</option>
-                    <option>Augenbrauen &amp; Wimpern</option>
-                    <option>Waxing</option>
-                </select>
-            </div>
-            <div class="frow">
-                <div class="fg"><label>Datum</label><input type="date" /></div>
-                <div class="fg">
-                    <label>Uhrzeit</label>
-                    <select>
-                        <option>09:00</option>
-                        <option>10:00</option>
-                        <option>11:00</option>
-                        <option>13:00</option>
-                        <option>14:00</option>
-                        <option>15:00</option>
-                        <option>16:00</option>
-                        <option>17:00</option>
-                        <option>18:00</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-submit" onclick="window.open('https://buchung.treatwell.at/ort/fem/','_blank')">Jetzt
-                über Treatwell buchen
-                →</button>
+        <div class="contact-img rv d2">
+            <img src="img-tools.jpg" alt="FEM Werkzeuge" loading="lazy" />
         </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
-        <div class="footer-top">
-            <a href="#" class="footer-logo">Fem</a>
-            <div class="footer-links">
-                <a href="#">Datenschutz</a>
-                <a href="#">Impressum</a>
-                <a href="https://instagram.com/fem.vienna" target="_blank">Instagram</a>
-                <a href="https://buchung.treatwell.at/ort/fem/" target="_blank">Treatwell</a>
-            </div>
+        <div class="ft-top"><a href="#" class="ft-logo">Fem</a>
+            <div class="ft-links"><a href="#">Datenschutz</a><a href="#">Impressum</a><a
+                    href="https://instagram.com/fem.vienna" target="_blank">Instagram</a><a
+                    href="https://buchung.treatwell.at/ort/fem/" target="_blank">Treatwell</a></div>
         </div>
-        <div class="footer-bottom">
-            <p>© 2026 FEM Kosmetiksalon Wien · Ramperstorffergasse 51 · 1050 Wien</p>
-        </div>
+        <p class="ft-copy">© 2026 FEM Kosmetiksalon Wien</p>
     </footer>
 
     <script src="script.js"></script>
