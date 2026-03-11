@@ -127,12 +127,10 @@ a {
 }
 
 @keyframes pulse {
-
     0%,
     100% {
         opacity: 1
     }
-
     50% {
         opacity: .4
     }
@@ -401,23 +399,30 @@ h2 em {
     color: var(--sand)
 }
 
-/* ═══ HERO: Split lookbook ═══════════════ */
+/* ═══ HERO: Full-bleed background ═══════ */
 .hero {
-    display: grid;
-    grid-template-columns: 55% 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
     height: 100vh;
-    min-height: 600px
+    height: 100dvh;
+    min-height: 600px;
+    overflow: hidden
 }
 
-.hero-img {
-    overflow: hidden;
-    position: relative
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0
 }
 
-.hero-img img {
+.hero-bg img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    display: block;
     animation: slowZoom 20s ease-in-out infinite alternate
 }
 
@@ -425,35 +430,49 @@ h2 em {
     from {
         transform: scale(1.05)
     }
-
     to {
         transform: scale(1)
     }
 }
 
+.hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, .40) 0%,
+        rgba(0, 0, 0, .08) 35%,
+        rgba(0, 0, 0, .06) 55%,
+        rgba(0, 0, 0, .50) 100%);
+    z-index: 1
+}
+
 .hero-content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 4rem;
     text-align: center;
-    background: var(--bg);
-    gap: 1.5rem
+    padding: 2rem;
+    max-width: 700px;
+    gap: 1.2rem
 }
 
 .hero-logo {
-    width: 180px;
+    width: 120px;
+    border-radius: 14px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, .30);
     opacity: 0;
     animation: fadeIn 1s .4s ease forwards
 }
 
 .hero-sub {
-    font-size: .62rem;
-    font-weight: 400;
-    letter-spacing: .4em;
+    font-size: .68rem;
+    font-weight: 300;
+    letter-spacing: .35em;
     text-transform: uppercase;
-    color: var(--taupe);
+    color: rgba(255, 255, 255, .80);
     opacity: 0;
     animation: fadeIn .8s .8s ease forwards
 }
@@ -461,8 +480,84 @@ h2 em {
 .hero-btns {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
     opacity: 0;
     animation: slideUp .8s 1.1s var(--ease) forwards
+}
+
+.hero-btns .btn-p {
+    background: #fff;
+    color: var(--warm);
+    border-radius: 50px;
+    padding: .9rem 2.4rem;
+    transition: background .3s, transform .3s
+}
+
+.hero-btns .btn-p:hover {
+    background: var(--sand-lt);
+    transform: translateY(-2px)
+}
+
+.hero-btns .btn-o {
+    border: 1px solid rgba(255, 255, 255, .50);
+    color: #fff;
+    border-radius: 50px;
+    transition: all .3s
+}
+
+.hero-btns .btn-o:hover {
+    background: rgba(255, 255, 255, .12);
+    border-color: #fff;
+    transform: translateY(-2px)
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    opacity: 0;
+    animation: fadeIn 1s 1.6s ease forwards
+}
+
+.hero-scroll span {
+    font-family: 'Outfit', sans-serif;
+    font-size: .58rem;
+    font-weight: 300;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .5)
+}
+
+.hero-scroll-line {
+    width: 1px;
+    height: 36px;
+    background: rgba(255, 255, 255, .25);
+    position: relative;
+    overflow: hidden
+}
+
+.hero-scroll-line::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, .7);
+    animation: scrollPulse 2.2s ease-in-out infinite
+}
+
+@keyframes scrollPulse {
+    0%   { top: -100% }
+    50%  { top: 100% }
+    100% { top: 100% }
 }
 
 /* ═══ MARQUEE ════════════════════════════ */
@@ -1120,7 +1215,6 @@ footer {
 
 /* ═══ RESPONSIVE ═════════════════════════ */
 @media(max-width:960px) {
-
     nav,
     nav.scrolled {
         padding: 1.2rem 2rem
@@ -1136,16 +1230,12 @@ footer {
     }
 
     .hero {
-        grid-template-columns: 1fr;
-        height: auto
+        height: 100vh;
+        height: 100dvh
     }
 
-    .hero-img {
-        height: 55vh
-    }
-
-    .hero-content {
-        padding: 3rem 2rem
+    .hero-logo {
+        width: 95px
     }
 
     .story {
@@ -1248,17 +1338,22 @@ footer {
 
 @media(max-width:560px) {
     .hero-logo {
-        width: 140px
+        width: 85px
     }
 
     .hero-btns {
         flex-direction: column;
+        width: 80%
+    }
+
+    .hero-btns .btn-p,
+    .hero-btns .btn-o {
+        text-align: center;
         width: 100%
     }
 
-    .btn-p,
-    .btn-o {
-        text-align: center
+    .hero-scroll {
+        bottom: 1.5rem
     }
 
     .bento-img {
