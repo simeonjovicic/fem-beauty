@@ -15,11 +15,18 @@
 
 <body>
 
+    <!-- SCROLL PROGRESS -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
     <!-- LOADER -->
-    <div id="loader"><img src="img-logo.jpg" alt="FEM" class="loader-logo" /></div>
-    <script>
-        setTimeout(function () { var l = document.getElementById('loader'); if (!l) return; l.classList.add('done'); setTimeout(function () { l.style.display = 'none' }, 900) }, 2000);
-    </script>
+    <div id="loader">
+        <div class="loader-inner">
+            <img src="img-logo.jpg" alt="FEM" class="loader-logo" />
+            <div class="loader-bar">
+                <div class="loader-bar-fill"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- FLOAT CTA -->
     <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="float-cta"><span
@@ -50,11 +57,9 @@
         <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="mob-book">Termin buchen</a>
     </div>
 
-    <!-- ═══ HERO: Editorial left-aligned ═══ -->
+    <!-- ═══ HERO (UNCHANGED) ═══ -->
     <section class="hero">
-        <div class="hero-bg">
-            <img src="Hero1.png" alt="FEM Beauty Wien" />
-        </div>
+        <div class="hero-bg"><img src="Hero1.png" alt="FEM Beauty Wien" /></div>
         <div class="hero-inner">
             <div class="hero-content">
                 <div class="hero-accent"></div>
@@ -67,52 +72,47 @@
                 </div>
             </div>
         </div>
-        <div class="hero-scroll">
-            <span>Scroll</span>
+        <div class="hero-scroll"><span>Scroll</span>
             <div class="hero-scroll-line"></div>
         </div>
     </section>
 
-    <!-- ═══ USP: 3 compact strips — directly after hero ═══ -->
+    <!-- ═══ USP STRIP ═══ -->
     <section class="usp-strip">
-        <div class="usp-strip-item rv">
+        <div class="usp-strip-item">
             <span class="usp-num">01</span>
-            <div>
-                <strong>High-Tech &amp; Chinesische Medizin</strong>
+            <div><strong>High-Tech &amp; Chinesische Medizin</strong>
                 <p>HIFU, Carbon Laser &amp; Radiofrequenz vereint mit jahrtausendealtem Wissen.</p>
             </div>
         </div>
         <div class="usp-divider"></div>
-        <div class="usp-strip-item rv d1">
+        <div class="usp-strip-item">
             <span class="usp-num">02</span>
-            <div>
-                <strong>Premium Marken</strong>
+            <div><strong>Premium Marken</strong>
                 <p>iS Clinical · Babor · Fillmed · NewSha &mdash; nur im Profi-Bereich.</p>
             </div>
         </div>
         <div class="usp-divider"></div>
-        <div class="usp-strip-item rv d2">
+        <div class="usp-strip-item">
             <span class="usp-num">03</span>
-            <div>
-                <strong>Individuelle Beratung</strong>
+            <div><strong>Individuelle Beratung</strong>
                 <p>Persönliche Analyse vor jeder Behandlung. Auf DE · EN · 中文.</p>
             </div>
         </div>
     </section>
 
-
-    <!-- ═══ STORY: Offset editorial ═══ -->
+    <!-- ═══ STORY ═══ -->
     <section class="story" id="story">
-        <div class="story-img rv"><img src="https://placehold.co/800x600/ede0d0/4a3f38?text=Salon+Interior" alt="FEM Salon" loading="lazy" />
-        </div>
-        <div class="story-text rv d1">
-            <span class="tag">Über uns</span>
-            <h2>Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
-            <div class="line"></div>
-            <p>Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine stilvolle
-                Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit Entspannung und
-                individueller Betreuung.</p>
-            <div class="story-pills">
+        <div class="story-img"><img src="https://placehold.co/800x600/ede0d0/4a3f38?text=Salon+Interior" alt="FEM Salon"
+                loading="lazy" /></div>
+        <div class="story-text">
+            <span class="tag rv">Über uns</span>
+            <h2 class="rv d1">Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
+            <div class="line anim-line"></div>
+            <p class="rv d2">Der Kosmetiksalon FEM steht für moderne Ausstattung, höchste Hygienestandards und eine
+                stilvolle Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit
+                Entspannung und individueller Betreuung.</p>
+            <div class="story-pills rv d3">
                 <span>📍 U4 Pilgramgasse</span>
                 <span>🌐 DE · EN · 中文</span>
                 <span>☕ WLAN · Kaffee</span>
@@ -120,194 +120,441 @@
         </div>
     </section>
 
-    <!-- Brands full-width bar above services -->
-    <div class="brands-bar">
-        <span class="brands-bar-label">Unsere Marken</span>
-        <div class="brands-bar-items">
-            <span>iS Clinical</span>
-            <span class="brands-bar-dot">✦</span>
-            <span>Babor</span>
-            <span class="brands-bar-dot">✦</span>
-            <span>Fillmed</span>
-            <span class="brands-bar-dot">✦</span>
-            <span>NewSha</span>
+    <!-- Brands marquee -->
+    <div class="brands-marquee">
+        <div class="brands-marquee-track">
+            <span class="bm-item">iS Clinical</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Babor</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Fillmed</span><span class="bm-dot">✦</span>
+            <span class="bm-item">NewSha</span><span class="bm-dot">✦</span>
+            <span class="bm-item">iS Clinical</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Babor</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Fillmed</span><span class="bm-dot">✦</span>
+            <span class="bm-item">NewSha</span><span class="bm-dot">✦</span>
+            <span class="bm-item">iS Clinical</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Babor</span><span class="bm-dot">✦</span>
+            <span class="bm-item">Fillmed</span><span class="bm-dot">✦</span>
+            <span class="bm-item">NewSha</span><span class="bm-dot">✦</span>
         </div>
     </div>
 
-    <section class="treats" id="treatments">
-        <div class="treats-head rv">
-            <div><span class="tag">Behandlungen</span>
+    <!-- ═══ SERVICES — 5 expandable main categories ═══ -->
+    <section class="services" id="treatments">
+        <div class="services-inner">
+            <div class="services-head rv">
+                <span class="tag">Behandlungen</span>
                 <h2>Unsere <em>Services.</em></h2>
+                <p class="services-sub">Klicke auf eine Kategorie für mehr Details.</p>
             </div>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="link-arrow">Alle Preise →</a>
-        </div>
 
-        <div class="treats-track">
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc">
-                <div class="tc-img" style="background-image:url('https://placehold.co/600x400/ede0d0/4a3f38?text=Head+Spa')"></div>
-                <span class="tc-num">01</span>
-                <h3>Japanische Head Spa</h3>
-                <div class="tc-tags"><span>NewSha</span><span>Massage</span><span>Kopfhaut</span></div>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc">
-                <div class="tc-img" style="background-image:url('https://placehold.co/600x400/ede0d0/4a3f38?text=Gesichtsbehandlung')"></div>
-                <span class="tc-num">02</span>
-                <h3>Gesichtsbehandlungen</h3>
-                <div class="tc-tags"><span>iS Clinical</span><span>Babor</span><span>Fillmed</span></div>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc">
-                <div class="tc-img" style="background-image:url('https://placehold.co/600x400/ede0d0/4a3f38?text=HIFU+Lifting')"></div>
-                <span class="tc-num">03</span>
-                <h3>HIFU Lifting</h3>
-                <div class="tc-tags"><span>Anti-Aging</span><span>Straffung</span><span>Non-Invasiv</span></div>
-            </a>
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc">
-                <div class="tc-img" style="background-image:url('https://placehold.co/600x400/ede0d0/4a3f38?text=Nageldesign')"></div>
-                <span class="tc-num">04</span>
-                <h3>Nageldesign</h3>
-                <div class="tc-tags"><span>Maniküre</span><span>Gel</span><span>Nail Art</span></div>
-            </a>
-            <!-- More card -->
-            <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="tc tc-more">
-                <div class="tc-more-inner">
-                    <span class="tc-more-count">+5</span>
-                    <span class="tc-more-label">Weitere Services</span>
-                    <span class="tc-more-arrow">→</span>
+            <div class="srv-grid">
+                <div class="srv-card" data-srv="face">
+                    <div class="srv-card-front">
+                        <span class="srv-num">01</span>
+                        <div class="srv-icon">✦</div>
+                        <h3>Gesichtsbehandlungen</h3>
+                        <span class="srv-hint">Mehr erfahren →</span>
+                    </div>
+                    <div class="srv-card-expanded">
+                        <span class="srv-close">✕</span>
+                        <span class="srv-num">01</span>
+                        <h3>Gesichtsbehandlungen</h3>
+                        <p>Klassische und High-Tech Gesichtspflege — von Hydro Peel über Carbon Laser bis hin zu HIFU
+                            &amp; Radiofrequenz. Individuelle Hautanalyse mit iS Clinical, Babor &amp; Fillmed.</p>
+                        <div class="srv-tags"><span>Hydro Peel</span><span>Carbon
+                                Laser</span><span>HIFU</span><span>Radiofrequenz</span><span>Anti-Aging</span></div>
+                        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="srv-book">Jetzt buchen
+                            →</a>
+                    </div>
                 </div>
-            </a>
+
+                <div class="srv-card" data-srv="headspa">
+                    <div class="srv-card-front">
+                        <span class="srv-num">02</span>
+                        <div class="srv-icon">✦</div>
+                        <h3>Head Spa</h3>
+                        <span class="srv-hint">Mehr erfahren →</span>
+                    </div>
+                    <div class="srv-card-expanded">
+                        <span class="srv-close">✕</span>
+                        <span class="srv-num">02</span>
+                        <h3>Head Spa</h3>
+                        <p>Japanische Head Spa mit premium NewSha Produkten. Tiefenreinigende Kopfhautpflege, Massage
+                            &amp; Entspannung — ein unvergessliches Erlebnis für Haar &amp; Seele.</p>
+                        <div class="srv-tags">
+                            <span>NewSha</span><span>Kopfhautpflege</span><span>Massage</span><span>Entspannung</span>
+                        </div>
+                        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="srv-book">Jetzt buchen
+                            →</a>
+                    </div>
+                </div>
+
+                <div class="srv-card" data-srv="nails">
+                    <div class="srv-card-front">
+                        <span class="srv-num">03</span>
+                        <div class="srv-icon">✦</div>
+                        <h3>Nageldesign</h3>
+                        <span class="srv-hint">Mehr erfahren →</span>
+                    </div>
+                    <div class="srv-card-expanded">
+                        <span class="srv-close">✕</span>
+                        <span class="srv-num">03</span>
+                        <h3>Nageldesign</h3>
+                        <p>Maniküre, Pediküre, Gel-Nägel &amp; kreatives Nail Art. Von klassisch elegant bis ausgefallen
+                            — unsere Designerinnen verwirklichen jeden Wunsch mit Präzision.</p>
+                        <div class="srv-tags"><span>Maniküre</span><span>Pediküre</span><span>Gel</span><span>Nail
+                                Art</span></div>
+                        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="srv-book">Jetzt buchen
+                            →</a>
+                    </div>
+                </div>
+
+                <div class="srv-card" data-srv="laser">
+                    <div class="srv-card-front">
+                        <span class="srv-num">04</span>
+                        <div class="srv-icon">✦</div>
+                        <h3>Laser Haarentfernung</h3>
+                        <span class="srv-hint">Mehr erfahren →</span>
+                    </div>
+                    <div class="srv-card-expanded">
+                        <span class="srv-close">✕</span>
+                        <span class="srv-num">04</span>
+                        <h3>Laser Haarentfernung</h3>
+                        <p>Dauerhaft glatte Haut ohne Rasur und Waxing. Modernste Lasertechnologie für alle Hauttypen —
+                            schonend, effektiv und langanhaltend.</p>
+                        <div class="srv-tags"><span>Diodenlaser</span><span>Ganzkörper</span><span>Schmerzarm</span>
+                        </div>
+                        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="srv-book">Jetzt buchen
+                            →</a>
+                    </div>
+                </div>
+
+                <div class="srv-card" data-srv="lash">
+                    <div class="srv-card-front">
+                        <span class="srv-num">05</span>
+                        <div class="srv-icon">✦</div>
+                        <h3>Wimpern &amp; Waxing</h3>
+                        <span class="srv-hint">Mehr erfahren →</span>
+                    </div>
+                    <div class="srv-card-expanded">
+                        <span class="srv-close">✕</span>
+                        <span class="srv-num">05</span>
+                        <h3>Wimpern &amp; Waxing</h3>
+                        <p>Wimpernlifting, Lash Extensions &amp; professionelles Waxing. Für den perfekten
+                            Augenaufschlag und seidig glatte Haut — schnell, sauber und präzise.</p>
+                        <div class="srv-tags"><span>Lash
+                                Lift</span><span>Extensions</span><span>Waxing</span><span>Augenbrauen</span></div>
+                        <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="srv-book">Jetzt buchen
+                            →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mob-dots srv-dots"></div>
+            <p class="mob-counter srv-counter"></p>
+            <p class="mob-swipe-hint">← Wischen für mehr →</p>
+
+            <div class="services-cta">
+                <a href="https://buchung.treatwell.at/ort/fem/" target="_blank" class="link-arrow">Alle Preise auf
+                    Treatwell →</a>
+            </div>
         </div>
     </section>
 
-    <!-- ═══ REVIEWS / TESTIMONIALS ═══ -->
+    <!-- ═══ REVIEWS — auto-rotating ═══ -->
     <section class="reviews" id="reviews">
         <div class="reviews-inner">
             <div class="reviews-head rv">
                 <span class="tag">Kundenstimmen</span>
                 <h2>Was unsere <em>Kunden sagen.</em></h2>
             </div>
-            <div class="reviews-grid">
-                <div class="review-card rv">
-                    <div class="review-stars">★★★★★</div>
-                    <p class="review-text">„Die Atmosphäre ist so entspannend und Jenny hat mir die beste Gesichtsbehandlung gegeben. Meine Haut strahlt seitdem!"</p>
-                    <div class="review-author">
-                        <div class="review-avatar">S</div>
-                        <div>
-                            <strong>Sarah M.</strong>
-                            <span>Stammkundin seit 2021</span>
+
+            <!-- Grid shows 4 at a time, fades between sets -->
+            <div class="reviews-carousel" id="reviewsCarousel">
+                <!-- SET 1 -->
+                <div class="reviews-set active">
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Die Atmosphäre ist so entspannend und Jenny hat mir die beste
+                            Gesichtsbehandlung gegeben. Meine Haut strahlt seitdem!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">S</div>
+                            <div><strong>Sarah M.</strong><span>Stammkundin seit 2021</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Die Head Spa war ein unvergessliches Erlebnis. Sehr professionell und
+                            hygienisch!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">L</div>
+                            <div><strong>Lisa K.</strong><span>via Treatwell</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Nageldesign auf höchstem Niveau! Timea versteht genau, was man sich
+                            vorstellt."</p>
+                        <div class="review-author">
+                            <div class="review-avatar">A</div>
+                            <div><strong>Anna R.</strong><span>Stammkundin seit 2023</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Das HIFU Lifting hat mich überzeugt — sichtbare Ergebnisse ohne OP!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">M</div>
+                            <div><strong>Maria T.</strong><span>via Google</span></div>
                         </div>
                     </div>
                 </div>
-                <div class="review-card rv d1">
-                    <div class="review-stars">★★★★★</div>
-                    <p class="review-text">„Die Head Spa war ein unvergessliches Erlebnis. Sehr professionell und hygienisch!"</p>
-                    <div class="review-author">
-                        <div class="review-avatar">L</div>
-                        <div>
-                            <strong>Lisa K.</strong>
-                            <span>via Treatwell</span>
+
+                <!-- SET 2 -->
+                <div class="reviews-set">
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Ich komme seit zwei Jahren regelmäßig zur Gesichtsbehandlung. Meine Haut
+                            hat sich komplett verändert — nur positiv!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">K</div>
+                            <div><strong>Katharina W.</strong><span>Stammkundin seit 2022</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Beste Maniküre in Wien! Vicky ist unglaublich talentiert und nimmt sich
+                            richtig Zeit."</p>
+                        <div class="review-author">
+                            <div class="review-avatar">E</div>
+                            <div><strong>Elena B.</strong><span>via Google</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Die Laser-Haarentfernung war viel angenehmer als erwartet. Super
+                            Ergebnis nach nur drei Sitzungen."</p>
+                        <div class="review-author">
+                            <div class="review-avatar">J</div>
+                            <div><strong>Julia S.</strong><span>via Treatwell</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Endlich ein Salon, der auch auf Chinesisch beraten kann. Jenny ist
+                            einfach die Beste!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">Y</div>
+                            <div><strong>Yuki L.</strong><span>via Google</span></div>
                         </div>
                     </div>
                 </div>
-                <div class="review-card rv d2">
-                    <div class="review-stars">★★★★★</div>
-                    <p class="review-text">„Nageldesign auf höchstem Niveau! Timea versteht genau, was man sich vorstellt."</p>
-                    <div class="review-author">
-                        <div class="review-avatar">A</div>
-                        <div>
-                            <strong>Anna R.</strong>
-                            <span>Stammkundin seit 2023</span>
+
+                <!-- SET 3 -->
+                <div class="reviews-set">
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Wimpernlifting sieht so natürlich aus — ich bekomme ständig Komplimente.
+                            Danke, FEM!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">N</div>
+                            <div><strong>Nina H.</strong><span>Stammkundin seit 2024</span></div>
                         </div>
                     </div>
-                </div>
-                <div class="review-card rv">
-                    <div class="review-stars">★★★★★</div>
-                    <p class="review-text">„Das HIFU Lifting hat mich überzeugt — sichtbare Ergebnisse ohne OP!"</p>
-                    <div class="review-author">
-                        <div class="review-avatar">M</div>
-                        <div>
-                            <strong>Maria T.</strong>
-                            <span>via Google</span>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Sehr sauberer, moderner Salon. Man fühlt sich sofort wohl. Die Carbon
+                            Laser Behandlung war fantastisch."</p>
+                        <div class="review-author">
+                            <div class="review-avatar">D</div>
+                            <div><strong>Daniela F.</strong><span>via Treatwell</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Ich habe das Kombi-Paket Gesicht + Head Spa gebucht — absolute
+                            Tiefenentspannung. Kann ich nur empfehlen!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">P</div>
+                            <div><strong>Petra G.</strong><span>via Google</span></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars">★★★★★</div>
+                        <p class="review-text">„Das Team ist so herzlich und professionell. Jede Behandlung ist ein
+                            Erlebnis. Mein absoluter Lieblingssalon!"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">C</div>
+                            <div><strong>Christina A.</strong><span>Stammkundin seit 2020</span></div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Mobile single-card track (populated by JS) -->
+            <div class="mob-reviews-track" id="mobReviewsTrack"></div>
+            <div class="mob-dots review-mob-dots"></div>
+
+            <!-- Desktop carousel dots -->
+            <div class="reviews-dots">
+                <button class="reviews-dot active" data-set="0"></button>
+                <button class="reviews-dot" data-set="1"></button>
+                <button class="reviews-dot" data-set="2"></button>
+            </div>
         </div>
     </section>
 
-    <!-- ═══ TEAM ═══ -->
+    <!-- ═══ TEAM — clickable cards ═══ -->
     <section class="team" id="team">
         <div class="team-inner">
             <div class="team-top rv">
                 <span class="tag">Unser Team</span>
                 <h2>Expertise &amp;<br><em>Leidenschaft.</em></h2>
+                <p class="team-sub">Klicke auf ein Teammitglied für mehr Infos.</p>
             </div>
-            <div class="team-strip">
-                <div class="tcard rv">
-                    <div class="tcard-img" style="background-image:url('https://placehold.co/400x500/ede0d0/4a3f38?text=Jenny')">
+            <div class="team-grid">
+                <div class="tm-card" data-member="jenny">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/ede0d0/4a3f38?text=Jenny')"></div>
+                        <div class="tm-overlay">
+                            <span class="tm-badge">Inhaberin</span>
+                            <h3>Jenny</h3>
+                            <p>Kosmetikerin &amp; Inhaberin</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
-                        <span class="tcard-badge">Inhaberin</span>
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Jenny</h3>
-                        <p class="tcard-role">Kosmetikerin &amp; Inhaberin</p>
+                        <span class="tm-role">Inhaberin &amp; Kosmetikerin</span>
+                        <p>Modernste Kosmetiktechniken treffen auf klassische chinesische Medizin. Jenny hat FEM 2019
+                            gegründet und setzt alles daran, dass du den Salon strahlend verlässt. Spezialisiert auf
+                            Gesichtsbehandlungen &amp; HIFU.</p>
+                        <span class="tm-lang">DE · EN · 中文</span>
                     </div>
                 </div>
-                <div class="tcard rv d1">
-                    <div class="tcard-img"
-                        style="background-image:url('https://placehold.co/400x500/dcc4a0/4a3f38?text=Yang')">
+
+                <div class="tm-card" data-member="yang">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/dcc4a0/4a3f38?text=Yang')"></div>
+                        <div class="tm-overlay">
+                            <h3>Yang</h3>
+                            <p>Kosmetikerin</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Yang</h3>
-                        <p class="tcard-role">Kosmetikerin</p>
+                        <span class="tm-role">Kosmetikerin</span>
+                        <p>Spezialistin für Gesichtsbehandlungen und Hautpflege mit Fokus auf sensible Haut und
+                            Anti-Aging Treatments.</p>
                     </div>
                 </div>
-                <div class="tcard rv d2">
-                    <div class="tcard-img"
-                        style="background-image:url('https://placehold.co/400x500/c9995e/fff?text=Najmeh')">
+
+                <div class="tm-card" data-member="najmeh">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/c9995e/fff?text=Najmeh')"></div>
+                        <div class="tm-overlay">
+                            <h3>Najmeh</h3>
+                            <p>Kosmetikerin · Nägel</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Najmeh</h3>
-                        <p class="tcard-role">Kosmetikerin &middot; Nägel</p>
+                        <span class="tm-role">Kosmetikerin &amp; Nägel</span>
+                        <p>Vielseitig talentiert — Najmeh beherrscht sowohl professionelle Gesichtsbehandlungen als auch
+                            kreatives Nageldesign.</p>
                     </div>
                 </div>
-                <div class="tcard rv d1">
-                    <div class="tcard-img"
-                        style="background-image:url('https://placehold.co/400x500/f5f0ea/4a3f38?text=Timea')">
+
+                <div class="tm-card" data-member="timea">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/f5f0ea/4a3f38?text=Timea')"></div>
+                        <div class="tm-overlay">
+                            <h3>Timea</h3>
+                            <p>Nageldesignerin</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Timea</h3>
-                        <p class="tcard-role">Nageldesignerin</p>
+                        <span class="tm-role">Nageldesignerin</span>
+                        <p>Kreative Nail-Art Spezialistin. Timea versteht genau, was man sich vorstellt und setzt auch
+                            die aufwändigsten Designs präzise um.</p>
                     </div>
                 </div>
-                <div class="tcard rv d2">
-                    <div class="tcard-img"
-                        style="background-image:url('https://placehold.co/400x500/ede0d0/4a3f38?text=Vicky')">
+
+                <div class="tm-card" data-member="vicky">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/ede0d0/4a3f38?text=Vicky')"></div>
+                        <div class="tm-overlay">
+                            <h3>Vicky</h3>
+                            <p>Nageldesignerin</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Vicky</h3>
-                        <p class="tcard-role">Nageldesignerin</p>
+                        <span class="tm-role">Nageldesignerin</span>
+                        <p>Geduldig, gründlich und mit Liebe zum Detail — Vicky erklärt jede Option und findet immer das
+                            perfekte Design.</p>
                     </div>
                 </div>
-                <div class="tcard rv d1">
-                    <div class="tcard-img"
-                        style="background-image:url('https://placehold.co/400x500/dcc4a0/4a3f38?text=Jing')">
+
+                <div class="tm-card" data-member="jing">
+                    <div class="tm-card-visual">
+                        <div class="tm-img"
+                            style="background-image:url('https://placehold.co/400x500/dcc4a0/4a3f38?text=Jing')"></div>
+                        <div class="tm-overlay">
+                            <h3>Jing</h3>
+                            <p>Nageldesignerin</p>
+                        </div>
                     </div>
-                    <div class="tcard-info">
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Jing</h3>
-                        <p class="tcard-role">Nageldesignerin</p>
+                        <span class="tm-role">Nageldesignerin</span>
+                        <p>Von clean looks bis statement nails — Jing bringt jede Idee mit Perfektion und
+                            Fingerspitzengefühl zum Leben.</p>
                     </div>
                 </div>
-                <div class="tcard rv d2">
-                    <div class="tcard-img tcard-init"><span>K</span></div>
-                    <div class="tcard-info">
+
+                <div class="tm-card" data-member="krina">
+                    <div class="tm-card-visual">
+                        <div class="tm-img tm-init"><span>K</span></div>
+                        <div class="tm-overlay">
+                            <h3>Krina</h3>
+                            <p>Nägel · Fußpflege</p>
+                        </div>
+                    </div>
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Krina</h3>
-                        <p class="tcard-role">Nägel &middot; Fußpflege</p>
+                        <span class="tm-role">Nägel &amp; Fußpflege</span>
+                        <p>Expertin für gepflegte Hände und Füße — Krina kombiniert Nageldesign mit professioneller
+                            Fußpflege.</p>
                     </div>
                 </div>
-                <div class="tcard rv d1">
-                    <div class="tcard-img tcard-init"><span>N</span></div>
-                    <div class="tcard-info">
+
+                <div class="tm-card" data-member="nasim">
+                    <div class="tm-card-visual">
+                        <div class="tm-img tm-init"><span>N</span></div>
+                        <div class="tm-overlay">
+                            <h3>Nasim</h3>
+                            <p>Nägel · Fußpflege</p>
+                        </div>
+                    </div>
+                    <div class="tm-card-detail">
+                        <span class="tm-close">✕</span>
                         <h3>Nasim</h3>
-                        <p class="tcard-role">Nägel &middot; Fußpflege</p>
+                        <span class="tm-role">Nägel &amp; Fußpflege</span>
+                        <p>Mit viel Erfahrung und Sorgfalt sorgt Nasim für wunderschöne Nägel und professionelle
+                            Fußpflege.</p>
                     </div>
                 </div>
             </div>
@@ -316,38 +563,41 @@
 
     <!-- ═══ STATS STRIP ═══ -->
     <section class="stats-strip">
-        <div class="stat-item rv">
-            <span class="stat-num">6+</span>
-            <span class="stat-label">Jahre Erfahrung</span>
+        <div class="stat-item">
+            <div class="stat-num-wrap"><span class="stat-num" data-count="6">0</span><span class="stat-suffix">+</span>
+            </div><span class="stat-label">Jahre Erfahrung</span>
         </div>
         <div class="stat-divider"></div>
-        <div class="stat-item rv d1">
-            <span class="stat-num">8</span>
-            <span class="stat-label">Expertinnen</span>
+        <div class="stat-item">
+            <div class="stat-num-wrap"><span class="stat-num" data-count="8">0</span><span class="stat-suffix"></span>
+            </div><span class="stat-label">Expertinnen</span>
         </div>
         <div class="stat-divider"></div>
-        <div class="stat-item rv d2">
-            <span class="stat-num">4.8</span>
-            <span class="stat-label">★ Bewertung</span>
+        <div class="stat-item">
+            <div class="stat-num-wrap"><span class="stat-num" data-count="4.8" data-decimal="true">0</span><span
+                    class="stat-suffix"></span></div><span class="stat-label">★ Bewertung</span>
         </div>
         <div class="stat-divider"></div>
-        <div class="stat-item rv d3">
-            <span class="stat-num">5k+</span>
-            <span class="stat-label">Zufriedene Kunden</span>
+        <div class="stat-item">
+            <div class="stat-num-wrap"><span class="stat-num" data-count="5">0</span><span class="stat-suffix">k+</span>
+            </div><span class="stat-label">Zufriedene Kunden</span>
         </div>
     </section>
 
     <!-- ═══ CONTACT ═══ -->
     <section class="contact" id="contact">
-        <div class="contact-info rv">
+        <div class="contact-info">
             <span class="tag">Kontakt &amp; Buchung</span>
             <h2>Bereit für<br><em>dein Erlebnis?</em></h2>
-            <div class="line"></div>
+            <div class="line anim-line"></div>
             <p>Alle Behandlungen beginnen mit einer persönlichen Beratung.</p>
             <div class="contact-details">
                 <div><strong>Adresse</strong><span>Ramperstorffergasse 51, 1050 Wien</span></div>
                 <div><strong>Telefon</strong><a href="tel:+436608866068">+43 660 8866068</a></div>
-                <div><strong>E-Mail</strong><a href="mailto:info@fembeauty.at">info@fembeauty.at</a></div>
+                <div><strong>E-Mail</strong><a
+                        href="/cdn-cgi/l/email-protection#1871767e77587e7d757a7d796d6c6136796c"><span
+                            class="__cf_email__"
+                            data-cfemail="81e8efe7eec1e7e4ece3e4e0f4f5f8afe0f5">[email&#160;protected]</span></a></div>
                 <div><strong>Instagram</strong><a href="https://instagram.com/fem.vienna"
                         target="_blank">@fem.vienna</a></div>
                 <div><strong>Zeiten</strong><span>Mo–Fr 09–19 · Sa 09–18</span></div>
@@ -359,8 +609,7 @@
             <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2659.2!2d16.3558!3d48.1857!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476da836d80ebf75%3A0x3e5a9d2f7b6c1234!2sRamperstorffergasse+51%2C+1050+Wien!5e0!3m2!1sde!2sat!4v1710000000000"
                 width="100%" height="100%" style="border:0" allowfullscreen="" loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade" title="FEM Beauty Wien">
-            </iframe>
+                referrerpolicy="no-referrer-when-downgrade" title="FEM Beauty Wien"></iframe>
         </div>
     </section>
 
@@ -371,9 +620,11 @@
                     href="https://instagram.com/fem.vienna" target="_blank">Instagram</a><a
                     href="https://buchung.treatwell.at/ort/fem/" target="_blank">Treatwell</a></div>
         </div>
-        <p class="ft-copy">© 2026 FEM Kosmetiksalon Wien</p>
+        <p class="ft-copy">&copy; 2024 FEM Beauty Wien. Alle Rechte vorbehalten.</p>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="script.js"></script>
 </body>
 
