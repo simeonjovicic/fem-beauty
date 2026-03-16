@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    var isMobile = function () { return window.innerWidth <= 768; };
+    var isMob = function () { return window.innerWidth <= 768; };
     var hasGSAP = typeof gsap !== 'undefined';
 
     /* ─── Loader ────────────────────────────── */
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () { l.style.display = 'none'; }, 1200);
     }, 2400);
 
-    /* ─── Sticky nav ────────────────────────── */
+    /* ─── Nav ───────────────────────────────── */
     var nav = document.getElementById('nav');
     window.addEventListener('scroll', function () {
         nav.classList.toggle('scrolled', window.scrollY > 60);
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ─── Basic reveals ─────────────────────── */
+    /* ─── Reveals ───────────────────────────── */
     var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('on'); });
     }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
@@ -59,36 +59,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.story-img').forEach(function (el) { storyObs.observe(el); });
 
 
-    /* ═══════════════════════════════════════════
-       SERVICE CARDS — expand/collapse
-       ═══════════════════════════════════════════ */
+    /* ═══ Expand/Collapse — Services ═════════ */
     document.querySelectorAll('.srv-card').forEach(function (card) {
         card.addEventListener('click', function (e) {
-            if (e.target.classList.contains('srv-close')) { card.classList.remove('open'); recalcSrvHeight(); return; }
+            if (e.target.classList.contains('srv-close')) { card.classList.remove('open'); return; }
             if (e.target.tagName === 'A' || e.target.closest('a')) return;
             document.querySelectorAll('.srv-card.open').forEach(function (c) { if (c !== card) c.classList.remove('open'); });
             card.classList.toggle('open');
-            recalcSrvHeight();
         });
     });
     document.addEventListener('click', function (e) {
-        if (!e.target.closest('.srv-card')) {
-            document.querySelectorAll('.srv-card.open').forEach(function (c) { c.classList.remove('open'); });
-            recalcSrvHeight();
-        }
+        if (!e.target.closest('.srv-card')) document.querySelectorAll('.srv-card.open').forEach(function (c) { c.classList.remove('open'); });
     });
 
-    function recalcSrvHeight() {
-        // Delay to let CSS transition complete
-        setTimeout(function () {
-            if (srvCarousel) srvCarousel._setHeight();
-        }, 60);
-    }
-
-
-    /* ═══════════════════════════════════════════
-       TEAM CARDS — expand/collapse
-       ═══════════════════════════════════════════ */
+    /* ═══ Expand/Collapse — Team ════════════ */
     document.querySelectorAll('.tm-card').forEach(function (card) {
         card.addEventListener('click', function (e) {
             if (e.target.classList.contains('tm-close')) { card.classList.remove('open'); return; }
@@ -102,454 +86,366 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    /* ═══════════════════════════════════════════════════════════
-       GSAP CAROUSEL ENGINE
-       Reusable for both services & reviews
-       ═══════════════════════════════════════════════════════════ */
-    function GsapCarousel(cfg) {
-        this.container = cfg.container;
-        this.items = cfg.items;
-        this.dotsContainer = cfg.dotsContainer;
-        this.counterEl = cfg.counterEl;
-        this.autoPlay = cfg.autoPlay || 0;
+    /* ═══════════════════════════════════════════
+       FLEX SLIDER — clean, no teleport
+       Cards sit in a flex row inside .slider-track.
+       We translateX the track to slide.
+       ═══════════════════════════════════════════ */
+    function FlexSlider(cfg) {
+        this.container = cfg.container;   // the overflow:hidden wrapper
+        this.cards = cfg.cards;           // NodeList or array of card elements
+        this.dotsEl = cfg.dots || null;
+        this.counterEl = cfg.counter || null;
+        this.auto = cfg.auto || 0;       // ms, 0 = off
         this.current = 0;
-        this.total = this.items.length;
-        this.busy = false;
+        this.total = this.cards.length;
+        this.track = null;
         this.timer = null;
-        this.touchStartX = 0;
-        this.touchStartY = 0;
-        this.touchDeltaX = 0;
+        this.touchX0 = 0;
+        this.touchY0 = 0;
+        this.dx = 0;
         this.dragging = false;
-        this.threshold = 50;
 
-        this._init();
+        if (this.total > 0) this._build();
     }
 
-    GsapCarousel.prototype._init = function () {
-        var self = this;
-        if (!this.container || this.total === 0) return;
+    FlexSlider.prototype._build = function () {
+        // Wrap cards in a slider-track div
+        this.track = document.createElement('div');
+        this.track.className = 'slider-track';
+        // Move cards into track
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < this.total; i++) frag.appendChild(this.cards[i]);
+        this.track.appendChild(frag);
+        this.container.appendChild(this.track);
 
-        // Set initial state: first item active, rest hidden
-        this.items.forEach(function (item, i) {
-            item.classList.remove('carousel-active', 'carousel-prev', 'carousel-next');
-            if (i === 0) {
-                item.classList.add('carousel-active');
-                gsap.set(item, { opacity: 1, x: 0, scale: 1 });
-            } else {
-                gsap.set(item, { opacity: 0, x: 80, scale: 0.92 });
+        this._dots();
+        this._counter();
+        this._touch();
+        if (this.auto > 0) this._startAuto();
+    };
+
+    FlexSlider.prototype.goTo = function (idx) {
+        if (idx < 0 || idx >= this.total) return;
+        this.current = idx;
+        this.track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        this._dots();
+        this._counter();
+    };
+
+    FlexSlider.prototype.next = function () { this.goTo((this.current + 1) % this.total); };
+    FlexSlider.prototype.prev = function () { this.goTo((this.current - 1 + this.total) % this.total); };
+
+    FlexSlider.prototype._dots = function () {
+        if (!this.dotsEl) return;
+        // Build once
+        if (this.dotsEl.children.length !== this.total) {
+            this.dotsEl.innerHTML = '';
+            var self = this;
+            for (var i = 0; i < this.total; i++) {
+                var d = document.createElement('button');
+                d.className = 'mob-dot';
+                d.setAttribute('data-i', i);
+                (function (idx) {
+                    d.addEventListener('click', function () {
+                        self.goTo(idx);
+                        if (self.auto > 0) self._startAuto();
+                    });
+                })(i);
+                this.dotsEl.appendChild(d);
             }
-        });
-
-        this._setHeight();
-        this._buildDots();
-        this._updateCounter();
-        this._bindTouch();
-        if (this.autoPlay > 0) this._startAuto();
-    };
-
-    GsapCarousel.prototype._setHeight = function () {
-        // Measure the active card's natural height and set it on the container
-        var active = this.items[this.current];
-        if (!active || !this.container) return;
-        // Temporarily make it visible to measure
-        var h = active.scrollHeight;
-        this.container.style.height = h + 'px';
-        this.container.style.transition = 'height .4s cubic-bezier(.19,1,.22,1)';
-    };
-
-    GsapCarousel.prototype._buildDots = function () {
-        var self = this;
-        if (!this.dotsContainer) return;
-        this.dotsContainer.innerHTML = '';
-        for (var i = 0; i < this.total; i++) {
-            var dot = document.createElement('button');
-            dot.className = 'mob-dot' + (i === 0 ? ' active' : '');
-            dot.setAttribute('data-idx', i);
-            (function (idx) {
-                dot.addEventListener('click', function () {
-                    self.goTo(idx);
-                    if (self.autoPlay > 0) self._startAuto();
-                });
-            })(i);
-            this.dotsContainer.appendChild(dot);
         }
+        this.dotsEl.querySelectorAll('.mob-dot').forEach(function (d, i) {
+            d.classList.toggle('active', i === this.current);
+        }.bind(this));
     };
 
-    GsapCarousel.prototype._updateDots = function () {
-        if (!this.dotsContainer) return;
-        var self = this;
-        this.dotsContainer.querySelectorAll('.mob-dot').forEach(function (d, i) {
-            d.classList.toggle('active', i === self.current);
-        });
-    };
-
-    GsapCarousel.prototype._updateCounter = function () {
+    FlexSlider.prototype._counter = function () {
         if (this.counterEl) this.counterEl.textContent = (this.current + 1) + ' / ' + this.total;
     };
 
-    GsapCarousel.prototype.goTo = function (idx, direction) {
-        if (this.busy || idx === this.current || idx < 0 || idx >= this.total) return;
-        this.busy = true;
+    FlexSlider.prototype._touch = function () {
         var self = this;
-        var prev = this.current;
-        var dir = direction || (idx > prev ? 1 : -1);
-        var prevItem = this.items[prev];
-        var nextItem = this.items[idx];
 
-        // Pre-measure incoming card height and animate container
-        var nextH = nextItem.scrollHeight;
-        this.container.style.height = nextH + 'px';
-
-        // Animate out
-        gsap.to(prevItem, {
-            x: dir * -100, opacity: 0, scale: 0.92,
-            duration: 0.55, ease: 'power3.inOut',
-            onComplete: function () {
-                prevItem.classList.remove('carousel-active');
-            }
-        });
-
-        // Animate in
-        gsap.fromTo(nextItem,
-            { x: dir * 100, opacity: 0, scale: 0.92 },
-            {
-                x: 0, opacity: 1, scale: 1,
-                duration: 0.55, ease: 'power3.inOut',
-                delay: 0.05,
-                onStart: function () {
-                    nextItem.classList.add('carousel-active');
-                },
-                onComplete: function () {
-                    self.current = idx;
-                    self.busy = false;
-                    self._updateDots();
-                    self._updateCounter();
-                }
-            }
-        );
-    };
-
-    GsapCarousel.prototype.next = function () {
-        this.goTo((this.current + 1) % this.total, 1);
-    };
-
-    GsapCarousel.prototype.prev = function () {
-        this.goTo((this.current - 1 + this.total) % this.total, -1);
-    };
-
-    GsapCarousel.prototype._bindTouch = function () {
-        var self = this;
-        var el = this.container;
-
-        el.addEventListener('touchstart', function (e) {
-            if (self.busy) return;
-            self.touchStartX = e.touches[0].clientX;
-            self.touchStartY = e.touches[0].clientY;
-            self.touchDeltaX = 0;
+        this.container.addEventListener('touchstart', function (e) {
+            self.touchX0 = e.touches[0].clientX;
+            self.touchY0 = e.touches[0].clientY;
+            self.dx = 0;
             self.dragging = true;
-
-            // Live drag: slightly shift active card
-            var active = self.items[self.current];
-            if (active) gsap.killTweensOf(active);
+            // Disable CSS transition during drag
+            self.track.style.transition = 'none';
         }, { passive: true });
 
-        el.addEventListener('touchmove', function (e) {
+        this.container.addEventListener('touchmove', function (e) {
             if (!self.dragging) return;
-            self.touchDeltaX = e.touches[0].clientX - self.touchStartX;
-            var deltaY = Math.abs(e.touches[0].clientY - self.touchStartY);
-
-            // If scrolling more vertically, abort drag
-            if (deltaY > Math.abs(self.touchDeltaX) * 1.5) {
-                self.dragging = false;
-                gsap.to(self.items[self.current], { x: 0, scale: 1, duration: 0.3, ease: 'power2.out' });
-                return;
-            }
-
-            // Live drag feedback — subtle shift + scale
-            var active = self.items[self.current];
-            var progress = Math.max(-1, Math.min(1, self.touchDeltaX / el.offsetWidth));
-            gsap.set(active, {
-                x: self.touchDeltaX * 0.4,
-                scale: 1 - Math.abs(progress) * 0.04
-            });
+            self.dx = e.touches[0].clientX - self.touchX0;
+            var dy = Math.abs(e.touches[0].clientY - self.touchY0);
+            // If scrolling vertically, abort
+            if (dy > Math.abs(self.dx) * 1.2) { self.dragging = false; self._snapBack(); return; }
+            // Live drag — move track with finger
+            var base = -(self.current * 100);
+            var pxOffset = self.dx;
+            var pctOffset = (pxOffset / self.container.offsetWidth) * 100;
+            self.track.style.transform = 'translateX(' + (base + pctOffset) + '%)';
         }, { passive: true });
 
-        el.addEventListener('touchend', function () {
+        this.container.addEventListener('touchend', function () {
             if (!self.dragging) return;
             self.dragging = false;
-
-            if (Math.abs(self.touchDeltaX) > self.threshold) {
-                if (self.touchDeltaX < 0) self.next();
-                else self.prev();
+            // Re-enable transition
+            self.track.style.transition = '';
+            var threshold = self.container.offsetWidth * 0.2;
+            if (self.dx < -threshold && self.current < self.total - 1) {
+                self.goTo(self.current + 1);
+            } else if (self.dx > threshold && self.current > 0) {
+                self.goTo(self.current - 1);
             } else {
-                // Snap back with spring
-                gsap.to(self.items[self.current], {
-                    x: 0, scale: 1,
-                    duration: 0.5, ease: 'elastic.out(1, 0.75)'
-                });
+                self._snapBack();
             }
-
-            if (self.autoPlay > 0) self._startAuto();
+            if (self.auto > 0) self._startAuto();
         }, { passive: true });
     };
 
-    GsapCarousel.prototype._startAuto = function () {
+    FlexSlider.prototype._snapBack = function () {
+        this.track.style.transition = '';
+        this.track.style.transform = 'translateX(-' + (this.current * 100) + '%)';
+    };
+
+    FlexSlider.prototype._startAuto = function () {
         var self = this;
         clearInterval(this.timer);
-        this.timer = setInterval(function () { self.next(); }, this.autoPlay);
+        this.timer = setInterval(function () { self.next(); }, this.auto);
     };
 
-    GsapCarousel.prototype.destroy = function () {
+    FlexSlider.prototype.destroy = function () {
         clearInterval(this.timer);
-        this.container.style.height = '';
-        this.container.style.transition = '';
-        this.items.forEach(function (item) {
-            item.classList.remove('carousel-active', 'carousel-prev', 'carousel-next');
-            gsap.set(item, { clearProps: 'all' });
-        });
+        // Unwrap: move cards back out of track
+        if (this.track && this.track.parentNode) {
+            while (this.track.firstChild) this.container.appendChild(this.track.firstChild);
+            this.track.remove();
+        }
+        this.track = null;
+        if (this.dotsEl) this.dotsEl.innerHTML = '';
     };
 
 
-    /* ═══════════════════════════════════════════
-       SERVICES — Mobile carousel instance
-       ═══════════════════════════════════════════ */
-    var srvCarousel = null;
-
-    function initServicesMobile() {
-        if (!isMobile() || !hasGSAP) return;
-        if (srvCarousel) return; // already init
-
+    /* ═══ Services mobile slider ════════════ */
+    var srvSlider = null;
+    function initSrvMobile() {
+        if (!isMob() || srvSlider) return;
         var grid = document.querySelector('.srv-grid');
-        var cards = Array.from(document.querySelectorAll('.srv-card'));
-        var dots = document.querySelector('.srv-dots');
-        var counter = document.querySelector('.srv-counter');
-
-        if (!grid || cards.length === 0) return;
-        srvCarousel = new GsapCarousel({
+        var cards = Array.from(grid.querySelectorAll('.srv-card'));
+        if (!grid || !cards.length) return;
+        srvSlider = new FlexSlider({
             container: grid,
-            items: cards,
-            dotsContainer: dots,
-            counterEl: counter,
-            autoPlay: 0
+            cards: cards,
+            dots: document.querySelector('.srv-dots'),
+            counter: document.querySelector('.srv-counter')
         });
     }
-
-    function destroyServicesMobile() {
-        if (srvCarousel) { srvCarousel.destroy(); srvCarousel = null; }
-    }
+    function destroySrvMobile() { if (srvSlider) { srvSlider.destroy(); srvSlider = null; } }
 
 
-    /* ═══════════════════════════════════════════
-       REVIEWS — Desktop set carousel (improved)
-       ═══════════════════════════════════════════ */
+    /* ═══ Desktop review sets ═══════════════ */
     var sets = document.querySelectorAll('.reviews-set');
-    var dots = document.querySelectorAll('.reviews-dot');
+    var desktopDots = document.querySelectorAll('.reviews-dot');
     var currentSet = 0;
-    var reviewTimer;
+    var deskTimer;
 
     function showSet(idx) {
         if (idx === currentSet) return;
-        var prev = sets[currentSet];
-        var next = sets[idx];
-
-        // Exit animation
-        prev.classList.remove('active');
-        prev.classList.add('exiting');
-
-        // After exit transition, remove class
-        setTimeout(function () { prev.classList.remove('exiting'); }, 700);
-
-        // Enter
-        next.classList.add('active');
-
+        sets[currentSet].classList.remove('active');
+        sets[currentSet].classList.add('exiting');
+        setTimeout(function () { sets[currentSet === idx ? currentSet : (currentSet)]; }, 700);
+        var prev = currentSet;
+        sets[idx].classList.add('active');
         currentSet = idx;
-        dots.forEach(function (d, i) { d.classList.toggle('active', i === idx); });
+        setTimeout(function () { sets[prev].classList.remove('exiting'); }, 700);
+        desktopDots.forEach(function (d, i) { d.classList.toggle('active', i === idx); });
     }
 
-    function nextDesktopSet() { showSet((currentSet + 1) % sets.length); }
-
-    function startDesktopAutoRotate() {
-        clearInterval(reviewTimer);
-        if (!isMobile()) reviewTimer = setInterval(nextDesktopSet, 5000);
+    function startDeskAuto() {
+        clearInterval(deskTimer);
+        if (!isMob()) deskTimer = setInterval(function () {
+            showSet((currentSet + 1) % sets.length);
+        }, 5000);
     }
 
-    dots.forEach(function (dot) {
+    desktopDots.forEach(function (dot) {
         dot.addEventListener('click', function () {
             showSet(parseInt(this.getAttribute('data-set')));
-            startDesktopAutoRotate();
+            startDeskAuto();
         });
     });
 
-    if (!isMobile()) startDesktopAutoRotate();
+    if (!isMob()) startDeskAuto();
 
 
-    /* ═══════════════════════════════════════════
-       REVIEWS — Mobile carousel instance
-       ═══════════════════════════════════════════ */
-    var mobReviewsTrack = document.getElementById('mobReviewsTrack');
-    var reviewMobDots = document.querySelector('.review-mob-dots');
-    var reviewCardHTMLs = [];
-    var reviewCarousel = null;
+    /* ═══ Mobile review slider ═════════════ */
+    var mobTrack = document.getElementById('mobReviewsTrack');
+    var mobReviewDots = document.querySelector('.review-mob-dots');
+    var revHTMLs = [];
+    var revSlider = null;
 
-    // Collect all review card HTML once
-    sets.forEach(function (set) {
-        set.querySelectorAll('.review-card').forEach(function (card) {
-            reviewCardHTMLs.push(card.outerHTML);
-        });
+    sets.forEach(function (s) {
+        s.querySelectorAll('.review-card').forEach(function (c) { revHTMLs.push(c.outerHTML); });
     });
 
-    function initReviewsMobile() {
-        if (!isMobile() || !hasGSAP || !mobReviewsTrack) return;
-        if (reviewCarousel) return; // already init
-
-        // Populate track
-        mobReviewsTrack.innerHTML = reviewCardHTMLs.join('');
-        var cards = Array.from(mobReviewsTrack.querySelectorAll('.review-card'));
-
-        reviewCarousel = new GsapCarousel({
-            container: mobReviewsTrack,
-            items: cards,
-            dotsContainer: reviewMobDots,
-            autoPlay: 4500
+    function initRevMobile() {
+        if (!isMob() || revSlider || !mobTrack) return;
+        mobTrack.innerHTML = revHTMLs.join('');
+        var cards = Array.from(mobTrack.querySelectorAll('.review-card'));
+        revSlider = new FlexSlider({
+            container: mobTrack,
+            cards: cards,
+            dots: mobReviewDots,
+            auto: 4500
         });
     }
-
-    function destroyReviewsMobile() {
-        if (reviewCarousel) { reviewCarousel.destroy(); reviewCarousel = null; }
-        if (mobReviewsTrack) mobReviewsTrack.innerHTML = '';
-        if (reviewMobDots) reviewMobDots.innerHTML = '';
+    function destroyRevMobile() {
+        if (revSlider) { revSlider.destroy(); revSlider = null; }
+        if (mobTrack) mobTrack.innerHTML = '';
+        if (mobReviewDots) mobReviewDots.innerHTML = '';
     }
 
 
     /* ─── Init + resize ─────────────────────── */
-    if (isMobile()) {
-        initServicesMobile();
-        initReviewsMobile();
-    }
+    if (isMob()) { initSrvMobile(); initRevMobile(); }
 
-    var resizeTimeout;
+    var rto;
     window.addEventListener('resize', function () {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function () {
-            if (isMobile()) {
-                initServicesMobile();
-                initReviewsMobile();
-                clearInterval(reviewTimer);
-                // Recalc heights after orientation change etc
-                if (srvCarousel) srvCarousel._setHeight();
-                if (reviewCarousel) reviewCarousel._setHeight();
+        clearTimeout(rto);
+        rto = setTimeout(function () {
+            if (isMob()) {
+                initSrvMobile();
+                initRevMobile();
+                clearInterval(deskTimer);
             } else {
-                destroyServicesMobile();
-                destroyReviewsMobile();
-                startDesktopAutoRotate();
+                destroySrvMobile();
+                destroyRevMobile();
+                startDeskAuto();
             }
         }, 250);
     });
 
 
-    /* ═══════════════════════════════════════════
-       COUNTER ANIMATION
-       ═══════════════════════════════════════════ */
-    var counterDone = false;
-    var statsObs = new IntersectionObserver(function (entries) {
+    /* ═══ Counter animation ═════════════════ */
+    var cDone = false;
+    var sObs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
-            if (e.isIntersecting && !counterDone) {
-                counterDone = true;
-                animateCounters();
-                statsObs.disconnect();
-            }
+            if (e.isIntersecting && !cDone) { cDone = true; runCounters(); sObs.disconnect(); }
         });
     }, { threshold: 0.3 });
-    var statsSection = document.querySelector('.stats-strip');
-    if (statsSection) statsObs.observe(statsSection);
+    var ss = document.querySelector('.stats-strip');
+    if (ss) sObs.observe(ss);
 
-    function animateCounters() {
+    function runCounters() {
         document.querySelectorAll('.stat-num[data-count]').forEach(function (el) {
-            var target = parseFloat(el.getAttribute('data-count'));
-            var isDecimal = el.hasAttribute('data-decimal');
-            var duration = 2000, start = performance.now();
-            function ease(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+            var t = parseFloat(el.getAttribute('data-count'));
+            var dec = el.hasAttribute('data-decimal');
+            var dur = 2000, s = performance.now();
+            function ease(x) { return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); }
             function step(now) {
-                var p = Math.min((now - start) / duration, 1), val = ease(p) * target;
-                el.textContent = isDecimal ? val.toFixed(1) : Math.floor(val);
+                var p = Math.min((now - s) / dur, 1), v = ease(p) * t;
+                el.textContent = dec ? v.toFixed(1) : Math.floor(v);
                 if (p < 1) requestAnimationFrame(step);
-                else el.textContent = isDecimal ? target.toFixed(1) : Math.round(target);
+                else el.textContent = dec ? t.toFixed(1) : Math.round(t);
             }
             requestAnimationFrame(step);
         });
     }
 
 
-    /* ═══════════════════════════════════════════
-       GSAP CINEMATIC SCROLL
-       ═══════════════════════════════════════════ */
+    /* ═══ GSAP Cinematic Scroll ═════════════ */
     if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
 
+        // Hero depth
         gsap.to('.hero-bg img', {
             y: 150, scale: 1.1, ease: 'none',
             scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
         });
         gsap.to('.hero-content', {
-            y: -60, opacity: 0, ease: 'none',
-            scrollTrigger: { trigger: '.hero', start: '60% top', end: 'bottom top', scrub: true }
+            y: -80, opacity: 0, ease: 'none',
+            scrollTrigger: { trigger: '.hero', start: '50% top', end: 'bottom top', scrub: true }
         });
         gsap.to('.hero-scroll', {
             opacity: 0, ease: 'none',
-            scrollTrigger: { trigger: '.hero', start: '20% top', end: '40% top', scrub: true }
+            scrollTrigger: { trigger: '.hero', start: '15% top', end: '35% top', scrub: true }
         });
 
-        gsap.utils.toArray('.usp-strip-item').forEach(function (item, i) {
-            gsap.fromTo(item, { x: -40, opacity: 0 },
+        // USP
+        gsap.utils.toArray('.usp-strip-item').forEach(function (el, i) {
+            gsap.fromTo(el, { x: -40, opacity: 0 },
                 {
-                    x: 0, opacity: 1, duration: 1, delay: i * 0.15, ease: 'expo.out',
+                    x: 0, opacity: 1, duration: 1, delay: i * .15, ease: 'expo.out',
                     scrollTrigger: { trigger: '.usp-strip', start: 'top 85%', toggleActions: 'play none none none' }
                 });
         });
 
+        // Story parallax
         gsap.to('.story-img img', {
             y: -80, ease: 'none',
             scrollTrigger: { trigger: '.story', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
         });
 
-        gsap.utils.toArray('.srv-card').forEach(function (card, i) {
-            gsap.fromTo(card, { y: 60, opacity: 0 },
+        // Gallery
+        gsap.utils.toArray('.gallery-item').forEach(function (el, i) {
+            gsap.fromTo(el, { y: 40, opacity: 0, scale: .95 },
                 {
-                    y: 0, opacity: 1, duration: 1, delay: i * 0.1, ease: 'expo.out',
+                    y: 0, opacity: 1, scale: 1, duration: 1, delay: i * .12, ease: 'expo.out',
+                    scrollTrigger: { trigger: '.gallery', start: 'top 85%', toggleActions: 'play none none none' }
+                });
+        });
+        gsap.utils.toArray('.gallery-item img').forEach(function (img) {
+            gsap.to(img, {
+                y: -30, ease: 'none',
+                scrollTrigger: { trigger: img.parentElement, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+            });
+        });
+
+        // Services
+        gsap.utils.toArray('.srv-card').forEach(function (c, i) {
+            gsap.fromTo(c, { y: 60, opacity: 0 },
+                {
+                    y: 0, opacity: 1, duration: 1, delay: i * .1, ease: 'expo.out',
                     scrollTrigger: { trigger: '.srv-grid', start: 'top 80%', toggleActions: 'play none none none' }
                 });
         });
 
+        // Reviews
         gsap.fromTo('.reviews-carousel', { y: 40, opacity: 0 },
             {
                 y: 0, opacity: 1, duration: 1.2, ease: 'expo.out',
                 scrollTrigger: { trigger: '.reviews', start: 'top 75%', toggleActions: 'play none none none' }
             });
-
-        if (mobReviewsTrack) {
-            gsap.fromTo(mobReviewsTrack, { y: 40, opacity: 0 },
+        if (mobTrack) {
+            gsap.fromTo(mobTrack, { y: 40, opacity: 0 },
                 {
                     y: 0, opacity: 1, duration: 1.2, ease: 'expo.out',
                     scrollTrigger: { trigger: '.reviews', start: 'top 75%', toggleActions: 'play none none none' }
                 });
         }
 
-        gsap.utils.toArray('.tm-card').forEach(function (card, i) {
-            gsap.fromTo(card, { y: 50, opacity: 0, rotation: i % 2 === 0 ? -2 : 2 },
+        // Team
+        gsap.utils.toArray('.tm-card').forEach(function (c, i) {
+            gsap.fromTo(c, { y: 50, opacity: 0, rotation: i % 2 === 0 ? -2 : 2 },
                 {
-                    y: 0, opacity: 1, rotation: 0, duration: 0.9, delay: i * 0.07, ease: 'expo.out',
+                    y: 0, opacity: 1, rotation: 0, duration: .9, delay: i * .07, ease: 'expo.out',
                     scrollTrigger: { trigger: '.team-grid', start: 'top 80%', toggleActions: 'play none none none' }
                 });
         });
 
-        gsap.utils.toArray('.stat-item').forEach(function (item, i) {
-            gsap.fromTo(item, { scale: 0.8, opacity: 0 },
+        // Stats
+        gsap.utils.toArray('.stat-item').forEach(function (el, i) {
+            gsap.fromTo(el, { scale: .8, opacity: 0 },
                 {
-                    scale: 1, opacity: 1, duration: 0.8, delay: i * 0.12, ease: 'expo.out',
+                    scale: 1, opacity: 1, duration: .8, delay: i * .12, ease: 'expo.out',
                     scrollTrigger: { trigger: '.stats-strip', start: 'top 80%', toggleActions: 'play none none none' }
                 });
         });
 
+        // Contact
         gsap.fromTo('.contact-info', { x: -80, opacity: 0 },
             {
                 x: 0, opacity: 1, duration: 1.4, ease: 'expo.out',
@@ -561,20 +457,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 scrollTrigger: { trigger: '.contact', start: 'top 70%', toggleActions: 'play none none none' }
             });
 
-        var mTrack = document.querySelector('.brands-marquee-track');
-        if (mTrack) {
+        // Marquee speed
+        var mT = document.querySelector('.brands-marquee-track');
+        if (mT) {
             ScrollTrigger.create({
                 trigger: '.brands-marquee', start: 'top bottom', end: 'bottom top',
-                onUpdate: function (self) { mTrack.style.animationDuration = (25 - self.progress * 14) + 's'; }
+                onUpdate: function (s) { mT.style.animationDuration = (25 - s.progress * 14) + 's'; }
             });
         }
 
+        // Footer
         gsap.fromTo('footer', { y: 30, opacity: 0 },
             {
                 y: 0, opacity: 1, duration: 1, ease: 'expo.out',
                 scrollTrigger: { trigger: 'footer', start: 'top 90%', toggleActions: 'play none none none' }
             });
 
+        // Section heads
         document.querySelectorAll('.services-head, .reviews-head, .team-top').forEach(function (el) {
             gsap.fromTo(el, { y: 30, opacity: 0 },
                 {
@@ -585,23 +484,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* ─── Smooth scroll ─────────────────────── */
-    document.querySelectorAll('a[href^="#"]').forEach(function (link) {
-        link.addEventListener('click', function (e) {
+    document.querySelectorAll('a[href^="#"]').forEach(function (lnk) {
+        lnk.addEventListener('click', function (e) {
             var t = document.querySelector(this.getAttribute('href'));
             if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         });
     });
 
     /* ─── 3D tilt on review cards (desktop) ─── */
-    if (!isMobile()) {
-        document.querySelectorAll('.review-card').forEach(function (card) {
-            card.addEventListener('mousemove', function (e) {
-                var r = card.getBoundingClientRect();
+    if (!isMob()) {
+        document.querySelectorAll('.review-card').forEach(function (c) {
+            c.addEventListener('mousemove', function (e) {
+                var r = c.getBoundingClientRect();
                 var rx = (e.clientY - r.top - r.height / 2) / (r.height / 2) * -2;
                 var ry = (e.clientX - r.left - r.width / 2) / (r.width / 2) * 2;
-                card.style.transform = 'translateY(-6px) perspective(600px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+                c.style.transform = 'translateY(-6px) perspective(600px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
             });
-            card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+            c.addEventListener('mouseleave', function () { c.style.transform = ''; });
         });
     }
 });

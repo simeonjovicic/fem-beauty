@@ -862,6 +862,35 @@ h2 em {
     background: var(--sand-pale)
 }
 
+/* ═══ SALON GALLERY ═══════════════════ */
+.gallery {
+    padding: 0;
+    overflow: hidden
+}
+
+.gallery-track {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px
+}
+
+.gallery-item {
+    overflow: hidden;
+    height: 300px;
+    position: relative
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out)
+}
+
+.gallery-item:hover img {
+    transform: scale(1.06)
+}
+
 /* ═══ BRANDS MARQUEE ═══════════════════ */
 .brands-marquee {
     overflow: hidden;
@@ -957,7 +986,7 @@ h2 em {
 
 .srv-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: var(--line)
 }
@@ -1740,12 +1769,12 @@ footer {
 
 /* ═══ RESPONSIVE ═════════════════════════ */
 @media(max-width:1100px) {
-    .srv-grid {
+    .team-grid {
         grid-template-columns: repeat(3, 1fr)
     }
 
-    .team-grid {
-        grid-template-columns: repeat(3, 1fr)
+    .gallery-item {
+        height: 240px
     }
 }
 
@@ -1828,6 +1857,15 @@ footer {
 
     .srv-card {
         min-height: 280px
+    }
+
+    /* Gallery */
+    .gallery-track {
+        grid-template-columns: repeat(2, 1fr)
+    }
+
+    .gallery-item {
+        height: 200px
     }
 
     /* Reviews */
@@ -1919,38 +1957,32 @@ footer {
     }
 }
 
-/* ═══ MOBILE — Transform carousels ══════ */
+/* ═══ MOBILE — Flex-slider carousels ═══ */
 @media(max-width:768px) {
 
-    /* --- SERVICES: GSAP-powered carousel --- */
+    /* --- SERVICES: flex slider --- */
     .srv-grid {
-        display: block;
-        position: relative;
+        display: flex !important;
+        flex-wrap: nowrap;
         overflow: hidden;
         background: transparent;
         touch-action: pan-y
-            /* height set by JS */
+    }
+
+    .srv-grid .slider-track {
+        display: flex;
+        transition: transform .5s cubic-bezier(.25, .46, .45, .94);
+        will-change: transform
     }
 
     .srv-card {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        opacity: 0;
-        transform: translateX(100%) scale(.92);
-        pointer-events: none;
-        will-change: transform, opacity;
+        flex: 0 0 100%;
+        min-width: 100%;
         border-right: none;
         border-radius: 10px;
-        border: 1px solid var(--line)
-    }
-
-    .srv-card.carousel-active {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-        pointer-events: auto;
-        z-index: 2
+        border: 1px solid var(--line);
+        opacity: 1 !important;
+        transform: none !important
     }
 
     .srv-card-front {
@@ -1986,36 +2018,29 @@ footer {
         display: block
     }
 
-    /* --- REVIEWS: GSAP-powered single-card carousel --- */
+    /* --- REVIEWS: flex slider --- */
     .reviews-carousel {
         display: none
     }
 
     .mob-reviews-track {
-        display: block;
-        position: relative;
+        display: block !important;
         overflow: hidden;
         touch-action: pan-y
-            /* height set by JS */
+    }
+
+    .mob-reviews-track .slider-track {
+        display: flex;
+        transition: transform .5s cubic-bezier(.25, .46, .45, .94);
+        will-change: transform
     }
 
     .mob-reviews-track .review-card {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        opacity: 0;
-        transform: translateX(60px);
-        pointer-events: none;
-        will-change: transform, opacity;
-        transition: none
-    }
-
-    .mob-reviews-track .review-card.carousel-active {
-        opacity: 1;
-        transform: translateX(0);
-        pointer-events: auto;
-        z-index: 2
+        flex: 0 0 100%;
+        min-width: 100%;
+        opacity: 1 !important;
+        transform: none !important;
+        position: relative !important
     }
 
     .reviews .mob-dots {
@@ -2026,7 +2051,7 @@ footer {
         display: none
     }
 
-    /* --- TEAM: smaller --- */
+    /* --- TEAM --- */
     .team-grid {
         gap: .5rem
     }
@@ -2097,6 +2122,15 @@ footer {
     /* Services card height */
     .srv-card {
         min-height: 260px
+    }
+
+    /* Gallery */
+    .gallery-track {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .gallery-item {
+        height: 160px
     }
 
     /* Contact */
