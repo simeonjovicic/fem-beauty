@@ -601,9 +601,47 @@ h2 em {
     font-weight: 300;
     line-height: 1.9;
     color: rgba(255, 255, 255, .60);
-    margin-bottom: 2.2rem;
+    margin-bottom: 1.6rem;
     opacity: 0;
     animation: fadeSlideUp .7s .95s var(--ease) forwards
+}
+
+/* Hero social proof */
+.hero-proof {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeSlideUp .7s 1.05s var(--ease) forwards
+}
+
+.hero-proof-stars {
+    font-size: .9rem;
+    color: var(--sand-lt);
+    letter-spacing: .06em
+}
+
+.hero-proof-rating {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #fff
+}
+
+.hero-proof-sep {
+    color: rgba(255, 255, 255, .25);
+    font-size: .7rem
+}
+
+.hero-proof-count,
+.hero-proof-sources {
+    font-size: .6rem;
+    font-weight: 300;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .50)
 }
 
 .hero-btns {
@@ -611,7 +649,7 @@ h2 em {
     gap: 1rem;
     flex-wrap: wrap;
     opacity: 0;
-    animation: fadeSlideUp .7s 1.15s var(--ease) forwards
+    animation: fadeSlideUp .7s 1.2s var(--ease) forwards
 }
 
 @keyframes fadeSlideUp {
@@ -718,6 +756,49 @@ h2 em {
     100% {
         top: 100%
     }
+}
+
+/* ─── Hero Trust Bar ──────────────────── */
+.hero-trust {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeSlideUp .7s 1.35s var(--ease) forwards
+}
+
+.hero-trust-rating {
+    display: flex;
+    align-items: center;
+    gap: .4rem
+}
+
+.hero-trust-stars {
+    font-size: .85rem;
+    color: var(--sand-lt);
+    letter-spacing: .08em
+}
+
+.hero-trust-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #fff
+}
+
+.hero-trust-sep {
+    color: rgba(255, 255, 255, .3);
+    font-size: .9rem
+}
+
+.hero-trust-text {
+    font-size: .6rem;
+    font-weight: 300;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .5)
 }
 
 /* ═══ USP STRIP ════════════════════════ */
@@ -1150,7 +1231,7 @@ h2 em {
     color: #fff
 }
 
-/* ═══ REVIEWS — Carousel ═══════════════ */
+/* ═══ REVIEWS — Unified ═════════════════ */
 .reviews {
     background: var(--cream);
     padding: 5rem 0;
@@ -1177,11 +1258,83 @@ h2 em {
     margin-bottom: 3rem
 }
 
-.reviews-carousel {
-    position: relative;
-    min-height: 280px
+.reviews-cta {
+    text-align: center;
+    margin-top: 2.5rem
 }
 
+/* ── Reviews source pills (filter buttons) ── */
+.reviews-sources {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem
+}
+
+.reviews-src-pill {
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .1em;
+    padding: .35rem .9rem;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    cursor: pointer;
+    transition: all .35s var(--ease-out)
+}
+
+.reviews-src-pill strong {
+    font-weight: 500
+}
+
+.tw-pill {
+    color: var(--taupe);
+    border: 1px solid var(--line);
+    background: transparent
+}
+
+.go-pill {
+    color: var(--taupe);
+    border: 1px solid var(--line);
+    background: transparent
+}
+
+.tw-pill:hover,
+.go-pill:hover {
+    border-color: var(--sand-lt);
+    color: var(--warm)
+}
+
+.reviews-src-pill.active {
+    color: var(--sand);
+    border-color: var(--sand);
+    background: rgba(201, 153, 94, .08)
+}
+
+.reviews-src-total {
+    font-size: .55rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--taupe);
+    transition: opacity .3s
+}
+
+/* ── Carousel ── */
+.reviews-carousel {
+    position: relative;
+    min-height: 280px;
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none
+}
+
+.reviews-carousel:active {
+    cursor: grabbing
+}
+
+/* ── Review card ── */
 .review-card {
     background: var(--white);
     padding: 2.2rem 2rem;
@@ -1210,6 +1363,33 @@ h2 em {
     box-shadow: 0 16px 44px rgba(180, 110, 60, .12)
 }
 
+/* ── Platform badge on each card ── */
+.review-platform {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: .42rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: .2rem .6rem;
+    border-radius: 50px;
+    pointer-events: none;
+    line-height: 1.4
+}
+
+.review-platform.tw {
+    color: var(--sand);
+    background: rgba(201, 153, 94, .08);
+    border: 1px solid rgba(201, 153, 94, .25)
+}
+
+.review-platform.go {
+    color: var(--warm-lt);
+    background: rgba(74, 63, 56, .06);
+    border: 1px solid rgba(74, 63, 56, .15)
+}
+
 .review-stars {
     font-size: .85rem;
     color: var(--sand);
@@ -1224,6 +1404,40 @@ h2 em {
     line-height: 1.7;
     color: var(--warm);
     font-style: italic;
+    margin-bottom: 0
+}
+
+.review-text.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden
+}
+
+.review-text.clamped.expanded {
+    -webkit-line-clamp: unset;
+    display: block
+}
+
+.review-more {
+    display: inline-block;
+    font-family: 'Outfit', sans-serif;
+    font-size: .7rem;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--sand);
+    cursor: pointer;
+    margin-top: .3rem;
+    margin-bottom: 1.6rem;
+    transition: color .3s;
+    letter-spacing: .02em
+}
+
+.review-more:hover {
+    color: var(--warm)
+}
+
+.review-text-wrap {
     margin-bottom: 1.6rem
 }
 
@@ -1264,6 +1478,7 @@ h2 em {
     color: var(--soft)
 }
 
+/* ── Dots ── */
 .reviews-dots {
     display: flex;
     justify-content: center;
@@ -1285,6 +1500,38 @@ h2 em {
 .reviews-dot.active {
     background: var(--sand);
     transform: scale(1.2)
+}
+
+/* ── Desktop crossfade sets ── */
+.reviews-set {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(30px) scale(.98);
+    transition: opacity .65s var(--ease-out), transform .65s var(--ease-out);
+    pointer-events: none;
+    will-change: opacity, transform
+}
+
+.reviews-set.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+    position: relative
+}
+
+.reviews-set.exiting {
+    opacity: 0;
+    transform: translateX(-30px) scale(.98);
+    pointer-events: none
+}
+
+/* Hidden on desktop */
+.mob-reviews-track {
+    display: none
 }
 
 /* ═══ TEAM — Clickable cards ═══════════ */
@@ -1740,7 +1987,7 @@ footer {
     display: none
 }
 
-/* Desktop reviews crossfade (improved) */
+/* Desktop reviews crossfade */
 .reviews-set {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1877,6 +2124,10 @@ footer {
         padding: 0 1.5rem
     }
 
+    .reviews-sources {
+        gap: .5rem
+    }
+
     /* Team */
     .team {
         padding: 4rem 0
@@ -1960,24 +2211,30 @@ footer {
 /* ═══ MOBILE — Flex-slider carousels ═══ */
 @media(max-width:768px) {
 
+    /* ── FIX: Slider track must have explicit width ── */
+    .slider-track {
+        display: flex;
+        width: 100%;
+        transition: transform .5s cubic-bezier(.25, .46, .45, .94);
+        will-change: transform;
+        -webkit-user-select: none;
+        user-select: none
+    }
+
     /* --- SERVICES: flex slider --- */
     .srv-grid {
         display: flex !important;
         flex-wrap: nowrap;
         overflow: hidden;
         background: transparent;
+        gap: 0;
         touch-action: pan-y
-    }
-
-    .srv-grid .slider-track {
-        display: flex;
-        transition: transform .5s cubic-bezier(.25, .46, .45, .94);
-        will-change: transform
     }
 
     .srv-card {
         flex: 0 0 100%;
-        min-width: 100%;
+        min-width: 0;
+        width: 100%;
         border-right: none;
         border-radius: 10px;
         border: 1px solid var(--line);
@@ -2029,26 +2286,28 @@ footer {
         touch-action: pan-y
     }
 
-    .mob-reviews-track .slider-track {
-        display: flex;
-        transition: transform .5s cubic-bezier(.25, .46, .45, .94);
-        will-change: transform
-    }
-
     .mob-reviews-track .review-card {
         flex: 0 0 100%;
-        min-width: 100%;
+        min-width: 0;
+        width: 100%;
         opacity: 1 !important;
         transform: none !important;
         position: relative !important
     }
 
-    .reviews .mob-dots {
-        display: flex
+    .reviews .mob-counter {
+        display: block
     }
 
     .reviews-dots {
         display: none
+    }
+
+    /* Reviews source pills stack */
+    .reviews-sources {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem
     }
 
     /* --- TEAM --- */
