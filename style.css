@@ -1925,6 +1925,16 @@ footer {
     letter-spacing: .03em
 }
 
+.ft-hango {
+    color: var(--soft);
+    text-decoration: none;
+    transition: color .3s
+}
+
+.ft-hango:hover {
+    color: var(--sand)
+}
+
 /* ═══ MOBILE CAROUSEL shared ════════════ */
 .mob-dots {
     display: none;
