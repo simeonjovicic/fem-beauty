@@ -28,17 +28,60 @@ document.addEventListener('DOMContentLoaded', function () {
     var burger = document.getElementById('burger');
     var mobMenu = document.getElementById('mobileMenu');
     if (burger && mobMenu) {
-        burger.addEventListener('click', function () {
+        var closeMenu = function () {
+            burger.classList.remove('open');
+            mobMenu.classList.remove('open');
+            document.body.style.overflow = '';
+        };
+
+        burger.addEventListener('click', function (e) {
+            e.stopPropagation();
             burger.classList.toggle('open');
             mobMenu.classList.toggle('open');
             document.body.style.overflow = mobMenu.classList.contains('open') ? 'hidden' : '';
         });
+
+        // Close when clicking anywhere on the mobile menu (background or links)
+        mobMenu.addEventListener('click', closeMenu);
+
+        // Prevents closing when clicking links (they bubble up and close via the mobMenu listener anyway, but we keep the logic clean)
         mobMenu.querySelectorAll('a').forEach(function (a) {
-            a.addEventListener('click', function () {
-                burger.classList.remove('open');
-                mobMenu.classList.remove('open');
-                document.body.style.overflow = '';
+            a.addEventListener('click', closeMenu);
+        });
+    }
+
+    /* ─── Lightbox ─────────────────────────── */
+    var lightbox = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    var lbClose = document.querySelector('.lightbox-close');
+
+    if (lightbox && lbImg) {
+        var openLightbox = function (src) {
+            lbImg.src = src;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        var closeLightbox = function () {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        // Click on gallery images
+        document.querySelectorAll('.gallery-item img, .story-img img').forEach(function (img) {
+            img.addEventListener('click', function () {
+                openLightbox(this.src);
             });
+        });
+
+        lbClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', function (e) {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // ESC key to close
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
         });
     }
 
@@ -87,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ═══════════════════════════════════════════
-       FLEX SLIDER — touch + mouse drag
+       FLEX SLIDER — touch + mouse drag + LOOP
        ═══════════════════════════════════════════ */
     function FlexSlider(cfg) {
         this.container = cfg.container;
@@ -95,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
         this.dotsEl = cfg.dots || null;
         this.counterEl = cfg.counter || null;
         this.auto = cfg.auto || 0;
+        this.loop = cfg.loop !== undefined ? cfg.loop : true; // DEFAULT: loop enabled
         this.current = 0;
         this.total = this.cards.length;
         this.track = null;
@@ -136,14 +180,20 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     FlexSlider.prototype.goTo = function (idx) {
-        if (idx < 0 || idx >= this.total) return;
+        // Handle looping
+        if (this.loop) {
+            if (idx >= this.total) idx = 0;
+            if (idx < 0) idx = this.total - 1;
+        } else {
+            if (idx < 0 || idx >= this.total) return;
+        }
         this.current = idx;
         this.track.style.transform = 'translateX(-' + (idx * 100) + '%)';
         this._dots();
         this._counter();
     };
-    FlexSlider.prototype.next = function () { this.goTo((this.current + 1) % this.total); };
-    FlexSlider.prototype.prev = function () { this.goTo((this.current - 1 + this.total) % this.total); };
+    FlexSlider.prototype.next = function () { this.goTo(this.current + 1); };
+    FlexSlider.prototype.prev = function () { this.goTo(this.current - 1); };
 
     FlexSlider.prototype._dots = function () {
         if (!this.dotsEl) return;
@@ -180,9 +230,16 @@ document.addEventListener('DOMContentLoaded', function () {
             self.dragging = false;
             self.track.style.transition = '';
             var th = self.container.offsetWidth * 0.2;
-            if (self.dx < -th && self.current < self.total - 1) { self.didDrag = true; self.goTo(self.current + 1); }
-            else if (self.dx > th && self.current > 0) { self.didDrag = true; self.goTo(self.current - 1); }
-            else { if (Math.abs(self.dx) > 10) self.didDrag = true; self._snapBack(); }
+            if (self.dx < -th) {
+                self.didDrag = true;
+                self.goTo(self.current + 1);
+            } else if (self.dx > th) {
+                self.didDrag = true;
+                self.goTo(self.current - 1);
+            } else {
+                if (Math.abs(self.dx) > 10) self.didDrag = true;
+                self._snapBack();
+            }
             if (self.auto > 0) self._startAuto();
         }
         this.container.addEventListener('touchstart', function (e) { onStart(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
@@ -226,7 +283,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var grid = document.querySelector('.srv-grid');
         var cards = Array.from(grid.querySelectorAll('.srv-card'));
         if (!grid || !cards.length) return;
-        srvSlider = new FlexSlider({ container: grid, cards: cards, dots: document.querySelector('.srv-dots'), counter: document.querySelector('.srv-counter') });
+        srvSlider = new FlexSlider({
+            container: grid,
+            cards: cards,
+            dots: document.querySelector('.srv-dots'),
+            counter: document.querySelector('.srv-counter'),
+            loop: true  // Loop enabled for services
+        });
     }
     function destroySrvMobile() { if (srvSlider) { srvSlider.destroy(); srvSlider = null; } }
 
@@ -255,22 +318,17 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ── Clamp long review texts with "Mehr anzeigen" toggle ── */
     function clampReviews(container) {
         container.querySelectorAll('.review-text').forEach(function (el) {
-            // Skip if already processed
             if (el.parentElement.classList.contains('review-text-wrap')) return;
 
-            // Wrap text + toggle in a container div
             var wrap = document.createElement('div');
             wrap.className = 'review-text-wrap';
             el.parentElement.insertBefore(wrap, el);
             wrap.appendChild(el);
 
-            // Measure: add clamped, check if it's actually truncated
             el.classList.add('clamped');
 
-            // Use rAF to ensure layout is computed
             requestAnimationFrame(function () {
                 if (el.scrollHeight > el.clientHeight + 2) {
-                    // Text is truncated — add toggle
                     var btn = document.createElement('span');
                     btn.className = 'review-more';
                     btn.textContent = 'Mehr anzeigen';
@@ -281,7 +339,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                     wrap.appendChild(btn);
                 } else {
-                    // Text fits — remove clamp class
                     el.classList.remove('clamped');
                 }
             });
@@ -295,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function () {
         dotsContainer.innerHTML = '';
         currentSet = 0;
 
-        // Split into sets of 2
         for (var i = 0; i < cards.length; i += 2) {
             var setDiv = document.createElement('div');
             setDiv.className = 'reviews-set' + (i === 0 ? ' active' : '');
@@ -305,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         sets = carousel.querySelectorAll('.reviews-set');
 
-        // Build dots
         sets.forEach(function (_, idx) {
             var dot = document.createElement('button');
             dot.className = 'reviews-dot' + (idx === 0 ? ' active' : '');
@@ -340,7 +395,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isMob() || !mobTrack) return;
         mobTrack.innerHTML = cards.map(function (c) { return c.html; }).join('');
         var cardEls = Array.from(mobTrack.querySelectorAll('.review-card'));
-        revSlider = new FlexSlider({ container: mobTrack, cards: cardEls, counter: mobReviewCounter, auto: 4500 });
+        revSlider = new FlexSlider({
+            container: mobTrack,
+            cards: cardEls,
+            counter: mobReviewCounter,
+            auto: 4500,
+            loop: true  // Loop enabled for reviews
+        });
         clampReviews(mobTrack);
     }
     function destroyRevMobile() {
@@ -352,22 +413,18 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ── Apply filter ── */
     function applyFilter(platform) {
         if (activeFilter === platform) {
-            // Deselect → show all
             activeFilter = null;
         } else {
             activeFilter = platform;
         }
 
-        // Update pill states
         twPill.classList.toggle('active', activeFilter === 'treatwell');
         goPill.classList.toggle('active', activeFilter === 'google');
 
-        // Update total label
         if (activeFilter === 'treatwell') totalLabel.textContent = 'Nur Treatwell Bewertungen';
         else if (activeFilter === 'google') totalLabel.textContent = 'Nur Google Bewertungen';
         else totalLabel.textContent = '1.420+ verifizierte Bewertungen';
 
-        // Filter cards
         var filtered = activeFilter
             ? allCards.filter(function (c) { return c.platform === activeFilter; })
             : allCards;
@@ -376,11 +433,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isMob()) buildMobileSlider(filtered);
     }
 
-    /* ── Pill click handlers ── */
     twPill.addEventListener('click', function () { applyFilter('treatwell'); });
     goPill.addEventListener('click', function () { applyFilter('google'); });
 
-    /* ── Initial build (all reviews) ── */
     buildDesktopSets(allCards);
     if (isMob()) buildMobileSlider(allCards);
 

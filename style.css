@@ -283,7 +283,7 @@ nav.scrolled .nav-links a {
     border: none;
     cursor: pointer;
     padding: 6px;
-    z-index: 210
+    z-index: 310
 }
 
 .burger span {
@@ -310,7 +310,7 @@ nav.scrolled .burger span {
 .mob {
     position: fixed;
     inset: 0;
-    z-index: 199;
+    z-index: 300;
     background: var(--bg);
     display: flex;
     flex-direction: column;
@@ -1634,15 +1634,16 @@ h2 em {
 
 .tm-badge {
     display: inline-block;
-    font-size: .42rem;
-    font-weight: 500;
+    font-size: .52rem;
+    font-weight: 600;
     letter-spacing: .2em;
     text-transform: uppercase;
-    color: var(--sand-lt);
-    border: 1px solid rgba(255, 255, 255, .3);
-    padding: .1rem .5rem;
+    color: #fff;
+    background: var(--sand);
+    padding: .35rem .8rem;
     border-radius: 50px;
-    margin-bottom: .3rem
+    margin-bottom: .8rem;
+    box-shadow: 0 4px 12px rgba(201, 153, 94, 0.25);
 }
 
 /* Expanded detail panel */
@@ -2008,6 +2009,11 @@ footer {
     transform-origin: left;
 }
 
+/* Hidden on desktop */
+.ft-mob-copy {
+    display: none;
+}
+
 /* ═══ MOBILE CAROUSEL shared ════════════ */
 .mob-dots {
     display: none;
@@ -2081,33 +2087,6 @@ footer {
 /* Hidden on desktop */
 .mob-reviews-track {
     display: none
-}
-
-/* Desktop reviews crossfade */
-.reviews-set {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem;
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transform: translateX(30px) scale(.98);
-    transition: opacity .65s var(--ease-out), transform .65s var(--ease-out);
-    pointer-events: none;
-    will-change: opacity, transform
-}
-
-.reviews-set.active {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    pointer-events: auto;
-    position: relative
-}
-
-.reviews-set.exiting {
-    opacity: 0;
-    transform: translateX(-30px) scale(.98);
-    pointer-events: none
 }
 
 /* ═══ RESPONSIVE ═════════════════════════ */
@@ -2279,36 +2258,80 @@ footer {
         display: none
     }
 
-    /* Footer */
+    /* ═══ FOOTER MOBILE — Redesigned ═══ */
     footer {
         padding: 2.5rem 1.5rem 5rem;
     }
 
     .ft-inner {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 2rem;
+        align-items: stretch;
+        gap: 0;
     }
 
+    /* Top row: [Insta icon] — FEM — [Treatwell icon] centered */
     .ft-left {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: nowrap;
+        order: 1;
+    }
+
+    /* Reorder: Logo in middle, icons on sides */
+    .ft-left .ft-logo {
+        order: 2;
+    }
+
+    .ft-left .ft-copy {
+        display: none;
+    }
+
+    /* First icon (Instagram) goes left */
+    .ft-left .ft-icon:nth-of-type(1) {
+        order: 1;
+    }
+
+    /* Second icon (Treatwell) goes right */
+    .ft-left .ft-icon:nth-of-type(2) {
+        order: 3;
+    }
+
+    .ft-left .ft-icon-label {
+        display: none;
+    }
+
+    .ft-left .ft-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Bottom row: Impressum left — Copyright middle — Hango right */
+    .ft-right {
+        order: 2;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
         gap: 1rem;
     }
 
-    .ft-right {
-        width: 100%;
-        justify-content: flex-start;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
-    }
-
-    .ft-hango-wrap {
+    .ft-right .ft-hango-wrap {
         margin-left: 0;
         border-left: none;
         padding-left: 0;
-        margin-top: 0.5rem;
+    }
+
+    /* Show mobile copyright */
+    .ft-mob-copy {
+        display: block;
+        font-size: .55rem;
+        color: var(--soft);
+        letter-spacing: .03em;
     }
 
     /* Float CTA smaller */
@@ -2351,7 +2374,8 @@ footer {
         border-radius: 10px;
         border: 1px solid var(--line);
         opacity: 1 !important;
-        transform: none !important
+        transform: none !important;
+        min-height: 360px;
     }
 
     .srv-card-front {
@@ -2366,8 +2390,17 @@ footer {
         font-size: .55rem
     }
 
+    /* ── MOBILE: Expanded card fixes ── */
     .srv-card-expanded {
-        padding: 2rem 2rem
+        padding: 2.2rem 2rem 2rem;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+    }
+
+    /* Hide number in expanded view on mobile */
+    .srv-card-expanded .srv-num {
+        display: none;
     }
 
     .srv-card-expanded h3 {
@@ -2492,7 +2525,7 @@ footer {
 
     /* Services card height */
     .srv-card {
-        min-height: 260px
+        min-height: 340px
     }
 
     /* Gallery */
@@ -2561,5 +2594,76 @@ footer {
 
     footer {
         padding: 2rem 1rem 4.5rem;
+    }
+}
+
+/* ═══ LIGHTBOX ═════════════════════════ */
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(253, 251, 248, 0.98);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lightbox.active {
+    display: flex;
+    opacity: 1;
+}
+
+.lightbox-content {
+    max-width: 90%;
+    max-height: 85vh;
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(74, 63, 56, 0.15);
+    transform: scale(0.95);
+    transition: transform 0.3s var(--ease-out);
+    object-fit: contain;
+}
+
+.lightbox.active .lightbox-content {
+    transform: scale(1);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 2rem;
+    right: 3rem;
+    color: var(--warm);
+    font-size: 3rem;
+    font-weight: 200;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s;
+}
+
+.lightbox-close:hover {
+    color: var(--sand);
+}
+
+.gallery-item img,
+.story-img img {
+    cursor: pointer;
+    transition: filter 0.3s;
+}
+
+.gallery-item img:hover,
+.story-img img:hover {
+    filter: brightness(0.9);
+}
+
+@media(max-width: 768px) {
+    .lightbox-close {
+        top: 1rem;
+        right: 1.5rem;
     }
 }
