@@ -1871,18 +1871,28 @@ h2 em {
 
 /* ═══ FOOTER ═══════════════════════════ */
 footer {
-    padding: 3.5rem 3.5rem 2rem;
+    padding: 3.5rem 3.5rem 6.5rem;
     background: var(--cream);
-    border-top: 1px solid var(--line)
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: center;
 }
 
-.ft-top {
+.ft-inner {
+    width: 100%;
+    max-width: 1400px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 2.5rem;
-    border-bottom: 1px solid var(--line)
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.ft-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .ft-logo {
@@ -1892,47 +1902,110 @@ footer {
     color: var(--warm);
     text-decoration: none;
     text-transform: uppercase;
-    transition: color .3s
+    transition: color .3s;
 }
 
 .ft-logo:hover {
-    color: var(--sand)
-}
-
-.ft-links {
-    display: flex;
-    gap: 2rem
-}
-
-.ft-links a {
-    font-size: .58rem;
-    font-weight: 400;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--taupe);
-    text-decoration: none;
-    transition: color .3s
-}
-
-.ft-links a:hover {
-    color: var(--sand)
+    color: var(--sand);
 }
 
 .ft-copy {
     font-size: .6rem;
     color: var(--soft);
-    text-align: center;
-    letter-spacing: .03em
+    letter-spacing: .03em;
 }
 
-.ft-hango {
-    color: var(--soft);
+.ft-link {
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--taupe);
     text-decoration: none;
-    transition: color .3s
+    transition: color .3s;
 }
 
-.ft-hango:hover {
-    color: var(--sand)
+.ft-link:hover {
+    color: var(--sand);
+}
+
+.ft-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.ft-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--taupe);
+    text-decoration: none;
+    transition: all .3s var(--ease-out);
+}
+
+.ft-icon:hover {
+    color: var(--sand);
+    transform: translateY(-2px);
+}
+
+.ft-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ft-icon-label {
+    margin-left: 0.4rem;
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.ft-hango-wrap {
+    font-size: .6rem;
+    color: var(--soft);
+    letter-spacing: .03em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: 1rem;
+    border-left: 1px solid var(--line);
+    padding-left: 1.5rem;
+}
+
+.ft-hango-highlight {
+    color: var(--sand);
+    font-weight: 500;
+    font-size: .65rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    transition: color .3s;
+}
+
+.ft-hango-highlight::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--sand);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s var(--ease-out);
+}
+
+.ft-hango-highlight:hover {
+    color: var(--warm);
+}
+
+.ft-hango-highlight:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
 }
 
 /* ═══ MOBILE CAROUSEL shared ════════════ */
@@ -2208,18 +2281,34 @@ footer {
 
     /* Footer */
     footer {
-        padding: 2.5rem 1.5rem 1.5rem
+        padding: 2.5rem 1.5rem 5rem;
     }
 
-    .ft-top {
+    .ft-inner {
         flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start
+        align-items: flex-start;
+        gap: 2rem;
     }
 
-    .ft-links {
-        flex-wrap: wrap;
-        gap: 1rem
+    .ft-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .ft-right {
+        width: 100%;
+        justify-content: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .ft-hango-wrap {
+        margin-left: 0;
+        border-left: none;
+        padding-left: 0;
+        margin-top: 0.5rem;
     }
 
     /* Float CTA smaller */
@@ -2471,6 +2560,6 @@ footer {
     }
 
     footer {
-        padding: 2rem 1rem 1rem
+        padding: 2rem 1rem 4.5rem;
     }
 }
