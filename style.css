@@ -888,6 +888,22 @@ h2 em {
     position: relative
 }
 
+.story.reverse-story {
+    grid-template-columns: 1fr 45%;
+    gap: 6rem;
+    align-items: center;
+}
+
+.story.reverse-story .story-text {
+    padding: 0;
+}
+
+.story.reverse-story .story-img {
+    height: 100%;
+    min-height: 600px;
+    border-radius: 4px;
+}
+
 .story-img {
     overflow: hidden
 }
@@ -2117,7 +2133,23 @@ footer {
 
     /* Story */
     .story {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+    }
+
+    .story.reverse-story {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .story.reverse-story .story-img {
+        min-height: 480px;
+        order: 2;
+    }
+    
+    .story.reverse-story .story-text {
+        order: 1;
+        padding: 0 1.5rem;
     }
 
     .story-img {
