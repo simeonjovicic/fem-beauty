@@ -128,6 +128,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!e.target.closest('.tm-card')) document.querySelectorAll('.tm-card.open').forEach(function (c) { c.classList.remove('open'); });
     });
 
+    /* ═══ About Toggle ══════════════════════ */
+    var aboutContent = document.querySelector('.about-text-content');
+    var aboutBtn = document.querySelector('.about-more');
+    if (aboutContent && aboutBtn) {
+        aboutBtn.addEventListener('click', function () {
+            var expanded = aboutContent.classList.toggle('expanded');
+            aboutBtn.textContent = expanded ? 'Weniger lesen' : 'Mehr lesen...';
+        });
+    }
+
 
     /* ═══════════════════════════════════════════
        FLEX SLIDER — touch + mouse drag + LOOP
