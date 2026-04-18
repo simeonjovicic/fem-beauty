@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         // Click on gallery images
-        document.querySelectorAll('.gallery-item img, .story-img img').forEach(function (img) {
+        document.querySelectorAll('.gallery-item img, .story-img img, .portrait-img-wrap img').forEach(function (img) {
             img.addEventListener('click', function () {
                 openLightbox(this.src);
             });
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
         entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('revealed'); storyObs.unobserve(e.target); } });
     }, { threshold: 0.15 });
     document.querySelectorAll('.story-img').forEach(function (el) { storyObs.observe(el); });
+    document.querySelectorAll('.portrait-img-wrap').forEach(function (el) { storyObs.observe(el); });
 
 
     /* ═══ Expand/Collapse — Services ═════════ */
@@ -529,6 +530,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         gsap.to('.story-img img', { y: -80, ease: 'none', scrollTrigger: { trigger: '.story', start: 'top bottom', end: 'bottom top', scrub: 1.5 } });
+
+        // Portrait frame — elegant reveal
+        if (document.querySelector('.portrait-frame')) {
+            gsap.fromTo('.portrait-frame', { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.portrait-frame', start: 'top 85%', toggleActions: 'play none none none' } });
+            gsap.fromTo('.portrait-accent', { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, delay: .3, ease: 'expo.out', scrollTrigger: { trigger: '.portrait-frame', start: 'top 85%', toggleActions: 'play none none none' } });
+            gsap.to('.portrait-img-wrap img', { y: -40, ease: 'none', scrollTrigger: { trigger: '.portrait-frame', start: 'top bottom', end: 'bottom top', scrub: 1.5 } });
+        }
 
         gsap.utils.toArray('.gallery-item').forEach(function (el, i) {
             gsap.fromTo(el, { y: 40, opacity: 0, scale: .95 }, { y: 0, opacity: 1, scale: 1, duration: 1, delay: i * .12, ease: 'expo.out', scrollTrigger: { trigger: '.gallery', start: 'top 85%', toggleActions: 'play none none none' } });
