@@ -807,7 +807,8 @@ h2 em {
     align-items: stretch;
     background: var(--white);
     border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line)
+    border-bottom: 1px solid var(--line);
+    overflow: hidden
 }
 
 .usp-strip-item {
@@ -1948,7 +1949,8 @@ h2 em {
 .contact {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    min-height: 70vh
+    min-height: 70vh;
+    overflow: hidden
 }
 
 .contact-map {
@@ -2288,6 +2290,7 @@ footer {
         margin: 0;
         position: relative;
         width: 100%;
+        overflow: hidden;
     }
 
     .portrait-mobile-overlay {
