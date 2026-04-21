@@ -898,6 +898,11 @@ h2 em {
     padding: 0;
 }
 
+/* ═══ Portrait Mobile Overlay ═══ */
+.portrait-mobile-overlay {
+    display: none;
+}
+
 /* ═══ Portrait Frame — Editorial with Hover ═══ */
 .portrait-frame {
     position: relative;
@@ -2279,8 +2284,43 @@ footer {
     }
     
     .story.reverse-story .portrait-frame {
-        order: 2;
+        order: 1;
         margin: 0;
+        position: relative;
+        width: 100%;
+    }
+
+    .portrait-mobile-overlay {
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 3;
+        padding: 5rem 1.5rem 1.8rem;
+        background: linear-gradient(to top, rgba(20, 14, 10, .85) 0%, transparent 100%);
+    }
+
+    .portrait-mobile-overlay .tag {
+        color: var(--gold);
+        opacity: 1;
+        animation: none;
+    }
+
+    .portrait-mobile-overlay h2 {
+        color: #fff;
+        font-size: clamp(1.8rem, 6vw, 2.4rem);
+        margin: .4rem 0 0;
+    }
+
+    .portrait-mobile-overlay h2 em {
+        color: var(--gold);
+    }
+
+    .story.reverse-story .story-text > .tag,
+    .story.reverse-story .story-text > h2,
+    .story.reverse-story .story-text > .line {
+        display: none;
     }
 
     .portrait-accent {
@@ -2288,10 +2328,18 @@ footer {
     }
 
     .portrait-img-wrap {
-        max-height: 480px;
-        aspect-ratio: 4 / 5;
+        max-width: 100%;
+        max-height: 65vh;
+        margin: 0;
+        aspect-ratio: 11 / 16;
+        height: auto;
         border-radius: 0;
         box-shadow: none;
+    }
+
+    .portrait-img-wrap img {
+        object-fit: cover;
+        height: 100%;
     }
 
     .portrait-frame:hover {
@@ -2299,14 +2347,12 @@ footer {
     }
 
     .portrait-detail {
-        justify-content: center;
-        padding: 0;
-        margin-top: .8rem;
+        display: none;
     }
-    
+
     .story.reverse-story .story-text {
-        order: 1;
-        padding: 0 1.5rem;
+        order: 2;
+        padding: .5rem .5rem 0;
     }
 
     .story-img {
@@ -2394,7 +2440,7 @@ footer {
 
     /* Team */
     .team {
-        padding: 4rem 0
+        padding: 0rem 0
     }
 
     .team-inner {
