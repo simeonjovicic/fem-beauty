@@ -2298,7 +2298,7 @@ footer {
         right: 0;
         z-index: 3;
         padding: 5rem 1.5rem 1.8rem;
-        background: linear-gradient(to top, rgba(20, 14, 10, .85) 0%, transparent 100%);
+        background: linear-gradient(to top, rgba(10, 6, 4, .95) 0%, rgba(10, 6, 4, .6) 40%, transparent 100%);
     }
 
     .portrait-mobile-overlay .tag {
@@ -2340,6 +2340,13 @@ footer {
     .portrait-img-wrap img {
         object-fit: cover;
         height: 100%;
+        transform: scale(1.08);
+        clip-path: inset(0 0 0 0) !important;
+        transition: none !important;
+    }
+
+    .portrait-img-wrap {
+        background: #0a0604;
     }
 
     .portrait-frame:hover {
