@@ -899,6 +899,32 @@ h2 em {
     padding: 0;
 }
 
+/* ─── Centered Story (No Image) ─── */
+.story.story-centered {
+    display: block;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    min-height: auto;
+    padding: 4rem 0;
+}
+
+.story.story-centered .story-text {
+    padding: 0;
+}
+
+.story.story-centered .line {
+    margin: 1.2rem auto;
+}
+
+.story.story-centered .hero-btns {
+    justify-content: center;
+}
+
+.story.story-centered .about-text-content {
+    margin: 0 auto;
+}
+
 /* ═══ Portrait Mobile Overlay ═══ */
 .portrait-mobile-overlay {
     display: none;
@@ -1825,19 +1851,199 @@ h2 em {
     margin-top: .7rem
 }
 
-/* ═══ About Jenny (Team Story) Clamping ═══ */
+/* ═══ Owner Section — Editorial Redesign ═════════════════ */
+.owner-section {
+    position: relative;
+    background: var(--cream);
+    padding: 7rem 3.5rem;
+    overflow: hidden;
+}
+
+/* Subtle warm grid texture in the background */
+.owner-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(201, 153, 94, .06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201, 153, 94, .06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+}
+
+/* Large decorative ampersand watermark */
+.owner-section::before {
+    content: '✦';
+    position: absolute;
+    bottom: -3rem;
+    right: 2rem;
+    font-size: 22rem;
+    color: rgba(201, 153, 94, .045);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.owner-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+/* ── Monogram column ── */
+.owner-monogram-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding-top: 1rem;
+}
+
+.owner-monogram-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 1.5px solid var(--sand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(135deg, rgba(201,153,94,.12), rgba(201,153,94,.03));
+    box-shadow: 0 0 0 8px rgba(201,153,94,.06), 0 8px 32px rgba(201,153,94,.15);
+    transition: box-shadow .5s var(--ease-out), transform .5s var(--ease-out);
+}
+
+.owner-monogram-ring:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 12px rgba(201,153,94,.09), 0 12px 44px rgba(201,153,94,.22);
+}
+
+.owner-monogram-ring::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(201,153,94,.3);
+}
+
+.owner-monogram-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--sand);
+    line-height: 1;
+    letter-spacing: -.04em;
+}
+
+.owner-monogram-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--sand), transparent);
+    margin: 1.2rem 0 1.5rem;
+}
+
+.owner-credentials {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    align-items: center;
+}
+
+.owner-cred {
+    font-size: .5rem;
+    font-weight: 400;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--taupe);
+    white-space: nowrap;
+    transition: color .3s;
+}
+
+.owner-cred:hover {
+    color: var(--sand);
+}
+
+/* ── Text column ── */
+.owner-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.owner-header {
+    margin-bottom: 2rem;
+}
+
+.owner-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.12;
+    color: var(--warm);
+    margin-top: .5rem;
+    letter-spacing: -.02em;
+}
+
+.owner-title em {
+    font-style: italic;
+    color: var(--sand);
+}
+
+/* Pull-quote */
+.owner-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 2vw, 1.22rem);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--warm-lt);
+    border-left: 3px solid var(--sand);
+    padding: .6rem 0 .6rem 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.owner-quote::before {
+    content: '"';
+    position: absolute;
+    left: -.6rem;
+    top: -.5rem;
+    font-size: 3.5rem;
+    color: var(--sand);
+    opacity: .25;
+    font-style: normal;
+    line-height: 1;
+}
+
+/* Gold divider */
+.owner-divider {
+    width: 48px;
+    height: 2px;
+    background: linear-gradient(to right, var(--sand), transparent);
+    margin-bottom: 2rem;
+}
+
+/* Body text */
+.owner-body p {
+    font-size: .9rem;
+    line-height: 2.1;
+    color: var(--warm-lt);
+    margin-bottom: 1.4rem;
+}
+
+/* About clamping — reused */
 .about-text-content {
-    max-height: 180px; /* Adjust as needed for ~2 paragraphs */
+    max-height: 180px;
     overflow: hidden;
     position: relative;
     transition: max-height .6s var(--ease-out);
 }
 
 .about-text-content.expanded {
-    max-height: 1200px; /* Set high enough for full text */
+    max-height: 1200px;
 }
 
-/* Fade out effect when clamped */
 .about-text-content::after {
     content: '';
     position: absolute;
@@ -1845,20 +2051,13 @@ h2 em {
     left: 0;
     width: 100%;
     height: 60px;
-    background: linear-gradient(transparent, var(--cream)); /* Fades into the background color */
+    background: linear-gradient(transparent, var(--cream));
     transition: opacity .4s ease;
     pointer-events: none;
 }
 
 .about-text-content.expanded::after {
     opacity: 0;
-}
-
-.about-text-content p {
-    font-size: .9rem;
-    line-height: 2.2;
-    color: var(--warm-lt);
-    margin-bottom: 1.8rem;
 }
 
 .about-more {
@@ -1869,14 +2068,46 @@ h2 em {
     text-transform: uppercase;
     color: var(--sand);
     cursor: pointer;
-    margin-top: 1.5rem;
-    margin-bottom: 2.5rem;
+    margin-top: 1.2rem;
+    margin-bottom: 0;
     transition: color .3s;
 }
 
 .about-more:hover {
-    color: var(--warm)
+    color: var(--warm);
 }
+
+/* Footer row: CTA + Lang pills */
+.owner-footer-row {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.owner-langs {
+    display: flex;
+    gap: .5rem;
+}
+
+.owner-langs span {
+    font-size: .5rem;
+    font-weight: 500;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--warm-lt);
+    border: 1px solid var(--line);
+    border-radius: 50px;
+    padding: .3rem .75rem;
+    transition: all .3s var(--ease-out);
+}
+
+.owner-langs span:hover {
+    border-color: var(--sand);
+    color: var(--sand);
+}
+
 
 /* ═══ STATS STRIP ═══════════════════════ */
 .stats-strip {
@@ -2284,6 +2515,48 @@ footer {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
+
+    /* Owner section mobile */
+    .owner-section {
+        padding: 5rem 1.5rem;
+    }
+
+    .owner-inner {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .owner-monogram-col {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.5rem;
+        padding-top: 0;
+    }
+
+    .owner-monogram-ring {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+
+    .owner-monogram-letter {
+        font-size: 2rem;
+    }
+
+    .owner-monogram-line {
+        display: none;
+    }
+
+    .owner-credentials {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .owner-title {
+        font-size: clamp(2rem, 7vw, 2.8rem);
+    }
+
     
     .story.reverse-story .portrait-frame {
         order: 1;
