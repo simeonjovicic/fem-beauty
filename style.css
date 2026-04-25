@@ -1061,17 +1061,29 @@ h2 em {
 
 .story-pills span {
     font-size: .7rem;
-    color: var(--taupe);
+    color: var(--warm);
     background: var(--cream);
-    padding: .5rem 1rem;
+    padding: .55rem 1.1rem;
     border-radius: 50px;
-    transition: transform .3s var(--ease-out), background .3s;
+    border: 1.5px solid var(--sand);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    transition: all .3s var(--ease-out);
     cursor: default
 }
 
 .story-pills span:hover {
-    transform: translateY(-3px);
-    background: var(--sand-pale)
+    transform: translateY(-4px);
+    background: var(--sand-pale);
+    border-color: var(--sand);
+    box-shadow: 0 6px 20px rgba(201, 153, 94, .15);
+}
+
+.story-pills span i {
+    font-size: .8rem;
+    color: var(--sand);
+    min-width: 16px;
 }
 
 /* ═══ SALON GALLERY ═══════════════════ */
