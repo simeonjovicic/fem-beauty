@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     var isMob = function () { return window.innerWidth <= 768; };
-    var hasGSAP = typeof gsap !== 'undefined';
+    var hasGSAP = false;
 
     /* ─── Loader ────────────────────────────── */
     (function () {
@@ -21,17 +21,29 @@ document.addEventListener('DOMContentLoaded', function () {
         else window.addEventListener('load', hide);
     })();
 
-    /* ─── Nav ───────────────────────────────── */
+    /* ─── Nav + Scroll Progress (rAF coalesced) ─── */
     var nav = document.getElementById('nav');
-    window.addEventListener('scroll', function () {
-        nav.classList.toggle('scrolled', window.scrollY > 60);
-    });
-
-    /* ─── Scroll Progress ───────────────────── */
     var prog = document.getElementById('scrollProgress');
+    var scrollMax = 0;
+    var recalcScrollMax = function () {
+        scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+    };
+    recalcScrollMax();
+    window.addEventListener('resize', recalcScrollMax, { passive: true });
+    window.addEventListener('load', recalcScrollMax);
+
+    var scrolled = false;
+    var rafScroll = function () {
+        var y = window.scrollY;
+        nav.classList.toggle('scrolled', y > 60);
+        if (scrollMax > 0 && prog) prog.style.width = (y / scrollMax * 100) + '%';
+        scrolled = false;
+    };
     window.addEventListener('scroll', function () {
-        var h = document.documentElement.scrollHeight - window.innerHeight;
-        if (h > 0) prog.style.width = (window.scrollY / h * 100) + '%';
+        if (!scrolled) {
+            scrolled = true;
+            requestAnimationFrame(rafScroll);
+        }
     }, { passive: true });
 
     /* ─── Mobile menu ───────────────────────── */
@@ -529,8 +541,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* ═══ GSAP Cinematic Scroll ═════════════ */
-    if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+    /* ═══ GSAP Cinematic Scroll (lazy loaded) ═════════════ */
+    function setupGsapScroll() {
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+        hasGSAP = true;
         gsap.registerPlugin(ScrollTrigger);
 
         gsap.to('.hero-bg img', { y: 150, scale: 1.1, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
@@ -581,6 +595,27 @@ document.addEventListener('DOMContentLoaded', function () {
             gsap.fromTo(el, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' } });
         });
     }
+
+    function loadGsap() {
+        var s1 = document.createElement('script');
+        s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
+        s1.async = true;
+        s1.onload = function () {
+            var s2 = document.createElement('script');
+            s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js';
+            s2.async = true;
+            s2.onload = setupGsapScroll;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s1);
+    }
+
+    var gsapBootstrap = function () {
+        if ('requestIdleCallback' in window) requestIdleCallback(loadGsap, { timeout: 800 });
+        else setTimeout(loadGsap, 100);
+    };
+    if (document.readyState === 'complete') gsapBootstrap();
+    else window.addEventListener('load', gsapBootstrap);
 
     /* ─── Smooth scroll ─────────────────────── */
     document.querySelectorAll('a[href^="#"]').forEach(function (lnk) {

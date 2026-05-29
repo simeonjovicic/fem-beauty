@@ -37,7 +37,9 @@
     <link rel="preload" as="image" href="hero-640.webp" imagesrcset="hero-640.webp 640w, hero-1080.webp 1080w, hero-1920.webp 1920w" imagesizes="100vw" fetchpriority="high" />
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" /></noscript>
-    <link rel="stylesheet" href="style.css" />
+    <style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--bg:#fdfbf8;--white:#fff;--cream:#f5f0ea;--sand:#c9995e;--sand-lt:#dcc4a0;--warm:#4a3f38;--line:rgba(201,153,94,.12);--ease-out:cubic-bezier(.19,1,.22,1)}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--warm);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}img{display:block;max-width:100%}#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .6s var(--ease-out),visibility .6s}#loader.done{opacity:0;visibility:hidden;pointer-events:none}.loader-inner{display:flex;flex-direction:column;align-items:center;gap:2rem}.loader-logo{width:160px;height:auto;opacity:0;animation:lfade .8s .2s ease forwards}.loader-bar{width:120px;height:1px;background:var(--line);overflow:hidden;opacity:0;animation:lfade .5s .5s ease forwards}.loader-bar-fill{height:100%;width:0%;background:var(--sand);animation:lfill 1.8s .6s var(--ease-out) forwards}@keyframes lfade{to{opacity:1}}@keyframes lfill{to{width:100%}}</style>
+    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="style.css" /></noscript>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -352,7 +354,7 @@
 
         <section class="story" id="story">
             <div class="story-img"><img src="foto-store-4.webp"
-                    width="899" height="1200"
+                    width="599" height="800"
                     alt="FEM Beauty Salon Eingangsbereich — Ramperstorffergasse 51, Wien 1050" loading="lazy" decoding="async" /></div>
             <div class="story-text">
                 <span class="tag rv">Über uns</span>
@@ -372,16 +374,16 @@
         <section class="gallery">
             <div class="gallery-track">
                 <div class="gallery-item rv"><img src="foto-store-2.webp"
-                        width="900" height="1200"
+                        width="600" height="800"
                         alt="FEM Beauty Wien — Behandlungsraum für Gesichtsbehandlungen" loading="lazy" decoding="async" /></div>
                 <div class="gallery-item rv d1"><img src="foto-store-3.webp"
-                        width="1200" height="899"
+                        width="800" height="599"
                         alt="Premium Kosmetikprodukte bei FEM — iS Clinical, Babor, Fillmed" loading="lazy" decoding="async" /></div>
                 <div class="gallery-item rv d2"><img src="foto-store-0.webp"
-                        width="900" height="1200"
+                        width="600" height="800"
                         alt="FEM Kosmetiksalon Interieur — stilvolle Atmosphäre Wien 1050" loading="lazy" decoding="async" /></div>
                 <div class="gallery-item rv d3"><img src="foto-store-1.webp"
-                        width="1200" height="900" alt="FEM Beauty Logo und Empfangsbereich"
+                        width="800" height="600" alt="FEM Beauty Logo und Empfangsbereich"
                         loading="lazy" decoding="async" /></div>
             </div>
         </section>
@@ -984,8 +986,6 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
     <script src="script.js" defer></script>
 </body>
 
