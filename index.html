@@ -420,7 +420,7 @@
                             <span class="srv-hint">Mehr erfahren →</span>
                         </div>
                         <div class="srv-card-expanded">
-                            <span class="srv-close">✕</span>
+                            <button type="button" class="srv-close" aria-label="Schließen">✕</button>
                             <span class="srv-num">01</span>
                             <h3>Gesichtsbehandlungen</h3>
                             <p>Klassische Gesichtspflege, Fruchtsäure-Treatments, Körperbehandlungen sowie innovative
@@ -438,7 +438,7 @@
                             <div class="srv-icon">·</div>
                             <h3>Japanische Head Spa</h3><span class="srv-hint">Mehr erfahren →</span>
                         </div>
-                        <div class="srv-card-expanded"><span class="srv-close">✕</span><span class="srv-num">02</span>
+                        <div class="srv-card-expanded"><button type="button" class="srv-close" aria-label="Schließen">✕</button><span class="srv-num">02</span>
                             <h3>Japanische Head Spa</h3>
                             <p>Premium Head Spa mit NewSha Produkten. Tiefenreinigende Kopfhautpflege, wohltuende
                                 Massage &amp; pure Entspannung — ein unvergessliches Erlebnis für Haar &amp; Seele.</p>
@@ -453,7 +453,7 @@
                             <div class="srv-icon">·</div>
                             <h3>Maniküre &amp; Pediküre</h3><span class="srv-hint">Mehr erfahren →</span>
                         </div>
-                        <div class="srv-card-expanded"><span class="srv-close">✕</span><span class="srv-num">03</span>
+                        <div class="srv-card-expanded"><button type="button" class="srv-close" aria-label="Schließen">✕</button><span class="srv-num">03</span>
                             <h3>Maniküre &amp; Pediküre</h3>
                             <p>Professionelle Hand- und Fußpflege, Gel-Nägel &amp; kreatives Nail Art. Von klassisch
                                 elegant bis ausgefallen — unsere Designerinnen verwirklichen jeden Wunsch mit Präzision.
@@ -469,7 +469,7 @@
                             <div class="srv-icon">·</div>
                             <h3>Waxing</h3><span class="srv-hint">Mehr erfahren →</span>
                         </div>
-                        <div class="srv-card-expanded"><span class="srv-close">✕</span><span class="srv-num">04</span>
+                        <div class="srv-card-expanded"><button type="button" class="srv-close" aria-label="Schließen">✕</button><span class="srv-num">04</span>
                             <h3>Waxing</h3>
                             <p>Professionelles Waxing für seidig glatte Haut. Schnell, sauber und schonend — für alle
                                 Körperbereiche. Langanhaltende Ergebnisse mit minimaler Irritation.</p>
@@ -484,7 +484,7 @@
                             <div class="srv-icon">·</div>
                             <h3>Laser-Haar&shy;entfernung</h3><span class="srv-hint">Mehr erfahren →</span>
                         </div>
-                        <div class="srv-card-expanded"><span class="srv-close">✕</span><span class="srv-num">05</span>
+                        <div class="srv-card-expanded"><button type="button" class="srv-close" aria-label="Schließen">✕</button><span class="srv-num">05</span>
                             <h3>Laser-Haarentfernung</h3>
                             <p>Dauerhaft glatte Haut ohne Rasur. Kein Diodenlaser sondern IPL Laser für alle Hauttypen —
                                 schonend, effektiv und langanhaltend.</p>
@@ -499,7 +499,7 @@
                             <div class="srv-icon">·</div>
                             <h3>Brauen &amp; Wimpern</h3><span class="srv-hint">Mehr erfahren →</span>
                         </div>
-                        <div class="srv-card-expanded"><span class="srv-close">✕</span><span class="srv-num">06</span>
+                        <div class="srv-card-expanded"><button type="button" class="srv-close" aria-label="Schließen">✕</button><span class="srv-num">06</span>
                             <h3>Augenbrauen- &amp; Wimpernstyling</h3>
                             <p>Wimpernlifting, Lash Extensions, Augenbrauen-Styling &amp; Färben. Für den perfekten
                                 Augenaufschlag — natürlich oder dramatisch, ganz nach deinem Wunsch.</p>
@@ -551,8 +551,8 @@
                     <span class="tag">Kundenstimmen</span>
                     <h2>Was unsere <em>Kunden sagen.</em></h2>
                     <div class="reviews-sources">
-                        <span class="reviews-src-pill tw-pill">Treatwell <strong>4,9</strong> ★</span>
-                        <span class="reviews-src-pill go-pill">Google <strong>5,0</strong> ★</span>
+                        <button type="button" class="reviews-src-pill tw-pill" aria-label="Nur Treatwell-Bewertungen filtern" aria-pressed="false">Treatwell <strong>4,9</strong> ★</button>
+                        <button type="button" class="reviews-src-pill go-pill" aria-label="Nur Google-Bewertungen filtern" aria-pressed="false">Google <strong>5,0</strong> ★</button>
                         <span class="reviews-src-total">1.420+ verifizierte Bewertungen</span>
                     </div>
                 </div>
@@ -890,9 +890,9 @@
         </section>
 
         <!-- LIGHTBOX -->
-        <div id="lightbox" class="lightbox">
-            <span class="lightbox-close">&times;</span>
-            <img class="lightbox-content" id="lightbox-img" src="" alt="Enlarged view">
+        <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Bildansicht">
+            <button type="button" class="lightbox-close" aria-label="Schließen">&times;</button>
+            <img class="lightbox-content" id="lightbox-img" src="" alt="Vergrößerte Ansicht">
         </div>
 
         <!-- ═══ CONTACT ═══ -->

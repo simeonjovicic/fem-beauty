@@ -441,6 +441,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         twPill.classList.toggle('active', activeFilter === 'treatwell');
         goPill.classList.toggle('active', activeFilter === 'google');
+        twPill.setAttribute('aria-pressed', activeFilter === 'treatwell' ? 'true' : 'false');
+        goPill.setAttribute('aria-pressed', activeFilter === 'google' ? 'true' : 'false');
 
         if (activeFilter === 'treatwell') totalLabel.textContent = 'Nur Treatwell Bewertungen';
         else if (activeFilter === 'google') totalLabel.textContent = 'Nur Google Bewertungen';
