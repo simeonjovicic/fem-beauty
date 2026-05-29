@@ -4,12 +4,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var hasGSAP = typeof gsap !== 'undefined';
 
     /* ─── Loader ────────────────────────────── */
-    setTimeout(function () {
+    (function () {
         var l = document.getElementById('loader');
         if (!l) return;
-        l.classList.add('done');
-        setTimeout(function () { l.style.display = 'none'; }, 1200);
-    }, 2400);
+        var started = performance.now();
+        var MIN_VISIBLE = 1400; // let the bar animation play out
+        var hide = function () {
+            var elapsed = performance.now() - started;
+            var wait = Math.max(0, MIN_VISIBLE - elapsed);
+            setTimeout(function () {
+                l.classList.add('done');
+                setTimeout(function () { l.style.display = 'none'; }, 600);
+            }, wait);
+        };
+        if (document.readyState === 'complete') hide();
+        else window.addEventListener('load', hide);
+    })();
 
     /* ─── Nav ───────────────────────────────── */
     var nav = document.getElementById('nav');

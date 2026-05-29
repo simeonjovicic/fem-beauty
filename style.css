@@ -73,7 +73,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 1s var(--ease-out), visibility 1s
+    transition: opacity .6s var(--ease-out), visibility .6s
 }
 
 #loader.done {
@@ -90,7 +90,8 @@ a {
 }
 
 .loader-logo {
-    width: 120px;
+    width: 160px;
+    height: auto;
     opacity: 0;
     animation: lfade .8s .2s ease forwards
 }
@@ -1084,6 +1085,15 @@ h2 em {
     font-size: .8rem;
     color: var(--sand);
     min-width: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-pills span i svg {
+    width: .85rem;
+    height: .85rem;
+    display: block;
 }
 
 /* ═══ SALON GALLERY ═══════════════════ */

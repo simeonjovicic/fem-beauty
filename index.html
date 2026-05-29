@@ -34,12 +34,10 @@
         content="Kosmetikstudio Wien, Kosmetiksalon 1050 Wien, Gesichtsbehandlung Wien, Head Spa Wien, japanische Head Spa, Maniküre Wien, Pediküre Wien, HIFU Wien, Carbon Laser Wien, Laser Haarentfernung Wien, Wimpernlifting Wien, Nagelstudio Wien 5. Bezirk, iS Clinical Wien, Babor Wien, Waxing Wien" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap"
-        rel="stylesheet" />
+    <link rel="preload" as="image" href="hero-640.webp" imagesrcset="hero-640.webp 640w, hero-1080.webp 1080w, hero-1920.webp 1920w" imagesizes="100vw" fetchpriority="high" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" /></noscript>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVJkEZSMUkrQ6usKu8zIstOWilQXm+ub6z27V3f5h/Qr8FJ0V4YHBvkNvgJr3vDG5xT+189d6Cg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -258,7 +256,7 @@
 
     <div id="loader">
         <div class="loader-inner">
-            <img src="logo-fem.png" alt="FEM" class="loader-logo" />
+            <img src="logo-fem.webp" alt="FEM" class="loader-logo" width="600" height="337" />
             <div class="loader-bar">
                 <div class="loader-bar-fill"></div>
             </div>
@@ -296,7 +294,11 @@
 
     <main>
         <section class="hero">
-            <div class="hero-bg"><img src="hero1.png"
+            <div class="hero-bg"><img src="hero-1080.webp"
+                    srcset="hero-640.webp 640w, hero-1080.webp 1080w, hero-1920.webp 1920w"
+                    sizes="100vw"
+                    width="1920" height="1071"
+                    fetchpriority="high"
                     alt="FEM Kosmetiksalon Wien — Behandlungsraum mit moderner Ausstattung im 5. Bezirk" /></div>
             <div class="hero-inner">
                 <div class="hero-content">
@@ -349,8 +351,9 @@
         </section>
 
         <section class="story" id="story">
-            <div class="story-img"><img src="foto-store-4.jpeg"
-                    alt="FEM Beauty Salon Eingangsbereich — Ramperstorffergasse 51, Wien 1050" loading="lazy" /></div>
+            <div class="story-img"><img src="foto-store-4.webp"
+                    width="899" height="1200"
+                    alt="FEM Beauty Salon Eingangsbereich — Ramperstorffergasse 51, Wien 1050" loading="lazy" decoding="async" /></div>
             <div class="story-text">
                 <span class="tag rv">Über uns</span>
                 <h2 class="rv d1">Schönheit &amp;<br><em>Entspannung</em><br>im Herzen Wiens.</h2>
@@ -359,23 +362,27 @@
                     stilvolle Atmosphäre in Wien 1050. In ruhigem Ambiente verbinden wir professionelle Kosmetik mit
                     Entspannung und individueller Betreuung.</p>
                 <div class="story-pills rv d3">
-                    <span><i class="fas fa-map-pin"></i> U4 Pilgramgasse</span>
-                    <span><i class="fas fa-globe"></i> DE · EN · 中文</span>
-                    <span><i class="fas fa-mug-hot"></i> WLAN-Getränke zur Begrüßung</span>
+                    <span><i aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 384 512" fill="currentColor"><path d="M215.7 499.2C267 435 384 279.4 384 192 384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2 12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></i> U4 Pilgramgasse</span>
+                    <span><i aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 512 512" fill="currentColor"><path d="M256 0a256 256 0 1 0 0 512 256 256 0 1 0 0-512zm0 48c34.2 0 67.8 35.3 89.5 91.3-28.1 5-58.5 7.7-89.5 7.7s-61.4-2.7-89.5-7.7C188.2 83.3 221.8 48 256 48zM48 256c0-19.7 2.8-38.7 7.8-56.8 31.6 6.9 65.9 11 101.7 11.8-1 14.6-1.5 29.5-1.5 45 0 15.5.5 30.4 1.5 45-35.8.8-70.1 4.9-101.7 11.8C50.8 294.7 48 275.7 48 256zm208 208c-34.2 0-67.8-35.3-89.5-91.3 28.1-5 58.5-7.7 89.5-7.7s61.4 2.7 89.5 7.7C323.8 428.7 290.2 464 256 464zm98.2-156.2c1-14.6 1.5-29.5 1.5-45 0-15.5-.5-30.4-1.5-45 35.8-.8 70.1-4.9 101.7-11.8 5 18.1 7.8 37.1 7.8 56.8 0 19.7-2.8 38.7-7.8 56.8-31.6-6.9-65.9-11-101.7-11.8z"/></svg></i> DE · EN · 中文</span>
+                    <span><i aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 512 512" fill="currentColor"><path d="M88 0c13.3 0 24 10.7 24 24v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V24C64 10.7 74.7 0 88 0zm32 64h208c30.9 0 56 25.1 56 56v40h32a96 96 0 1 1 0 192h-37.6c-12.4 53.7-60.5 96-118.4 96H120c-30.9 0-56-25.1-56-56V120c0-30.9 25.1-56 56-56zm0 32c-13.3 0-24 10.7-24 24v272c0 13.3 10.7 24 24 24h160c39.8 0 72-32.2 72-72V120c0-13.3-10.7-24-24-24H120zm200 240h31.6a48 48 0 1 0 0-96H352v96zM168 0c13.3 0 24 10.7 24 24v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V24c0-13.3 10.7-24 24-24zM248 0c13.3 0 24 10.7 24 24v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V24c0-13.3 10.7-24 24-24z"/></svg></i> WLAN-Getränke zur Begrüßung</span>
                 </div>
             </div>
         </section>
 
         <section class="gallery">
             <div class="gallery-track">
-                <div class="gallery-item rv"><img src="foto-store-2.jpeg"
-                        alt="FEM Beauty Wien — Behandlungsraum für Gesichtsbehandlungen" loading="lazy" /></div>
-                <div class="gallery-item rv d1"><img src="foto-store-3.jpeg"
-                        alt="Premium Kosmetikprodukte bei FEM — iS Clinical, Babor, Fillmed" loading="lazy" /></div>
-                <div class="gallery-item rv d2"><img src="foto-store-0.jpeg"
-                        alt="FEM Kosmetiksalon Interieur — stilvolle Atmosphäre Wien 1050" loading="lazy" /></div>
-                <div class="gallery-item rv d3"><img src="foto-store-1.jpeg" alt="FEM Beauty Logo und Empfangsbereich"
-                        loading="lazy" /></div>
+                <div class="gallery-item rv"><img src="foto-store-2.webp"
+                        width="900" height="1200"
+                        alt="FEM Beauty Wien — Behandlungsraum für Gesichtsbehandlungen" loading="lazy" decoding="async" /></div>
+                <div class="gallery-item rv d1"><img src="foto-store-3.webp"
+                        width="1200" height="899"
+                        alt="Premium Kosmetikprodukte bei FEM — iS Clinical, Babor, Fillmed" loading="lazy" decoding="async" /></div>
+                <div class="gallery-item rv d2"><img src="foto-store-0.webp"
+                        width="900" height="1200"
+                        alt="FEM Kosmetiksalon Interieur — stilvolle Atmosphäre Wien 1050" loading="lazy" decoding="async" /></div>
+                <div class="gallery-item rv d3"><img src="foto-store-1.webp"
+                        width="1200" height="900" alt="FEM Beauty Logo und Empfangsbereich"
+                        loading="lazy" decoding="async" /></div>
             </div>
         </section>
 
