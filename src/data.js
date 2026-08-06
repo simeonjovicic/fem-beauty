@@ -74,13 +74,12 @@ export const services = [
     tags: ['Klassisch', 'Fruchtsäure', 'Hydro Peel', 'Carbon Laser', 'HIFU', 'Radiofrequenz'],
   },
   {
-    id: 'headspa',
+    id: 'hands',
     number: '02',
-    title: 'Japanische Head Spa',
-    summary: 'Tiefenpflege, Massage und vollkommene Entspannung für Kopfhaut, Haar und Sinne.',
+    title: 'Premium Handpflege Vital',
     description:
-      'Premium Head Spa mit NewSha Produkten. Tiefenreinigende Kopfhautpflege, wohltuende Massage & pure Entspannung — ein unvergessliches Erlebnis für Haar & Seele.',
-    tags: ['NewSha', 'Kopfhautpflege', 'Massage', 'Entspannung'],
+      'Unsere Premium Handpflege Vital vereint Infrarotwärme, Peeling, Ultraschall sowie eine Kollagenbehandlung mit Wirkessenz. Sie spendet langanhaltende Feuchtigkeit, fördert die Hautregeneration und verbessert die Elastizität – für glatte, jugendlich strahlende Hände.',
+    tags: ['Infrarotwärme', 'Peeling', 'Ultraschall', 'Kollagen'],
   },
   {
     id: 'nails',
@@ -116,31 +115,19 @@ export const services = [
       'Wimpernlifting, Lash Extensions, Augenbrauen-Styling & Färben. Für den perfekten Augenaufschlag — natürlich oder dramatisch, ganz nach deinem Wunsch.',
     tags: ['Lash Lift', 'Extensions', 'Brow Styling', 'Färben'],
   },
-  {
-    id: 'new',
-    number: '07',
-    title: 'Neues Treatment',
-    expandedTitle: 'Neues Treatment — demnächst',
-    description:
-      'Hier ist der feste Platz für das kommende Angebot. Name, Beschreibung und Buchungsdetails können ergänzt werden, sobald das neue Treatment feststeht.',
-    tags: ['Neu bei FEM', 'Demnächst'],
-    placeholder: true,
-  },
 ]
 
-// Backdrop für das linke Panel im Service-Modal. Sieben Services teilen sich die
-// fünf vorhandenen Salon-Fotos — Gesicht und Laser bekommen den Behandlungsraum,
-// Head Spa und Brauen das ruhige Interieur, der Rest was thematisch am nächsten
-// liegt. Die Bilder sind in index.html ohnehin vorgeladen (Gallery), kosten hier
-// also nichts extra. Sobald es echte Treatment-Fotos gibt: nur diese Pfade tauschen.
-export const serviceImages = {
-  face: '/foto-store-2.webp',
-  headspa: '/foto-store-0.webp',
-  nails: '/foto-store-3.webp',
-  waxing: '/foto-store-4.webp',
-  laser: '/foto-store-2.webp',
-  lash: '/foto-store-0.webp',
-  new: '/foto-store-1.webp',
+// Eigene Sektion statt Kachel im Raster: Head Spa ist das Signature-Treatment
+// und traegt als einziges mehrere buchbare Varianten. Die stehen bereits in
+// voucherTreatments — hier nur die Beschreibung, die Varianten leitet die
+// Komponente von dort ab, damit Preise nicht an zwei Stellen gepflegt werden.
+export const headSpa = {
+  id: 'headspa',
+  title: 'Japanische Head Spa',
+  summary: 'Tiefenpflege, Massage und vollkommene Entspannung für Kopfhaut, Haar und Sinne.',
+  description:
+    'Premium Head Spa mit NewSha Produkten. Tiefenreinigende Kopfhautpflege, wohltuende Massage & pure Entspannung — ein unvergessliches Erlebnis für Haar & Seele.',
+  tags: ['NewSha', 'Kopfhautpflege', 'Massage', 'Entspannung'],
 }
 
 export const reviews = [

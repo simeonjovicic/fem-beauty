@@ -4,9 +4,11 @@ import { useBodyLock } from '../hooks'
 
 const navigation = [
   ['story', 'Salon'],
+  ['headspa', 'Head Spa'],
   ['treatments', 'Services'],
   ['reviews', 'Bewertungen'],
-  ['vouchers', 'Gutscheine'],
+  // Eigene Seite statt Sektionsanker — siehe sectionHref().
+  ['/gutscheine.html', 'Gutscheine'],
   ['team', 'Team'],
   ['contact', 'Kontakt'],
 ]
@@ -89,7 +91,13 @@ export function Header({ home = false }) {
   }, [home])
 
   const closeMenu = () => setMenuOpen(false)
-  const sectionHref = (id) => (home ? `#${id}` : `/#${id}`)
+  // Eintraege, die mit / beginnen, sind eigene Seiten und bleiben unveraendert.
+  // Alles andere ist eine Sektion der Startseite und braucht ausserhalb von
+  // ihr den Umweg ueber /.
+  const sectionHref = (id) => {
+    if (id.startsWith('/')) return id
+    return home ? `#${id}` : `/#${id}`
+  }
 
   return (
     <>

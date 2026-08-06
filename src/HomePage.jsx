@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Footer, Header, Loader } from './components/Chrome'
-import VoucherShop from './components/VoucherShop'
-import { BOOKING_URL, reviews, serviceImages, services } from './data'
+// Bewusst kein Import aus VoucherShop: der Konfigurator lebt jetzt auf
+// /gutscheine.html, und das Band bringt seine Grafik selbst mit. Sonst
+// laege der ganze Shop wieder im Bundle der Startseite.
+import { BOOKING_URL, headSpa, reviews, services, voucherTreatments } from './data'
 import {
   useBodyLock,
   useMediaQuery,
@@ -200,31 +202,28 @@ function Gallery({ openImage }) {
   const isMobile = useMediaQuery('(max-width: 768px)')
   const visibleImages = isMobile ? [...galleryImages, mobileGalleryImage] : galleryImages
 
+  // Statisches Raster statt Laufband: die zweite, aria-hidden Kopie der Bilder
+  // war nur noetig, damit die Endlosbewegung nahtlos umschlug.
   return (
     <section className="gallery" aria-label="Einblicke in den Salon">
       <div className="gallery-track">
-        {[0, 1].map((copyIndex) => (
-          <div className="gallery-group" aria-hidden={copyIndex === 1} key={copyIndex}>
-            {visibleImages.map(([src, width, height, alt]) => (
-              <button
-                type="button"
-                className="gallery-item"
-                aria-label={`Foto vergrößern: ${alt}`}
-                tabIndex={copyIndex === 1 ? -1 : 0}
-                onClick={() => openImage(src)}
-                key={`${copyIndex}-${src}`}
-              >
-                <img
-                  src={src}
-                  width={width}
-                  height={height}
-                  alt={copyIndex === 0 ? alt : ''}
-                  loading="eager"
-                  decoding="async"
-                />
-              </button>
-            ))}
-          </div>
+        {visibleImages.map(([src, width, height, alt]) => (
+          <button
+            type="button"
+            className="gallery-item"
+            aria-label={`Foto vergrößern: ${alt}`}
+            onClick={() => openImage(src)}
+            key={src}
+          >
+            <img
+              src={src}
+              width={width}
+              height={height}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
         ))}
       </div>
     </section>
@@ -246,310 +245,274 @@ function BrandsMarquee() {
   )
 }
 
-function ServiceGlyph({ serviceId }) {
-  const commonProps = {
-    width: '1em',
-    height: '1em',
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: '1.45',
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
-    'aria-hidden': true,
-  }
+// Aufklappen in der Karte statt Overlay-Modal: der Klick blendet ein Panel
+// ueber die Karte selbst ein (position:absolute, inset:0), das Raster bleibt
+// stehen. Entspricht dem Verhalten vor dem React-Rebuild.
+function ServiceCard({ service, isOpen, onToggle, onClose }) {
+  const panelId = `srv-panel-${service.id}`
+  const frontRef = useRef(null)
+  const closeRef = useRef(null)
+  const panelRef = useRef(null)
+  const restoreFocus = useRef(false)
 
-  if (serviceId === 'face') {
-    return (
-      <svg {...commonProps}>
-        <path d="M15.8 4.1c-4.8-.9-8.9 2.4-8.9 7.6 0 4.4 2.7 7.2 6.8 8.2" />
-        <path d="M15.8 4.1c-1.7 1.8-2.2 3.8-1.5 5.8.4 1.2 1.6 1.8 2.7 2.3-.7.9-1.7 1.5-2.9 1.7M11.1 10.4h.1M11.6 16.5c1 .7 2.1.9 3.2.5" />
-      </svg>
-    )
-  }
+  // Beim Oeffnen deckt das Panel die Vorderseite ab und diese wird inert —
+  // ohne Fokuswechsel landet der Fokus sonst im Nichts. Zurueck geht er nur
+  // beim Schliessen ueber das ✕: erst nach dem Rerender ist das inert weg,
+  // ein focus() direkt im Klickhandler liefe ins Leere. Escape und Klick
+  // daneben lassen den Fokus bewusst dort, wo der Zeiger hingegangen ist.
+  //
+  // preventScroll ist hier Pflicht, nicht Politur: beim Fokussieren steht das
+  // Panel noch auf translateY(100%), und mit html{scroll-behavior:smooth}
+  // gleitet die Seite sonst zu dieser Position und wieder zurueck — die
+  // Einblendung sieht dann aus, als schoesse die Karte nach oben durch.
+  useEffect(() => {
+    if (isOpen) {
+      if (panelRef.current) panelRef.current.scrollTop = 0
+      closeRef.current?.focus({ preventScroll: true })
+    } else if (restoreFocus.current) {
+      restoreFocus.current = false
+      frontRef.current?.focus({ preventScroll: true })
+    }
+  }, [isOpen])
 
-  if (serviceId === 'headspa') {
-    return (
-      <svg {...commonProps}>
-        <path d="M4 8.2c2.3-2.1 4.7-2.1 7 0s4.7 2.1 7 0M3.5 12.2c2.6-2.1 5.1-2.1 7.7 0s5.1 2.1 7.7 0M5 16.2c2-1.7 4-1.7 6 0s4 1.7 6 0" />
-      </svg>
-    )
-  }
-
-  if (serviceId === 'nails') {
-    return (
-      <svg {...commonProps}>
-        <path d="M9 3.5h6v4H9zM8 8h8l1.2 12H6.8L8 8Z" />
-        <path d="M10.2 12.2c1.2-.8 2.4-.8 3.6 0" />
-      </svg>
-    )
-  }
-
-  if (serviceId === 'waxing') {
-    return (
-      <svg {...commonProps}>
-        <path d="M12 3.2S6.8 9.1 6.8 13.5a5.2 5.2 0 0 0 10.4 0C17.2 9.1 12 3.2 12 3.2Z" />
-        <path d="M9.5 14.4c.4 1 1.3 1.7 2.5 1.9" />
-      </svg>
-    )
-  }
-
-  if (serviceId === 'laser') {
-    return (
-      <svg {...commonProps}>
-        <circle cx="12" cy="12" r="3.2" />
-        <path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1" />
-      </svg>
-    )
-  }
-
-  if (serviceId === 'lash') {
-    return (
-      <svg {...commonProps}>
-        <path d="M3.3 12s3.1-4.6 8.7-4.6 8.7 4.6 8.7 4.6-3.1 4.6-8.7 4.6S3.3 12 3.3 12Z" />
-        <circle cx="12" cy="12" r="2.4" />
-        <path d="M6.1 7.4 4.9 5.6M9.8 6.4 9.4 4.2M13.9 6.4l.4-2.2M17.6 7.5l1.3-1.8" />
-      </svg>
-    )
+  const closeAndRestore = () => {
+    restoreFocus.current = true
+    onClose()
   }
 
   return (
-    <svg {...commonProps}>
-      <path d="M12 3.2c.7 4.1 2.7 6.1 6.8 6.8-4.1.7-6.1 2.7-6.8 6.8-.7-4.1-2.7-6.1-6.8-6.8 4.1-.7 6.1-2.7 6.8-6.8Z" />
-      <path d="M18.2 15.3c.3 1.7 1.1 2.5 2.8 2.8-1.7.3-2.5 1.1-2.8 2.8-.3-1.7-1.1-2.5-2.8-2.8 1.7-.3 2.5-1.1 2.8-2.8Z" />
-    </svg>
-  )
-}
-
-function ServiceCard({ service, onSelect }) {
-  return (
-    <button
-      type="button"
-      className="srv-card"
-      data-srv={service.id}
-      aria-haspopup="dialog"
-      aria-label={`${service.title}: Details öffnen`}
-      onClick={() => onSelect(service)}
-    >
-      <div className="srv-card-front">
+    <div className={`srv-card${isOpen ? ' open' : ''}`} data-srv={service.id}>
+      <button
+        ref={frontRef}
+        type="button"
+        className="srv-card-front"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        inert={isOpen}
+        onClick={onToggle}
+      >
         <span className="srv-num">{service.number}</span>
         <span className="srv-icon" aria-hidden="true">+</span>
         <h3>{service.title}</h3>
         <span className="srv-hint">Mehr erfahren <i aria-hidden="true">→</i></span>
-      </div>
-    </button>
-  )
-}
+      </button>
 
-function ServiceRow({ service, index, onSelect }) {
-  return (
-    <button
-      type="button"
-      className="srv-row rv"
-      style={{ transitionDelay: `${index * 0.06}s` }}
-      data-srv={service.id}
-      aria-haspopup="dialog"
-      aria-label={`${service.title}: Details öffnen`}
-      onClick={() => onSelect(service)}
-    >
-      <span className="srv-row-num">{service.number}</span>
-      <span className="srv-row-main">
-        <span className="srv-row-title-line">
-          <h3>{service.title}</h3>
-          {service.placeholder && <span className="srv-row-badge">Demnächst</span>}
-        </span>
-        <span className="srv-row-tags">{service.tags.join(' · ')}</span>
-      </span>
-      <span className="srv-row-glyph" aria-hidden="true"><ServiceGlyph serviceId={service.id} /></span>
-      <span className="srv-row-cta">
-        <span className="srv-row-cta-label">Mehr erfahren</span>
-        <i aria-hidden="true">→</i>
-      </span>
-    </button>
-  )
-}
-
-// The rows mount and unmount with the desktop breakpoint, so they need their own
-// observer — the global one in useRevealAnimations only collects .rv elements once.
-function ServiceRows({ items, onSelect }) {
-  const listRef = useRef(null)
-
-  useEffect(() => {
-    const list = listRef.current
-    if (!list) return undefined
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          entry.target.classList.add('on')
-          observer.unobserve(entry.target)
-        })
-      },
-      { threshold: 0.15 },
-    )
-
-    list.querySelectorAll('.srv-row').forEach((row) => observer.observe(row))
-    return () => observer.disconnect()
-  }, [items])
-
-  return (
-    <div className="srv-rows" ref={listRef}>
-      {items.map((service, index) => (
-        <ServiceRow key={service.id} service={service} index={index} onSelect={onSelect} />
-      ))}
-    </div>
-  )
-}
-
-function ServiceModal({ service, onClose }) {
-  const closeButtonRef = useRef(null)
-  useBodyLock(Boolean(service))
-
-  useEffect(() => {
-    if (!service) return undefined
-
-    const previouslyFocused = document.activeElement
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') onClose()
-    }
-
-    document.addEventListener('keydown', closeOnEscape)
-    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
-
-    return () => {
-      document.removeEventListener('keydown', closeOnEscape)
-      window.cancelAnimationFrame(focusFrame)
-      previouslyFocused?.focus?.()
-    }
-  }, [service, onClose])
-
-  if (!service) return null
-
-  const titleId = `service-modal-${service.id}`
-
-  return (
-    <div
-      className="srv-modal-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
-      <div className="srv-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-        <button ref={closeButtonRef} type="button" className="srv-modal-close" aria-label="Schließen" onClick={onClose}>×</button>
-        <div className="srv-modal-visual">
-          {serviceImages[service.id] && (
-            <img
-              className="srv-modal-photo"
-              src={serviceImages[service.id]}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          )}
-          <span className="srv-modal-kicker">FEM Service · {service.number}</span>
-          <span className="srv-modal-glyph"><ServiceGlyph serviceId={service.id} /></span>
-          <span className="srv-modal-number" aria-hidden="true">{service.number}</span>
-          <div className="srv-modal-title-wrap">
-            <span>FEM Beauty Wien</span>
-            <h2 id={titleId}>{service.expandedTitle || service.title}</h2>
-          </div>
+      <div className="srv-card-expanded" id={panelId} ref={panelRef} inert={!isOpen}>
+        <button
+          ref={closeRef}
+          type="button"
+          className="srv-close"
+          aria-label={`${service.title} schließen`}
+          onClick={closeAndRestore}
+        >
+          ✕
+        </button>
+        <span className="srv-num">{service.number}</span>
+        <h3>{service.expandedTitle || service.title}</h3>
+        <p>{service.description}</p>
+        <div className="srv-tags">
+          {service.tags.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
-        <div className="srv-modal-content">
-          <span className="tag">Behandlung im Überblick</span>
-          {service.summary ? (
-            <>
-              <p className="srv-modal-lead">{service.summary}</p>
-              <div className="srv-modal-rule" />
-              <p className="srv-modal-description">{service.description}</p>
-            </>
-          ) : (
-            <p className="srv-modal-lead">{service.description}</p>
-          )}
-          <div className="srv-modal-tags">{service.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-          <div className="srv-modal-actions">
-            {service.placeholder ? (
-              <span className="srv-modal-pending">In Vorbereitung</span>
-            ) : (
-              <BookingLink className="btn-p srv-modal-cta">Termin buchen</BookingLink>
-            )}
-            <span className="srv-modal-note">Persönliche Beratung inklusive</span>
-          </div>
-        </div>
+        <BookingLink className="srv-book">Jetzt buchen →</BookingLink>
       </div>
     </div>
   )
 }
 
-// Platzhalter bleiben vorerst ausgeblendet. Die Zeilen-Ansicht könnte sie tragen —
-// ServiceRow rendert dafür ein "Demnächst"-Badge — nur fehlt dem 07er-Slot noch
-// der echte Name. Sobald der steht: placeholder-Flag in data.js entfernen, oder
-// hier auf `services` wechseln, um den Slot vorab anzuteasern.
 const visibleServices = services.filter((service) => !service.placeholder)
 
 function Services() {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [selectedService, setSelectedService] = useState(null)
+  const [openId, setOpenId] = useState(null)
   const [current, setCurrent] = useState(0)
-  const closeModal = useCallback(() => setSelectedService(null), [])
+  const closeCard = useCallback(() => setOpenId(null), [])
+
+  // Klick daneben und Escape schliessen, wie in der Fassung vor dem Rebuild.
+  // Der oeffnende Klick selbst kann hier nicht durchschlagen: sein Ziel liegt
+  // per Definition innerhalb einer .srv-card.
+  useEffect(() => {
+    if (!openId) return undefined
+
+    const closeOnOutside = (event) => {
+      if (!event.target.closest('.srv-card')) setOpenId(null)
+    }
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setOpenId(null)
+    }
+
+    document.addEventListener('click', closeOnOutside)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('click', closeOnOutside)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [openId])
 
   const previous = useCallback(() => {
     setCurrent((index) => (index - 1 + visibleServices.length) % visibleServices.length)
+    setOpenId(null)
   }, [])
   const next = useCallback(() => {
     setCurrent((index) => (index + 1) % visibleServices.length)
+    setOpenId(null)
   }, [])
   const swipeHandlers = useSwipe(previous, next)
 
+  const serviceCards = visibleServices.map((service) => (
+    <ServiceCard
+      key={service.id}
+      service={service}
+      isOpen={openId === service.id}
+      onToggle={() => setOpenId((id) => (id === service.id ? null : service.id))}
+      onClose={closeCard}
+    />
+  ))
+
   return (
     <>
-      <section className="services" id="treatments">
+      <section className="services">
         <div className="services-inner">
           <div className="services-head rv">
-            <span className="tag">Behandlungen</span>
-            <h2>Unsere <em>Services.</em></h2>
+            <span className="tag">Im Überblick</span>
+            <h2>Weitere <em>Treatments.</em></h2>
             <p className="services-sub">Wähle eine Behandlung und entdecke alle Details.</p>
           </div>
 
-          {isMobile ? (
-            <>
-              <div className="srv-grid" {...swipeHandlers}>
-                <div className="slider-track" style={{ transform: `translateX(-${current * 100}%)` }}>
-                  {visibleServices.map((service) => (
-                    <ServiceCard
-                      key={service.id}
-                      service={service}
-                      onSelect={setSelectedService}
-                    />
-                  ))}
-                </div>
+          <div className="srv-grid" {...(isMobile ? swipeHandlers : {})}>
+            {isMobile ? (
+              <div className="slider-track" style={{ transform: `translateX(-${current * 100}%)` }}>
+                {serviceCards}
               </div>
+            ) : serviceCards}
+          </div>
 
-              <div className="srv-mobile-nav">
-                <div className="mob-dots srv-dots">
-                  {visibleServices.map((service, index) => (
-                    <button
-                      type="button"
-                      className={`mob-dot${index === current ? ' active' : ''}`}
-                      aria-label={`${service.title} anzeigen`}
-                      key={service.id}
-                      onClick={() => setCurrent(index)}
-                    />
-                  ))}
-                </div>
-                <p className="mob-counter srv-counter">{current + 1} / {visibleServices.length}</p>
-                <p className="mob-swipe-hint">← Wischen für mehr →</p>
-              </div>
-            </>
-          ) : (
-            <ServiceRows items={visibleServices} onSelect={setSelectedService} />
-          )}
+          <div className="srv-mobile-nav">
+            <div className="mob-dots srv-dots">
+              {visibleServices.map((service, index) => (
+                <button
+                  type="button"
+                  className={`mob-dot${index === current ? ' active' : ''}`}
+                  aria-label={`${service.title} anzeigen`}
+                  key={service.id}
+                  onClick={() => { setCurrent(index); setOpenId(null) }}
+                />
+              ))}
+            </div>
+            <p className="mob-counter srv-counter">{current + 1} / {visibleServices.length}</p>
+            <p className="mob-swipe-hint">← Wischen für mehr →</p>
+          </div>
 
           <div className="services-cta"><BookingLink className="link-arrow">Alle Preise auf Treatwell →</BookingLink></div>
         </div>
       </section>
-      <ServiceModal service={selectedService} onClose={closeModal} />
     </>
+  )
+}
+
+// Die Varianten kommen aus voucherTreatments statt aus einer eigenen Liste:
+// dort stehen sie mit Dauer und Preis bereits gepflegt, und zwei Quellen fuer
+// denselben Preis laufen frueher oder spaeter auseinander.
+const headSpaVariants = voucherTreatments.filter((t) => t.category === 'Head Spa')
+
+// Dachzeile fuer den gesamten Behandlungsteil: steht ueber Head Spa und traegt
+// deshalb auch den #treatments-Anker — der Bereich beginnt hier, nicht erst
+// beim Kartenraster.
+function ServicesIntro() {
+  return (
+    <section className="services services-intro" id="treatments">
+      <div className="services-inner">
+        <div className="services-head rv">
+          <span className="tag">Behandlungen</span>
+          <h2>Unsere <em>Services.</em></h2>
+          <p className="services-sub">Vom Signature Head Spa bis zur klassischen Kosmetik — alles unter einem Dach.</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function HeadSpa() {
+  return (
+    <section className="headspa" id="headspa">
+      <div className="headspa-visual">
+        <img
+          src="/foto-store-0.webp"
+          width="600"
+          height="800"
+          alt="Ruheraum im FEM Kosmetiksalon Wien — Setting der japanischen Head Spa"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <div className="headspa-body">
+        <span className="tag rv">Signature Treatment</span>
+        <h2 className="rv d1">Japanische <em>Head Spa.</em></h2>
+        <div className="line anim-line" />
+        <p className="headspa-lead rv d2">{headSpa.summary}</p>
+        <p className="headspa-desc rv d2">{headSpa.description}</p>
+
+        <ul className="headspa-variants rv d3">
+          {headSpaVariants.map((variant) => (
+            <li key={variant.id}>
+              <span className="headspa-variant-name">{variant.variant}</span>
+              <span className="headspa-variant-dur">{variant.duration}</span>
+              <span className="headspa-variant-price">{variant.price} €</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="headspa-tags rv d3">
+          {headSpa.tags.map((tag) => <span key={tag}>{tag}</span>)}
+        </div>
+
+        <div className="headspa-cta rv d3">
+          <BookingLink className="btn-p">Head Spa buchen</BookingLink>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Zwei gestapelte Karten statt einer: der Shop kennt Wert- und
+// Behandlungsgutschein, und die Wahl ist das Verkaufsargument. Rein
+// dekorativ und in CSS gebaut — ein Import der echten VoucherArtwork
+// zoege den ganzen Konfigurator ins Bundle der Startseite.
+function VoucherTeaser() {
+  return (
+    <section className="voucher-teaser" id="vouchers">
+      <div className="voucher-teaser-inner">
+        <div className="vt-stack rv" aria-hidden="true">
+          <div className="vt-card vt-card-back">
+            <span className="vt-card-kicker">Behandlung</span>
+          </div>
+          <div className="vt-card vt-card-front">
+            <span className="vt-card-top">FEM Gift Edition</span>
+            <span className="vt-card-mark">Fem</span>
+            <span className="vt-card-foot">
+              <span>Gutschein</span>
+              <span>Wien · 1050</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="voucher-teaser-body">
+          <span className="tag rv">FEM Gutscheine</span>
+          <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
+          <div className="line anim-line" />
+          <p className="rv d2">
+            Ein frei wählbarer Wertgutschein oder eine ganz bestimmte Behandlung —
+            persönlich gestaltet und sofort digital bereit.
+          </p>
+          <ul className="vt-points rv d2">
+            <li>Persönlich gestaltbar</li>
+            <li>Digital oder druckbereit</li>
+            <li>Flexibel einlösbar</li>
+          </ul>
+          <a className="btn-p rv d3" href="/gutscheine.html">Gutschein kaufen →</a>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -854,10 +817,12 @@ export default function HomePage() {
         <Story openImage={setLightboxImage} />
         <Gallery openImage={setLightboxImage} />
         <BrandsMarquee />
+        <ServicesIntro />
+        <HeadSpa />
         <Services />
         <Stats />
         <Reviews />
-        <VoucherShop />
+        <VoucherTeaser />
         <Owner />
         <Contact />
       </main>
