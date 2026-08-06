@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   VOUCHER_MAX_AMOUNT,
   VOUCHER_MAX_MESSAGE_LENGTH,
   VOUCHER_MIN_AMOUNT,
   voucherTreatments,
 } from '../data'
-import { useBodyLock } from '../hooks'
 
 const PRESET_AMOUNTS = [50, 100, 150, 200]
 const MIN_AMOUNT = VOUCHER_MIN_AMOUNT
@@ -243,56 +242,25 @@ function TreatmentPicker({ selectedId, onSelect, compact = false }) {
   )
 }
 
-function VoucherArtwork({ amount, recipient, sender, kind = 'value', treatment, compact = false }) {
-  const recipientLine = recipient.trim() ? `Für ${recipient.trim()}` : 'Für einen besonderen Menschen'
-  const isTreatment = kind === 'treatment'
-  const cardLabel = isTreatment
-    ? `FEM Behandlungsgutschein für ${treatment.title}, ${treatment.variant}, im Wert von ${formatCurrency(amount)}`
-    : `FEM Wertgutschein über ${formatCurrency(amount)}`
+const DELIVERY_OPTIONS = [
+  ['download', 'download', 'PDF erhalten', 'Selbst ausdrucken oder weiterleiten'],
+  ['email', 'mail', 'Direkt per E-Mail', 'Nach dem Kauf automatisch senden'],
+]
 
-  return (
-    <article
-      className={`voucher-artwork${isTreatment ? ' voucher-artwork-treatment' : ''}${compact ? ' voucher-artwork-compact' : ''}`}
-      aria-label={cardLabel}
-    >
-      <span className="voucher-artwork-sheen" aria-hidden="true" />
-      <span className="voucher-artwork-edge" aria-hidden="true" />
-      <div className="voucher-artwork-frame" />
-      <div className="voucher-artwork-orbit" aria-hidden="true" />
-      <div className="voucher-artwork-top">
-        <span className="voucher-artwork-brand">Fem</span>
-        <span className="voucher-artwork-edition">{isTreatment ? 'Treatment Edition' : 'Gift Edition'} · Vienna</span>
-      </div>
-      <div className="voucher-artwork-center" aria-live="polite">
-        {isTreatment ? (
-          <>
-            <span className="voucher-artwork-kicker">Behandlungsgutschein</span>
-            <strong className="voucher-artwork-treatment-title">{treatment.title}</strong>
-            <span className="voucher-artwork-treatment-variant">{treatment.variant} · {treatment.duration}</span>
-            <span className="voucher-artwork-treatment-value">Gutscheinwert {formatCurrency(amount)}</span>
-          </>
-        ) : (
-          <>
-            <span className="voucher-artwork-kicker">Wertgutschein</span>
-            <strong className="voucher-artwork-value">{formatCurrency(amount)}</strong>
-          </>
-        )}
-        <span className="voucher-artwork-recipient">{recipientLine}</span>
-      </div>
-      <div className="voucher-artwork-bottom">
-        <span>{sender.trim() ? `Von ${sender.trim()}` : 'Beauty · Head Spa · Self Care'}</span>
-        <span>{isTreatment ? treatment.category : 'Wien 1050'}</span>
-      </div>
-      <span className="voucher-artwork-seal" aria-hidden="true">F</span>
-    </article>
-  )
-}
+const STEPS = [
+  ['Auswahl', 'Was möchtest du schenken?'],
+  ['Für wen', 'Für wen ist der Gutschein?'],
+  ['Übersicht', 'Alles bereit zum Verschenken.'],
+]
 
-function VoucherModal({ initialAmount, initialKind, initialTreatmentId, onSelectionChange, onClose }) {
-  const amountSelection = useAmountSelection(initialAmount)
-  const [kind, setKind] = useState(initialKind)
-  const [treatmentId, setTreatmentId] = useState(initialTreatmentId || DEFAULT_TREATMENT_ID)
+// Drei Schritte statt einer langen Seite: alles gleichzeitig zu zeigen war
+// unuebersichtlich. Der Ablauf bleibt auf der Seite — kein Modal, keine
+// zweite Spalte, die um Aufmerksamkeit konkurriert.
+export default function VoucherShop() {
+  const amountSelection = useAmountSelection(100)
   const [step, setStep] = useState(0)
+  const [kind, setKind] = useState('value')
+  const [treatmentId, setTreatmentId] = useState(DEFAULT_TREATMENT_ID)
   const [recipient, setRecipient] = useState('')
   const [sender, setSender] = useState('')
   const [message, setMessage] = useState('')
@@ -300,374 +268,263 @@ function VoucherModal({ initialAmount, initialKind, initialTreatmentId, onSelect
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState(false)
-  const dialogRef = useRef(null)
-  const closeButtonRef = useRef(null)
-  const stepHeadingRef = useRef(null)
-  const checkoutTimerRef = useRef(null)
+  const [done, setDone] = useState(false)
+  const errorRef = useRef(null)
+  const headingRef = useRef(null)
+  const timerRef = useRef(null)
+  const stepRef = useRef(0)
+
   const selectedTreatment = getTreatment(treatmentId)
   const effectiveAmount = kind === 'treatment' ? selectedTreatment.price : amountSelection.amount
 
-  useBodyLock(true)
+  useEffect(() => () => window.clearTimeout(timerRef.current), [])
 
+  // Beim Schrittwechsel auf die Ueberschrift fokussieren, damit Screenreader
+  // den neuen Abschnitt ansagen. Nicht beim ersten Aufbau — sonst springt die
+  // Seite direkt nach dem Laden.
   useEffect(() => {
-    const previouslyFocused = document.activeElement
-    const dialog = dialogRef.current
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onClose()
-        return
-      }
-
-      if (event.key !== 'Tab' || !dialog) return
-      const focusable = [...dialog.querySelectorAll('button, input, textarea, [href], [tabindex]:not([tabindex="-1"])')]
-        .filter((element) => !element.disabled && element.getAttribute('aria-hidden') !== 'true')
-      if (!focusable.length) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      window.cancelAnimationFrame(focusFrame)
-      window.clearTimeout(checkoutTimerRef.current)
-      previouslyFocused?.focus?.()
-    }
-  }, [onClose])
-
-  useEffect(() => {
-    if (step === 0) return
-    const focusFrame = window.requestAnimationFrame(() => stepHeadingRef.current?.focus())
-    return () => window.cancelAnimationFrame(focusFrame)
+    if (stepRef.current === step) return
+    stepRef.current = step
+    headingRef.current?.focus({ preventScroll: true })
   }, [step])
-
-  const syncSelection = () => {
-    onSelectionChange({
-      kind,
-      treatmentId,
-      valueAmount: amountSelection.amount,
-    })
-  }
 
   const changeKind = (nextKind) => {
     setKind(nextKind)
     setError('')
   }
 
-  const goNext = () => {
-    setError('')
-
-    if (step === 0) {
-      if (kind === 'value' && !amountSelection.isValid) {
-        setError(`Bitte wähle einen Gutscheinwert zwischen ${MIN_AMOUNT} € und ${MAX_AMOUNT} €.`)
-        return
+  const problemAt = (index) => {
+    if (index === 0 && kind === 'value' && !amountSelection.isValid) {
+      return `Bitte wähle einen Gutscheinwert zwischen ${MIN_AMOUNT} € und ${MAX_AMOUNT} €.`
+    }
+    if (index === 1) {
+      if (!recipient.trim()) return 'Bitte trage den Namen der beschenkten Person ein.'
+      if (delivery === 'email' && !/^\S+@\S+\.\S+$/.test(email)) {
+        return 'Bitte trage eine gültige E-Mail-Adresse ein.'
       }
-      syncSelection()
-      setStep(1)
+    }
+    return ''
+  }
+
+  const goNext = () => {
+    const problem = problemAt(step)
+    setError(problem)
+    if (problem) {
+      window.requestAnimationFrame(() => errorRef.current?.focus({ preventScroll: true }))
       return
     }
-
-    if (step === 1) {
-      if (!recipient.trim()) {
-        setError('Bitte trage den Namen der beschenkten Person ein.')
-        return
-      }
-      if (delivery === 'email' && !/^\S+@\S+\.\S+$/.test(email)) {
-        setError('Bitte trage eine gültige E-Mail-Adresse ein.')
-        return
-      }
-      setStep(2)
-    }
+    setStep((current) => current + 1)
   }
 
   const goBack = () => {
     setError('')
-    setStep((currentStep) => Math.max(0, currentStep - 1))
+    setStep((current) => Math.max(0, current - 1))
   }
 
-  const simulateCheckout = () => {
+  const submit = () => {
     if (processing) return
     setProcessing(true)
-    syncSelection()
-    checkoutTimerRef.current = window.setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       setProcessing(false)
-      setStep(3)
+      setDone(true)
     }, 900)
   }
 
-  const stepTitles = [
-    ['Auswahl', 'Was möchtest du schenken?'],
-    ['Persönlich', 'Mach es zu deinem Geschenk.'],
-    ['Übersicht', 'Alles bereit zum Verschenken.'],
-  ]
-
-  return (
-    <div
-      className="voucher-modal-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
-      <div ref={dialogRef} className="voucher-modal" role="dialog" aria-modal="true" aria-labelledby="voucher-modal-title">
-        <button ref={closeButtonRef} type="button" className="voucher-modal-close" aria-label="Gutscheinshop schließen" onClick={onClose}>×</button>
-
-        <aside className="voucher-modal-visual" aria-label="Live-Vorschau des Gutscheins">
-          <div className="voucher-modal-visual-top">
-            <span>FEM Gift Studio</span>
-            <span>Live Preview</span>
+  if (done) {
+    return (
+      <section className="voucher-shop" id="vouchers">
+        <div className="vshop-done">
+          <span className="vshop-done-icon"><Icon name="check" /></span>
+          <h2>Dein Gutschein ist bereit.</h2>
+          <p>
+            Im produktiven Shop öffnet sich jetzt Stripe Checkout. Nach erfolgreicher
+            Zahlung werden Gutschein-Code und PDF automatisch erzeugt und versendet.
+          </p>
+          <div className="vshop-receipt">
+            <span>{kind === 'treatment' ? `${selectedTreatment.title} · ${selectedTreatment.variant}` : 'Wertgutschein'}</span>
+            <strong>{formatCurrency(effectiveAmount)}</strong>
+            <small>FEM–GIFT–PREVIEW</small>
           </div>
-          <div className="voucher-modal-artwork-wrap">
-            <VoucherArtwork
-              amount={effectiveAmount}
-              recipient={recipient}
-              sender={sender}
-              kind={kind}
-              treatment={selectedTreatment}
-              compact
-            />
-          </div>
-          <p>{kind === 'treatment' ? 'Treatment, Dauer und Preis erscheinen direkt auf der Karte.' : 'Deine Angaben erscheinen direkt auf der Karte.'}</p>
-        </aside>
-
-        <div className="voucher-modal-panel">
-          {step < 3 ? (
-            <>
-              <header className="voucher-modal-header">
-                <ol className="voucher-steps" aria-label="Fortschritt">
-                  {stepTitles.map(([label], index) => (
-                    <li className={`${index === step ? 'active' : ''}${index < step ? ' complete' : ''}`} aria-current={index === step ? 'step' : undefined} key={label}>
-                      <span>{String(index + 1).padStart(2, '0')}</span>
-                      <strong>{label}</strong>
-                    </li>
-                  ))}
-                </ol>
-              </header>
-
-              <div className="voucher-modal-body">
-                <span className="voucher-step-kicker">Schritt {step + 1} von 3</span>
-                <h2 ref={stepHeadingRef} id="voucher-modal-title" tabIndex="-1">{stepTitles[step][1]}</h2>
-
-                {step === 0 && (
-                  <div className="voucher-step-content">
-                    <p className="voucher-step-intro">Wähle einen flexiblen Betrag oder verschenke ein bestimmtes FEM Treatment zum exakt passenden Wert.</p>
-                    <VoucherKindSwitch value={kind} onChange={changeKind} compact />
-                    {kind === 'value' ? (
-                      <AmountPicker selection={amountSelection} idPrefix="voucher-modal" compact />
-                    ) : (
-                      <TreatmentPicker selectedId={treatmentId} onSelect={setTreatmentId} compact />
-                    )}
-                  </div>
-                )}
-
-                {step === 1 && (
-                  <div className="voucher-step-content">
-                    <p className="voucher-step-intro">Ein Name und ein paar persönliche Worte machen aus dem Gutschein ein echtes Geschenk.</p>
-                    <div className="voucher-form-grid">
-                      <label className="voucher-field">
-                        <span>Für wen? <i>*</i></span>
-                        <input value={recipient} maxLength="48" autoComplete="name" placeholder="Name der beschenkten Person" onChange={(event) => setRecipient(event.target.value)} />
-                      </label>
-                      <label className="voucher-field">
-                        <span>Von wem?</span>
-                        <input value={sender} maxLength="48" autoComplete="name" placeholder="Dein Name (optional)" onChange={(event) => setSender(event.target.value)} />
-                      </label>
-                    </div>
-                    <label className="voucher-field voucher-message-field">
-                      <span>Persönliche Nachricht <small>{message.length}/{MAX_MESSAGE_LENGTH}</small></span>
-                      <textarea
-                        value={message}
-                        maxLength={MAX_MESSAGE_LENGTH}
-                        rows="4"
-                        placeholder="Ich wünsche dir eine wunderschöne Auszeit bei FEM …"
-                        onChange={(event) => setMessage(event.target.value)}
-                      />
-                    </label>
-                    <fieldset className="voucher-delivery-options">
-                      <legend>Wie möchtest du ihn verschenken?</legend>
-                      <button type="button" className={delivery === 'download' ? 'selected' : undefined} aria-pressed={delivery === 'download'} onClick={() => setDelivery('download')}>
-                        <Icon name="download" />
-                        <span><strong>PDF erhalten</strong><small>Selbst ausdrucken oder weiterleiten</small></span>
-                        <i aria-hidden="true"><Icon name="check" /></i>
-                      </button>
-                      <button type="button" className={delivery === 'email' ? 'selected' : undefined} aria-pressed={delivery === 'email'} onClick={() => setDelivery('email')}>
-                        <Icon name="mail" />
-                        <span><strong>Direkt per E-Mail</strong><small>Nach dem Kauf automatisch senden</small></span>
-                        <i aria-hidden="true"><Icon name="check" /></i>
-                      </button>
-                    </fieldset>
-                    {delivery === 'email' && (
-                      <label className="voucher-field voucher-email-field">
-                        <span>E-Mail der beschenkten Person <i>*</i></span>
-                        <input type="email" value={email} autoComplete="email" placeholder="name@beispiel.at" onChange={(event) => setEmail(event.target.value)} />
-                      </label>
-                    )}
-                  </div>
-                )}
-
-                {step === 2 && (
-                  <div className="voucher-step-content voucher-review-step">
-                    <p className="voucher-step-intro">Prüfe deine Auswahl. Im echten Shop folgt danach die sichere Bezahlung über Stripe.</p>
-                    <div className="voucher-review-card">
-                      <div><span>Gutscheinart</span><strong>{kind === 'treatment' ? 'Behandlungsgutschein' : 'Wertgutschein'}</strong></div>
-                      {kind === 'treatment' && <div><span>Behandlung</span><strong>{selectedTreatment.title} · {selectedTreatment.variant}</strong></div>}
-                      <div><span>Gutscheinwert</span><strong>{formatCurrency(effectiveAmount)}</strong></div>
-                      <div><span>Für</span><strong>{recipient}</strong></div>
-                      <div><span>Von</span><strong>{sender || 'Nicht angegeben'}</strong></div>
-                      <div><span>Zustellung</span><strong>{delivery === 'email' ? `E-Mail an ${email}` : 'PDF zum Ausdrucken'}</strong></div>
-                      {message && <div className="voucher-review-message"><span>Nachricht</span><p>„{message}“</p></div>}
-                    </div>
-                    <div className="voucher-total">
-                      <div><span>Digitale Zustellung</span><span>Kostenlos</span></div>
-                      <div><strong>Gesamt</strong><strong>{formatCurrency(effectiveAmount)}</strong></div>
-                    </div>
-                    <p className="voucher-demo-disclaimer"><Icon name="lock" /> Frontend-Vorschau – es wird keine echte Zahlung ausgelöst.</p>
-                  </div>
-                )}
-
-                {error && <p className="voucher-form-error" role="alert">{error}</p>}
-              </div>
-
-              <footer className="voucher-modal-actions">
-                {step > 0 ? <button type="button" className="voucher-back-button" onClick={goBack}>Zurück</button> : <span />}
-                {step < 2 ? (
-                  <button type="button" className="voucher-next-button" onClick={goNext}>Weiter <Icon name="arrow" /></button>
-                ) : (
-                  <button type="button" className="voucher-next-button" disabled={processing} onClick={simulateCheckout}>
-                    {processing ? 'Wird vorbereitet …' : 'Zur sicheren Zahlung'} {!processing && <Icon name="lock" />}
-                  </button>
-                )}
-              </footer>
-            </>
-          ) : (
-            <div className="voucher-complete">
-              <span className="voucher-complete-icon"><Icon name="check" /></span>
-              <span className="voucher-step-kicker">Frontend-Demo abgeschlossen</span>
-              <h2 ref={stepHeadingRef} id="voucher-modal-title" tabIndex="-1">Dein Gutschein ist bereit.</h2>
-              <p>Im produktiven Shop würde jetzt Stripe Checkout öffnen. Nach erfolgreicher Zahlung werden Gutschein-Code und PDF automatisch erzeugt und versendet.</p>
-              <div className="voucher-complete-receipt">
-                <span>{kind === 'treatment' ? `${selectedTreatment.title} · ${selectedTreatment.variant}` : 'Wertgutschein'}</span>
-                <strong>{formatCurrency(effectiveAmount)}</strong>
-                <small>FEM–GIFT–PREVIEW</small>
-              </div>
-              <button type="button" className="voucher-next-button" onClick={onClose}>Vorschau schließen</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function VoucherShop() {
-  const amountSelection = useAmountSelection(100)
-  const [kind, setKind] = useState('value')
-  const [treatmentId, setTreatmentId] = useState(DEFAULT_TREATMENT_ID)
-  const [modalOpen, setModalOpen] = useState(false)
-  const sectionRef = useRef(null)
-  const closeModal = useCallback(() => setModalOpen(false), [])
-  const selectedTreatment = getTreatment(treatmentId)
-  const effectiveAmount = kind === 'treatment' ? selectedTreatment.price : amountSelection.amount
-  const selectionIsValid = kind === 'treatment' || amountSelection.isValid
-
-  const applyModalSelection = ({ kind: nextKind, treatmentId: nextTreatmentId, valueAmount }) => {
-    setKind(nextKind)
-    setTreatmentId(nextTreatmentId)
-    amountSelection.setAmount(valueAmount)
-  }
-
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return undefined
-
-    const observer = new IntersectionObserver(
-      ([entry]) => document.body.classList.toggle('voucher-shop-visible', entry.isIntersecting),
-      { threshold: 0.08 },
-    )
-    observer.observe(section)
-
-    return () => {
-      observer.disconnect()
-      document.body.classList.remove('voucher-shop-visible')
-    }
-  }, [])
-
-  return (
-    <>
-      <section ref={sectionRef} className="voucher-shop" id="vouchers">
-        <div className={`voucher-shop-inner voucher-shop-inner-${kind}`}>
-          <div className="voucher-showcase">
-            <div className="voucher-showcase-top">
-              <span>FEM Gift Edition</span>
-              <span>Wien · 1050</span>
-            </div>
-            <div className="voucher-preview-stage">
-              <VoucherArtwork
-                amount={effectiveAmount}
-                recipient=""
-                sender=""
-                kind={kind}
-                treatment={selectedTreatment}
-              />
-            </div>
-            <div className="voucher-showcase-footer">
-              <span>{kind === 'treatment' ? 'Lieblingsbehandlung. Liebevoll verschenkt.' : 'Ein Geschenk, das nachwirkt.'}</span>
-              <span>Digital · Persönlich · Besonders</span>
-            </div>
-          </div>
-
-          <div className="voucher-config rv">
-            <span className="tag">FEM Gutscheine</span>
-            <h2>Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
-            <p className="voucher-config-copy">Verschenke freie Auswahl oder ein ganz bestimmtes Beauty-Erlebnis – persönlich gestaltet und sofort bereit.</p>
-
-            <VoucherKindSwitch value={kind} onChange={setKind} />
-
-            {kind === 'value' ? (
-              <AmountPicker selection={amountSelection} idPrefix="voucher-shop" />
-            ) : (
-              <TreatmentPicker selectedId={treatmentId} onSelect={setTreatmentId} />
-            )}
-
-            <button
-              type="button"
-              className="voucher-open-button"
-              disabled={!selectionIsValid}
-              onClick={() => setModalOpen(true)}
-            >
-              <span>{kind === 'treatment' ? 'Behandlung personalisieren' : 'Gutschein gestalten'}</span>
-              <strong>{formatCurrency(effectiveAmount)}</strong>
-              <Icon name="arrow" />
-            </button>
-
-            <ul className="voucher-benefits" aria-label="Vorteile des Gutscheins">
-              <li><Icon name="sparkle" /><span>Persönlich gestaltbar</span></li>
-              <li><Icon name="download" /><span>Digital oder druckbereit</span></li>
-              <li><Icon name={kind === 'treatment' ? 'check' : 'gift'} /><span>{kind === 'treatment' ? 'Treatmentpreis inklusive' : 'Flexibel einlösbar'}</span></li>
-            </ul>
-          </div>
+          <button type="button" className="vshop-submit" onClick={() => { setDone(false); setStep(0) }}>
+            Zurück zum Gutschein
+          </button>
         </div>
       </section>
+    )
+  }
 
-      {modalOpen && (
-        <VoucherModal
-          initialAmount={amountSelection.amount}
-          initialKind={kind}
-          initialTreatmentId={treatmentId}
-          onSelectionChange={applyModalSelection}
-          onClose={closeModal}
-        />
-      )}
-    </>
+  return (
+    <section className="voucher-shop" id="vouchers">
+      <div className="vshop">
+        <ol className="vshop-steps">
+          {STEPS.map(([label], index) => (
+            <li
+              key={label}
+              className={index === step ? 'current' : (index < step ? 'done' : undefined)}
+              aria-current={index === step ? 'step' : undefined}
+            >
+              <span className="vshop-step-num">
+                {index < step ? <Icon name="check" /> : `0${index + 1}`}
+              </span>
+              <span className="vshop-step-label">{label}</span>
+            </li>
+          ))}
+        </ol>
+
+        <div className="vshop-panel">
+          <h2 className="vshop-heading" ref={headingRef} tabIndex="-1">{STEPS[step][1]}</h2>
+
+          {step === 0 && (
+            <>
+              <div className="vshop-field-group">
+                <span className="vshop-label">Gutscheinart</span>
+                <VoucherKindSwitch value={kind} onChange={changeKind} />
+              </div>
+              <div className="vshop-field-group">
+                {kind === 'value' ? (
+                  <AmountPicker selection={amountSelection} idPrefix="vshop" />
+                ) : (
+                  <TreatmentPicker selectedId={treatmentId} onSelect={setTreatmentId} />
+                )}
+              </div>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <div className="voucher-form-grid">
+                <label className="voucher-field">
+                  <span>Für wen? <i>*</i></span>
+                  <input
+                    value={recipient}
+                    maxLength="48"
+                    autoComplete="name"
+                    placeholder="Name der beschenkten Person"
+                    onChange={(event) => setRecipient(event.target.value)}
+                  />
+                </label>
+                <label className="voucher-field">
+                  <span>Von wem?</span>
+                  <input
+                    value={sender}
+                    maxLength="48"
+                    autoComplete="name"
+                    placeholder="Dein Name (optional)"
+                    onChange={(event) => setSender(event.target.value)}
+                  />
+                </label>
+              </div>
+
+              <label className="voucher-field voucher-message-field">
+                <span>Persönliche Widmung <small>{message.length}/{MAX_MESSAGE_LENGTH}</small></span>
+                <textarea
+                  value={message}
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  rows="4"
+                  placeholder="Ich wünsche dir eine wunderschöne Auszeit bei FEM …"
+                  onChange={(event) => setMessage(event.target.value)}
+                />
+              </label>
+
+              <fieldset className="voucher-delivery-options">
+                <legend>Wie möchtest du ihn verschenken?</legend>
+                {DELIVERY_OPTIONS.map(([value, icon, title, hint]) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className={delivery === value ? 'selected' : undefined}
+                    aria-pressed={delivery === value}
+                    onClick={() => { setDelivery(value); setError('') }}
+                  >
+                    <Icon name={icon} />
+                    <span><strong>{title}</strong><small>{hint}</small></span>
+                    <i aria-hidden="true"><Icon name="check" /></i>
+                  </button>
+                ))}
+              </fieldset>
+
+              {delivery === 'email' && (
+                <label className="voucher-field voucher-email-field">
+                  <span>E-Mail der beschenkten Person <i>*</i></span>
+                  <input
+                    type="email"
+                    value={email}
+                    autoComplete="email"
+                    placeholder="name@beispiel.at"
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </label>
+              )}
+            </>
+          )}
+
+          {step === 2 && (
+            <div className="vshop-review">
+              <div className="vshop-row">
+                <span>Gutscheinart</span>
+                <span>{kind === 'treatment' ? 'Behandlungsgutschein' : 'Wertgutschein'}</span>
+              </div>
+              {kind === 'treatment' && (
+                <div className="vshop-row">
+                  <span>Behandlung</span>
+                  <span>{selectedTreatment.title} · {selectedTreatment.variant}</span>
+                </div>
+              )}
+              <div className="vshop-row">
+                <span>Für</span>
+                <span>{recipient}</span>
+              </div>
+              <div className="vshop-row">
+                <span>Von</span>
+                <span>{sender || 'Nicht angegeben'}</span>
+              </div>
+              <div className="vshop-row">
+                <span>Zustellung</span>
+                <span>{delivery === 'email' ? `E-Mail an ${email}` : 'PDF zum Ausdrucken'}</span>
+              </div>
+              {message && (
+                <div className="vshop-row vshop-row-message">
+                  <span>Widmung</span>
+                  <span>„{message}“</span>
+                </div>
+              )}
+              <div className="vshop-row vshop-total">
+                <strong>Zu zahlen</strong>
+                <strong>{formatCurrency(effectiveAmount)}</strong>
+              </div>
+              <p className="vshop-trust"><Icon name="lock" /> Sichere Zahlung über Stripe</p>
+              <p className="vshop-demo">Frontend-Vorschau — es wird keine echte Zahlung ausgelöst.</p>
+            </div>
+          )}
+
+          {error && (
+            <p className="voucher-form-error" role="alert" tabIndex="-1" ref={errorRef}>{error}</p>
+          )}
+        </div>
+
+        <div className="vshop-nav">
+          {step > 0 ? (
+            <button type="button" className="vshop-back" onClick={goBack}>Zurück</button>
+          ) : <span />}
+
+          <div className="vshop-nav-end">
+            <span className="vshop-running">
+              {step < 2 ? 'Zwischensumme' : 'Gesamt'}
+              <strong>{formatCurrency(effectiveAmount)}</strong>
+            </span>
+            {step < 2 ? (
+              <button type="button" className="vshop-submit" onClick={goNext}>
+                <span>Weiter</span><Icon name="arrow" />
+              </button>
+            ) : (
+              <button type="button" className="vshop-submit" disabled={processing} onClick={submit}>
+                <span>{processing ? 'Wird vorbereitet …' : 'Weiter zur Zahlung'}</span>
+                {!processing && <Icon name="lock" />}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }

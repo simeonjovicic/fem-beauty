@@ -1571,8 +1571,8 @@ h2 em {
     margin: 0 auto;
     padding: 0 3.5rem;
     display: grid;
-    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
-    gap: 4rem;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    gap: 3.5rem;
     align-items: center
 }
 
@@ -1593,10 +1593,12 @@ h2 em {
 }
 
 /* Hintere Karte steht fuer den Behandlungsgutschein — nur angedeutet. */
+/* Deutlich heller als die vordere Karte und als der Sektionsgrund (#4a3f38),
+   damit der Stapel als zwei Karten lesbar ist statt als eine mit Schatten. */
 .vt-card-back {
     top: 0;
-    background: linear-gradient(150deg, #5b4e45, #463b34);
-    border: 1px solid rgba(220, 196, 160, .18);
+    background: linear-gradient(150deg, #77675b, #5c4e45);
+    border: 1px solid rgba(220, 196, 160, .3);
     transform: rotate(-7deg) translateX(-6%);
     display: flex;
     align-items: flex-start
@@ -1612,10 +1614,13 @@ h2 em {
 .vt-card-front {
     bottom: 0;
     background:
-        radial-gradient(130% 150% at 12% 8%, rgba(220, 196, 160, .26), transparent 58%),
-        linear-gradient(155deg, #514740, #3f352f);
-    background-color: #443a33;
-    box-shadow: 0 22px 48px rgba(20, 15, 12, .42);
+        /* Eng gefasst und in der Ecke gehalten: grossflaechig hellte der
+           Reflex die Karte bis zur Mitte auf, sie wurde damit heller als der
+           Sektionsgrund und war als Karte nicht mehr zu erkennen. */
+        radial-gradient(78% 88% at 10% 6%, rgba(220, 196, 160, .2), transparent 46%),
+        linear-gradient(155deg, #3f362f, #2b2420);
+    background-color: #332c27;
+    box-shadow: 0 22px 48px rgba(16, 12, 10, .5);
     transform: rotate(3.5deg) translateX(5%);
     display: grid;
     grid-template-rows: auto 1fr auto
@@ -1712,39 +1717,70 @@ h2 em {
 
 @media(max-width:960px) {
     .voucher-teaser-inner {
-        grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
-        gap: 2.5rem;
+        grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
+        gap: 2.2rem;
         padding: 0 2.5rem
     }
 }
 
 @media(max-width:768px) {
     .voucher-teaser {
-        padding: 3.4rem 0
+        padding: 2.6rem 0
+    }
+
+    /* Karte neben den Text statt darueber: gestapelt kostet der Kartenstapel
+       rund 190px zusaetzliche Hoehe, und die Seite soll kuerzer werden, nicht
+       laenger. Nebeneinander traegt er nichts zur Hoehe bei. */
+    .voucher-teaser-inner {
+        grid-template-columns: 158px minmax(0, 1fr);
+        gap: 1.1rem;
+        padding: 0 1.4rem;
+        align-items: start
+    }
+
+    .vt-stack {
+        margin-top: .3rem
+    }
+
+    .voucher-teaser-body p {
+        margin-bottom: 1.1rem
+    }
+
+    .vt-points {
+        gap: .3rem 1rem;
+        margin-bottom: 1.4rem;
+        font-size: .95em
+    }
+}
+
+@media(max-width:420px) {
+    /* Zu eng fuer zwei Spalten — hier wandert die Karte doch nach oben,
+       dafuer deutlich kleiner. */
+    .voucher-teaser {
+        padding: 2.2rem 0
     }
 
     .voucher-teaser-inner {
         grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 0 1.4rem
+        gap: 1.1rem
     }
 
-    /* Klein halten: das Band soll anreissen, nicht die Seite verlaengern —
-       den Platz fuer die grosse Karte hat jetzt /gutscheine.html. */
     .vt-stack {
-        width: 205px;
+        width: 182px;
         margin: 0 auto
     }
 
+    /* Die drei Vorteile umbrechen hier auf drei Zeilen und kosten rund 70px.
+       Auf dem Handy war die Seitenlaenge das Problem — sie stehen vollstaendig
+       auf /gutscheine.html, einen Klick entfernt. */
     .vt-points {
-        gap: .4rem 1.2rem;
-        margin-bottom: 1.6rem
+        display: none
     }
 }
 
 /* ═══ GUTSCHEIN — Seiten-Hero ═══════════ */
 .gutscheine-hero {
-    padding: 9rem 3.5rem 3rem;
+    padding: 6rem 3.5rem 1.6rem;
     max-width: 780px;
     margin: 0 auto;
     text-align: center
@@ -1760,7 +1796,7 @@ h2 em {
 }
 
 .gutscheine-hero .line {
-    margin: 1.4rem auto
+    margin: 1rem auto
 }
 
 .gutscheine-hero p {
@@ -1771,7 +1807,7 @@ h2 em {
 
 @media(max-width:768px) {
     .gutscheine-hero {
-        padding: 7rem 1.4rem 2rem
+        padding: 5rem 1.4rem 1.2rem
     }
 }
 
@@ -2484,9 +2520,532 @@ button.reviews-src-pill {
 .voucher-shop {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
-    padding: 7rem 3.5rem;
+    /* clip statt hidden: ::after ragt als Lichtkreis 14rem nach rechts hinaus
+       und muss beschnitten werden — hidden wuerde hier aber einen Scroll-
+       container erzeugen und das sticky der Bestelluebersicht aushebeln.
+       clip beschneidet, ohne scrollbar zu werden. */
+    overflow-x: clip;
+    padding: 0 3.5rem 3.5rem;
     background: var(--bg)
+}
+
+/* ── Gutscheinseite: drei Schritte, eine Spalte ──
+   Alles gleichzeitig zu zeigen wirkte ueberladen. Bewusst einspaltig und
+   schmal: eine mitlaufende Seitenspalte haette wieder zwei Dinge nebeneinander
+   gestellt, die um Aufmerksamkeit konkurrieren. */
+.vshop {
+    max-width: 660px;
+    margin: 0 auto
+}
+
+/* ── Schrittanzeige ── */
+.vshop-steps {
+    list-style: none;
+    margin: 0 0 1.6rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem
+}
+
+.vshop-steps li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .45rem;
+    padding-top: .7rem;
+    border-top: 2px solid var(--line);
+    text-align: center
+}
+
+.vshop-steps li.current,
+.vshop-steps li.done {
+    border-top-color: var(--sand)
+}
+
+.vshop-step-num {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--white);
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    color: var(--taupe)
+}
+
+.vshop-steps li.current .vshop-step-num {
+    border-color: var(--warm);
+    background: var(--warm);
+    color: var(--white)
+}
+
+.vshop-steps li.done .vshop-step-num {
+    border-color: var(--sand);
+    color: var(--sand)
+}
+
+.vshop-step-label {
+    font-size: .9rem;
+    letter-spacing: .02em;
+    color: var(--warm-lt)
+}
+
+.vshop-steps li.current .vshop-step-label {
+    color: var(--warm);
+    font-weight: 500
+}
+
+/* ── Inhalt des aktuellen Schritts ── */
+.vshop-panel {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1.8rem 1.9rem;
+    box-shadow: 0 18px 44px rgba(74, 63, 56, .06)
+}
+
+.vshop-heading {
+    margin: 0 0 1.2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+    font-weight: 400;
+    color: var(--warm);
+    line-height: 1.3;
+    outline: none
+}
+
+.vshop-field-group + .vshop-field-group {
+    margin-top: 1.3rem
+}
+
+.vshop-label {
+    display: block;
+    margin: 0 0 .6rem
+}
+
+.vshop-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding: .75rem 0;
+    border-bottom: 1px solid var(--line)
+}
+
+.vshop-row > span:last-child,
+.vshop-row > strong:last-child {
+    text-align: right;
+    color: var(--warm)
+}
+
+.vshop-row-message > span:last-child {
+    font-style: italic
+}
+
+.vshop-total {
+    margin-top: .6rem;
+    padding-top: 1rem;
+    border-bottom: 0
+}
+
+.vshop-total strong:last-child {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--warm)
+}
+
+/* ── Navigation ── */
+.vshop-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1.1rem
+}
+
+.vshop-nav-end {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    margin-left: auto
+}
+
+/* Der Betrag laeuft in der Navigationszeile mit, damit er beim Weiterklicken
+   sichtbar bleibt, ohne dafuer eine eigene Spalte zu brauchen. */
+.vshop-running {
+    display: flex;
+    align-items: baseline;
+    gap: .6rem;
+    font-size: .9rem;
+    color: var(--warm-lt);
+    white-space: nowrap
+}
+
+.vshop-running strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--warm)
+}
+
+.vshop-back {
+    padding: .8rem .2rem;
+    border: 0;
+    background: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: .9rem;
+    color: var(--warm-lt);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: color .3s, border-color .3s
+}
+
+.vshop-back:hover,
+.vshop-back:focus-visible {
+    color: var(--warm);
+    border-bottom-color: var(--sand)
+}
+
+.vshop-submit {
+    padding: 1rem 1.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    border: 0;
+    border-radius: 2px;
+    background: var(--warm);
+    color: var(--white);
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .3s var(--ease), transform .3s var(--ease)
+}
+
+.vshop-submit:hover:not(:disabled),
+.vshop-submit:focus-visible:not(:disabled) {
+    background: var(--sand);
+    transform: translateY(-2px)
+}
+
+.vshop-submit:disabled {
+    opacity: .55;
+    cursor: progress
+}
+
+.vshop-trust,
+.vshop-demo {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin-top: 1rem;
+    color: var(--warm-lt)
+}
+
+.vshop-demo {
+    margin-top: .4rem;
+    color: var(--taupe)
+}
+
+/* ── Abschluss-Ansicht ── */
+.vshop-done {
+    max-width: 540px;
+    margin: 0 auto;
+    text-align: center
+}
+
+.vshop-done-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1.2rem;
+    border-radius: 50%;
+    border: 1px solid var(--sand);
+    color: var(--sand);
+    font-size: 1.35rem
+}
+
+.vshop-done h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    color: var(--warm);
+    margin: .3rem 0 .8rem
+}
+
+.vshop-done p {
+    line-height: 1.9;
+    color: var(--warm-lt);
+    margin-bottom: 1.8rem
+}
+
+.vshop-receipt {
+    display: grid;
+    gap: .35rem;
+    padding: 1.5rem;
+    margin-bottom: 1.8rem;
+    background: var(--cream);
+    border: 1px solid var(--line)
+}
+
+.vshop-receipt strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--warm)
+}
+
+@media(max-width:600px) {
+    .vshop-panel {
+        padding: 1.4rem 1.1rem
+    }
+
+    .vshop-step-label {
+        font-size: .85rem
+    }
+
+    /* Gestapelt: Betrag und Weiter-Button nebeneinander waeren hier zu eng,
+       der Button soll die volle Breite als Ziel bieten. */
+    .vshop-nav {
+        flex-wrap: wrap;
+        gap: .9rem
+    }
+
+    .vshop-nav-end {
+        width: 100%;
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: .8rem
+    }
+
+    .vshop-running {
+        justify-content: space-between
+    }
+
+    .vshop-submit {
+        width: 100%
+    }
+}
+
+/* ═══ GUTSCHEINSEITE — LESBARKEIT ═══════
+   Gemessener Ausgangszustand: 37 von 47 Textelementen unter 14px, Median
+   10px, Hilfetexte bei 7,4px mit Kontrast 2,12 (WCAG-Minimum ist 4,5).
+   Das ist fuer aeltere Kundinnen nicht lesbar.
+
+   Bewusst als geschlossener Block und auf .voucher-shop begrenzt: die
+   betroffenen Groessen liegen ueber rund 25 Regeln im Altbestand verstreut,
+   und die gleichen Klassen sollen ausserhalb dieser Seite unveraendert
+   bleiben. So ist der Eingriff an einer Stelle nachvollziehbar und
+   nachjustierbar. --taupe und --soft sind als Textfarbe durchgehend durch
+   --warm-lt ersetzt: sie erreichen auf hellem Grund nur 3,1 bzw. weniger. */
+
+/* Beschriftungen: lesbare Groesse, kaum Sperrung, dunkel genug. */
+.voucher-shop .voucher-field > span,
+.voucher-shop .voucher-amount-picker legend,
+.voucher-shop .voucher-treatment-picker legend,
+.voucher-shop .voucher-delivery-options legend {
+    font-size: .95rem;
+    letter-spacing: .01em;
+    text-transform: none;
+    color: var(--warm);
+    font-weight: 500
+}
+
+.voucher-shop .voucher-field > span small {
+    font-size: .82rem;
+    letter-spacing: normal;
+    color: var(--warm-lt)
+}
+
+/* 16px verhindert zusaetzlich, dass iOS beim Antippen hineinzoomt. */
+.voucher-shop .voucher-field input,
+.voucher-shop .voucher-field textarea {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--warm)
+}
+
+.voucher-shop .voucher-field input::placeholder,
+.voucher-shop .voucher-field textarea::placeholder {
+    color: var(--taupe)
+}
+
+.voucher-shop .voucher-amount-hint {
+    font-size: .88rem;
+    letter-spacing: normal;
+    color: var(--warm-lt)
+}
+
+/* Auswahlkacheln: Titel und Erklaerung waren 7,5 bzw. 8px. */
+.voucher-shop .voucher-kind-copy strong,
+.voucher-shop .voucher-delivery-options > button strong {
+    font-size: 1rem;
+    letter-spacing: .01em;
+    text-transform: none;
+    color: var(--warm)
+}
+
+.voucher-shop .voucher-kind-copy small,
+.voucher-shop .voucher-delivery-options > button small {
+    font-size: .9rem;
+    letter-spacing: normal;
+    color: var(--warm-lt)
+}
+
+.voucher-shop .voucher-amount-options button strong {
+    font-size: 1.25rem
+}
+
+.voucher-shop .voucher-amount-options button span {
+    font-size: .9rem
+}
+
+/* Schrittzahlen und Zwischentitel. */
+.vshop-label {
+    font-size: .88rem;
+    letter-spacing: .06em;
+    text-transform: none;
+    color: var(--warm)
+}
+
+.vshop-label i {
+    font-size: 1.15rem
+}
+
+.vshop-row {
+    font-size: .95rem;
+    color: var(--warm-lt)
+}
+
+.vshop-total strong:first-child {
+    font-size: .95rem;
+    letter-spacing: .04em;
+    text-transform: none;
+    color: var(--warm)
+}
+
+.vshop-submit {
+    font-size: .88rem;
+    letter-spacing: .08em;
+    text-transform: none;
+    padding: 1.05rem 1.2rem
+}
+
+.vshop-trust,
+.vshop-demo {
+    font-size: .9rem;
+    color: var(--warm-lt)
+}
+
+.voucher-shop .voucher-field > span small {
+    font-size: .9rem
+}
+
+.vshop-done p {
+    font-size: 1rem
+}
+
+.vshop-receipt small {
+    font-size: .75rem;
+    letter-spacing: .1em;
+    color: var(--warm-lt)
+}
+
+/* Seiten-Hero */
+.gutscheine-hero .tag {
+    font-size: .9rem;
+    letter-spacing: .1em;
+    color: var(--warm-lt)
+}
+
+.gutscheine-hero p {
+    font-size: 1.05rem;
+    color: var(--warm-lt)
+}
+
+/* ── Ziffern in Outfit statt Playfair ──
+   Playfair Display ist eine Didone: sehr hoher Strichkontrast, die duennen
+   Haarstriche brechen bei 15–20px optisch weg. Fuer Betraege und Schritt-
+   nummern, die schnell und sicher erfasst werden muessen, ist die Grotesk
+   die bessere Wahl. Ueberschriften bleiben Playfair — das ist die Marke.
+   tabular-nums haelt alle Ziffern gleich breit, damit 50/100/150/200
+   untereinander nicht springen. */
+.voucher-shop .voucher-amount-options button strong,
+.voucher-shop .voucher-treatment-price,
+.vshop-step-num,
+.vshop-running strong,
+.vshop-total strong:last-child,
+.vshop-receipt strong {
+    font-family: 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-weight: 400;
+    letter-spacing: -.01em
+}
+
+/* Die Grotesk traegt bei gleicher Punktgroesse optisch kleiner auf als die
+   Antiqua — leicht angehoben, damit die Betraege nicht schrumpfen. */
+.voucher-shop .voucher-amount-options button strong {
+    font-size: 1.45rem;
+    font-weight: 300
+}
+
+.vshop-running strong {
+    font-size: 1.3rem
+}
+
+.vshop-total strong:last-child {
+    font-size: 1.55rem;
+    font-weight: 300
+}
+
+.vshop-receipt strong {
+    font-size: 1.7rem;
+    font-weight: 300
+}
+
+.vshop-step-num {
+    font-size: 1rem
+}
+
+/* Nachzuegler aus der zweiten Messung. */
+.voucher-shop .voucher-custom-value label {
+    font-size: .95rem;
+    letter-spacing: .01em;
+    text-transform: none;
+    color: var(--warm)
+}
+
+.voucher-shop .voucher-custom-input span {
+    font-size: 1rem;
+    color: var(--warm-lt)
+}
+
+.voucher-shop .voucher-kind-copy small {
+    font-size: .9rem
+}
+
+.voucher-shop .tag {
+    font-size: .88rem
+}
+
+/* Sand erreicht auf hellem Grund nur 2,48. Die Ziffern bleiben ein Akzent,
+   aber in dunklerem Ton und ueber 18,66px — damit greift der Grenzwert 3:1
+   fuer grosse Schrift statt 4,5:1. */
+.vshop-label i {
+    font-size: 1.3rem;
+    color: #9a6c33
+}
+
+/* Pflichtfeld-Sternchen: als Hinweis gedacht, in Sand aber kaum sichtbar.
+   Der Fehlerton ist hier auch semantisch die bessere Wahl. */
+.voucher-shop .voucher-field > span i {
+    color: #8d5143;
+    font-size: 1rem
 }
 
 body.voucher-shop-visible .float-cta {
@@ -3135,7 +3694,13 @@ body.voucher-shop-visible .float-cta {
     display: flex;
     min-width: 0;
     height: 72px;
+    /* align-items:baseline haelt Zahl und Euro-Zeichen auf einer Grundlinie,
+       setzt die Zeile aber an den oberen Rand — im 72px hohen Knopf sass der
+       Betrag 1px unter der Kante. flex-wrap aktiviert align-content, damit
+       laesst sich die Zeile zusaetzlich vertikal mittig setzen. */
+    flex-wrap: wrap;
     align-items: baseline;
+    align-content: center;
     justify-content: center;
     gap: .2rem;
     border: 1px solid var(--line);
@@ -4026,7 +4591,7 @@ body.voucher-shop-visible .float-cta {
 
 @media(max-width:1100px) {
     .voucher-shop {
-        padding: 5.5rem 1.5rem
+        padding: 0 1.5rem 3rem
     }
 
     .voucher-shop-inner {
@@ -4119,7 +4684,7 @@ body.voucher-shop-visible .float-cta {
 
 @media(max-width:600px) {
     .voucher-shop {
-        padding: 4rem 1rem
+        padding: 0 1rem 2.5rem
     }
 
     .voucher-shop-inner {
