@@ -1,0 +1,15 @@
+# Vorlage — kopieren nach .dev.vars und echte Werte eintragen.
+# .dev.vars ist gitignoriert, diese Datei hier nicht. Also niemals
+# echte Schlüssel in diese Vorlage schreiben.
+
+# Stripe-Schlüssel der Sandbox (früher "Testmodus").
+# Stripe empfiehlt für neue Integrationen eingeschränkte Schlüssel (rk_test_)
+# statt Geheimschlüssel (sk_test_) — ein RAK bekommt nur die Rechte, die er
+# wirklich braucht. Für diesen Worker genügen Schreibrechte auf Checkout
+# Sessions und Leserechte auf PaymentIntents, Charges und Events.
+# Beides funktioniert, rk_test_ ist die bessere Wahl.
+STRIPE_API_KEY=rk_test_dein_key_hier
+
+# Fällt beim ersten `stripe listen --forward-to ...` ab, muss nicht
+# im Dashboard gesucht werden.
+STRIPE_WEBHOOK_SECRET=whsec_kommt_von_der_stripe_cli

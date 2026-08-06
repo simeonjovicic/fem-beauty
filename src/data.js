@@ -1,5 +1,13 @@
 export const BOOKING_URL = 'https://trea.tw/uc3hWqqxxVC9uu2Yj'
 
+// Grenzen für Gutscheinwerte. Bewusst hier und nicht in der Komponente:
+// der Worker importiert dieselben Werte, damit Client- und Serverprüfung
+// nicht auseinanderlaufen können. Die Prüfung im Browser ist Komfort,
+// die im Worker ist die verbindliche.
+export const VOUCHER_MIN_AMOUNT = 25
+export const VOUCHER_MAX_AMOUNT = 500
+export const VOUCHER_MAX_MESSAGE_LENGTH = 180
+
 // Curated treatments with a clear fixed price in FEM's public booking menu.
 // Keeping this list intentionally small makes a treatment voucher feel selected,
 // while the regular value voucher remains available for every other service.

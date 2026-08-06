@@ -3,3 +3,15 @@ dist/
 .vite/
 .DS_Store
 *.log
+
+# Secrets — niemals committen
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+# Vorlagen ohne echte Werte gehören ins Repo
+!.dev.vars.example
+!.env.example
+
+# Lokaler Wrangler-Zustand inkl. der D1-SQLite-Datei
+.wrangler/

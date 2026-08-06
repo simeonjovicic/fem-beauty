@@ -1,0 +1,29 @@
+{
+  "name": "fem-gutscheine",
+  "main": "worker/src/index.js",
+  "compatibility_date": "2026-08-06",
+  // stripe-node erwartet Node-Bausteine (Buffer, crypto, events).
+  "compatibility_flags": ["nodejs_compat"],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fem-gutscheine",
+      // Platzhalter. Lokal genügt er; für Cloudflare erst nach
+      // `wrangler d1 create fem-gutscheine` durch die echte ID ersetzen.
+      "database_id": "local-dev-placeholder"
+    }
+  ],
+
+  "vars": {
+    // Ursprünge, die /api/checkout aus dem Browser aufrufen dürfen.
+    // Im Betrieb laufen Seite und Worker gleichursprünglich, dann leer.
+    "ALLOWED_ORIGINS": "http://localhost:8000,http://127.0.0.1:8000",
+    "PUBLIC_SITE_URL": "http://localhost:8000"
+  }
+
+  // Secrets stehen NICHT hier, sondern lokal in .dev.vars und
+  // in der Cloud via `wrangler secret put`:
+  //   STRIPE_API_KEY
+  //   STRIPE_WEBHOOK_SECRET
+}

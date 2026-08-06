@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { voucherTreatments } from '../data'
+import {
+  VOUCHER_MAX_AMOUNT,
+  VOUCHER_MAX_MESSAGE_LENGTH,
+  VOUCHER_MIN_AMOUNT,
+  voucherTreatments,
+} from '../data'
 import { useBodyLock } from '../hooks'
 
 const PRESET_AMOUNTS = [50, 100, 150, 200]
-const MIN_AMOUNT = 25
-const MAX_AMOUNT = 500
-const MAX_MESSAGE_LENGTH = 180
+const MIN_AMOUNT = VOUCHER_MIN_AMOUNT
+const MAX_AMOUNT = VOUCHER_MAX_AMOUNT
+const MAX_MESSAGE_LENGTH = VOUCHER_MAX_MESSAGE_LENGTH
 const DEFAULT_TREATMENT_ID = voucherTreatments[0].id
 
 const currencyFormatter = new Intl.NumberFormat('de-AT', {
