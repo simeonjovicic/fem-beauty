@@ -1399,6 +1399,186 @@ h2 em {
     transform: translate(2px, -1px)
 }
 
+/* ─── Services: editorial rows (Desktop/Tablet) ─── */
+.srv-rows {
+    border-top: 1px solid var(--line)
+}
+
+.srv-row {
+    appearance: none;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 2.2rem;
+    width: 100%;
+    padding: 2.1rem 1.6rem;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+    transition: background .4s var(--ease), padding-left .45s var(--ease-out), opacity .7s var(--ease-out), transform .7s var(--ease-out)
+}
+
+.srv-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 1px;
+    background: var(--sand);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .55s var(--ease-out)
+}
+
+.srv-row:hover,
+.srv-row:focus-visible {
+    background: #faf7f3;
+    padding-left: 2.5rem
+}
+
+.srv-row:hover::after,
+.srv-row:focus-visible::after {
+    transform: scaleX(1)
+}
+
+.srv-row:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba(201, 153, 94, .45)
+}
+
+.srv-row-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: .95rem;
+    color: var(--sand);
+    line-height: 1;
+    min-width: 2.2ch
+}
+
+.srv-row-main {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    min-width: 0
+}
+
+.srv-row-title-line {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    flex-wrap: wrap
+}
+
+.srv-row-main h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+    font-weight: 400;
+    color: var(--warm);
+    line-height: 1.2
+}
+
+.srv-row-badge {
+    font-size: .5rem;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--sand);
+    border: 1px solid var(--sand-lt);
+    border-radius: 50px;
+    padding: .32rem .7rem;
+    line-height: 1;
+    white-space: nowrap
+}
+
+.srv-row-tags {
+    font-size: .62rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--soft);
+    line-height: 1.6;
+    opacity: .55;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity .4s var(--ease), color .4s var(--ease)
+}
+
+.srv-row:hover .srv-row-tags,
+.srv-row:focus-visible .srv-row-tags {
+    opacity: 1;
+    color: var(--taupe)
+}
+
+.srv-row-glyph {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--sand);
+    font-size: 1.5rem;
+    opacity: 0;
+    transform: translateX(-8px) scale(.92);
+    transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), border-color .35s var(--ease)
+}
+
+.srv-row:hover .srv-row-glyph,
+.srv-row:focus-visible .srv-row-glyph {
+    opacity: 1;
+    transform: none;
+    border-color: var(--sand-lt)
+}
+
+.srv-row-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .58rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--soft);
+    white-space: nowrap;
+    transition: color .35s var(--ease)
+}
+
+.srv-row:hover .srv-row-cta,
+.srv-row:focus-visible .srv-row-cta {
+    color: var(--sand)
+}
+
+.srv-row-cta-label {
+    opacity: 0;
+    transform: translateX(6px);
+    transition: opacity .4s var(--ease-out), transform .4s var(--ease-out)
+}
+
+.srv-row:hover .srv-row-cta-label,
+.srv-row:focus-visible .srv-row-cta-label {
+    opacity: 1;
+    transform: none
+}
+
+.srv-row-cta i {
+    font-family: 'Outfit', sans-serif;
+    font-size: .95rem;
+    font-style: normal;
+    letter-spacing: 0;
+    transition: transform .4s var(--ease-out)
+}
+
+.srv-row:hover .srv-row-cta i,
+.srv-row:focus-visible .srv-row-cta i {
+    transform: translateX(4px)
+}
+
 /* Service modal */
 .srv-modal-backdrop {
     position: fixed;
@@ -1458,6 +1638,7 @@ h2 em {
 
 .srv-modal-visual {
     position: relative;
+    isolation: isolate;
     min-height: 500px;
     overflow: hidden;
     display: flex;
@@ -1467,16 +1648,44 @@ h2 em {
     color: var(--white)
 }
 
+/* Schichtung von unten: --warm als Fallback, Foto, Duotone + Raster, Ringe.
+   Negative z-index malen über den eigenen Hintergrund, aber unter den Inhalt. */
+.srv-modal-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(.32) sepia(.2) brightness(.66) contrast(1.04)
+}
+
 .srv-modal-visual::before {
     content: '';
     position: absolute;
-    top: 23%;
+    inset: 0;
+    z-index: -2;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(200deg, rgba(74, 63, 56, .5), rgba(74, 63, 56, .88) 64%);
+    background-size: 52px 52px, 52px 52px, cover;
+    pointer-events: none
+}
+
+.srv-modal-visual::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
     left: 50%;
-    width: 310px;
-    height: 310px;
-    border: 1px solid rgba(220, 196, 160, .16);
+    top: 44%;
+    width: min(72%, 320px);
+    aspect-ratio: 1;
+    border: 1px solid rgba(220, 196, 160, .18);
     border-radius: 50%;
-    transform: translate(-50%, -50%)
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 58px rgba(220, 196, 160, .04), 0 0 0 116px rgba(220, 196, 160, .022);
+    pointer-events: none
 }
 
 .srv-modal-kicker {
@@ -1499,14 +1708,18 @@ h2 em {
     display: grid;
     place-items: center;
     color: var(--sand-lt);
-    font-size: 2rem
+    font-size: 2rem;
+    /* Hält den Hairline-Glyph auch über unruhigen Bildstellen lesbar. */
+    background: rgba(38, 30, 25, .26);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px)
 }
 
 .srv-modal-number {
     position: absolute;
     right: -1rem;
     bottom: -3.7rem;
-    color: rgba(255, 255, 255, .035);
+    color: rgba(255, 255, 255, .07);
     font-family: 'Playfair Display', serif;
     font-size: 15rem;
     font-style: italic;
@@ -1920,11 +2133,12 @@ button.reviews-src-pill {
 }
 
 /* ═══ VOUCHER SHOP — Editorial configurator ══════════════ */
+/* Randlos wie .story und .contact — die Sektion ist der Split, kein Rahmen,
+   kein Ruheschatten. Die Trennung zu den Cream-Nachbarn oben und unten
+   übernimmt der Farbwechsel der hellen Hälfte, nicht mehr eine Kontur. */
 .voucher-shop {
     position: relative;
-    isolation: isolate;
     overflow: hidden;
-    padding: 7rem 3.5rem;
     background: var(--bg)
 }
 
@@ -1935,42 +2149,11 @@ body.voucher-shop-visible .float-cta {
     transform: translateY(18px) !important
 }
 
-.voucher-shop::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background-image: linear-gradient(rgba(201, 153, 94, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 153, 94, .035) 1px, transparent 1px);
-    background-size: 56px 56px;
-    pointer-events: none
-}
-
-.voucher-shop::after {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    right: -14rem;
-    top: -16rem;
-    width: 42rem;
-    height: 42rem;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(220, 196, 160, .16), rgba(220, 196, 160, 0) 68%);
-    pointer-events: none
-}
-
 .voucher-shop-inner {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1.08fr) minmax(430px, .92fr);
-    min-height: 760px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: var(--white);
-    box-shadow: 0 34px 90px rgba(74, 63, 56, .065)
-}
-
-.voucher-shop-inner-treatment {
-    min-height: 900px
+    min-height: 760px
 }
 
 .voucher-showcase {
@@ -1981,7 +2164,7 @@ body.voucher-shop-visible .float-cta {
     flex-direction: column;
     overflow: hidden;
     padding: 2.2rem 2.5rem 2.4rem;
-    background: #493d35;
+    background: var(--warm);
     color: var(--white)
 }
 
@@ -2314,7 +2497,8 @@ body.voucher-shop-visible .float-cta {
     min-width: 0;
     flex-direction: column;
     justify-content: center;
-    padding: clamp(3.5rem, 5.2vw, 5.5rem)
+    padding: clamp(3.5rem, 5.2vw, 5.5rem);
+    background: var(--white)
 }
 
 .voucher-config h2 {
@@ -2447,6 +2631,14 @@ body.voucher-shop-visible .float-cta {
     margin: 0;
     padding: 0;
     border: 0
+}
+
+/* Der Treatment-Picker baut ~320px (3 Reihen à 84px), der Wert-Picker ~193px.
+   Beide reservieren dieselbe Höhe, damit der Wechsel zwischen den Modi die
+   Sektion nicht mehr um ~140px springen lässt. */
+.voucher-amount-picker,
+.voucher-treatment-picker {
+    min-height: 320px
 }
 
 .voucher-treatment-options {
@@ -2841,7 +3033,7 @@ body.voucher-shop-visible .float-cta {
     justify-content: space-between;
     overflow: hidden;
     padding: 2rem;
-    background: #493d35;
+    background: var(--warm);
     color: var(--white)
 }
 
@@ -3464,10 +3656,6 @@ body.voucher-shop-visible .float-cta {
 }
 
 @media(max-width:1100px) {
-    .voucher-shop {
-        padding: 5.5rem 1.5rem
-    }
-
     .voucher-shop-inner {
         grid-template-columns: minmax(0, 1fr) minmax(390px, .9fr)
     }
@@ -3478,10 +3666,6 @@ body.voucher-shop-visible .float-cta {
 
     .voucher-config {
         padding: 3.5rem 2.8rem
-    }
-
-    .voucher-shop-inner-treatment {
-        min-height: 880px
     }
 
     .voucher-benefits {
@@ -3495,10 +3679,14 @@ body.voucher-shop-visible .float-cta {
 
 @media(max-width:900px) {
     .voucher-shop-inner {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+        min-height: 0
     }
 
-    .voucher-shop-inner-treatment {
+    /* Gestapelt schiebt der Moduswechsel nichts mehr seitlich weg —
+       die reservierte Höhe kostet hier nur Leerraum. */
+    .voucher-amount-picker,
+    .voucher-treatment-picker {
         min-height: 0
     }
 
@@ -3557,14 +3745,6 @@ body.voucher-shop-visible .float-cta {
 }
 
 @media(max-width:600px) {
-    .voucher-shop {
-        padding: 4rem 1rem
-    }
-
-    .voucher-shop-inner {
-        border-radius: 14px
-    }
-
     .voucher-showcase {
         min-height: 430px;
         padding: 1.4rem
@@ -4935,12 +5115,20 @@ footer {
         display: none
     }
 
-    .srv-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
+    .srv-row {
+        gap: 1.4rem;
+        padding: 1.7rem 1.1rem
     }
 
-    .srv-card {
-        min-height: 280px
+    .srv-row:hover,
+    .srv-row:focus-visible {
+        padding-left: 1.7rem
+    }
+
+    /* Zu eng für Glyph + Label — Pfeil trägt die Affordanz allein. */
+    .srv-row-glyph,
+    .srv-row-cta-label {
+        display: none
     }
 
     .srv-modal {
@@ -5311,10 +5499,11 @@ footer {
         padding: 2rem
     }
 
-    .srv-modal-visual::before {
-        top: 38%;
+    /* Nur der Ring wird kleiner — Raster und Duotone bleiben vollflächig. */
+    .srv-modal-visual::after {
+        top: 40%;
         width: 230px;
-        height: 230px
+        box-shadow: 0 0 0 40px rgba(220, 196, 160, .04), 0 0 0 80px rgba(220, 196, 160, .022)
     }
 
     .srv-modal-glyph {

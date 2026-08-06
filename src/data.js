@@ -120,6 +120,21 @@ export const services = [
   },
 ]
 
+// Backdrop für das linke Panel im Service-Modal. Sieben Services teilen sich die
+// fünf vorhandenen Salon-Fotos — Gesicht und Laser bekommen den Behandlungsraum,
+// Head Spa und Brauen das ruhige Interieur, der Rest was thematisch am nächsten
+// liegt. Die Bilder sind in index.html ohnehin vorgeladen (Gallery), kosten hier
+// also nichts extra. Sobald es echte Treatment-Fotos gibt: nur diese Pfade tauschen.
+export const serviceImages = {
+  face: '/foto-store-2.webp',
+  headspa: '/foto-store-0.webp',
+  nails: '/foto-store-3.webp',
+  waxing: '/foto-store-4.webp',
+  laser: '/foto-store-2.webp',
+  lash: '/foto-store-0.webp',
+  new: '/foto-store-1.webp',
+}
+
 export const reviews = [
   {
     platform: 'google',

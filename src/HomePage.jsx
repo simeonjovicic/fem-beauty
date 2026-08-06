@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Footer, Header, Loader } from './components/Chrome'
 import VoucherShop from './components/VoucherShop'
-import { BOOKING_URL, reviews, services } from './data'
+import { BOOKING_URL, reviews, serviceImages, services } from './data'
 import {
   useBodyLock,
   useMediaQuery,
@@ -341,6 +341,67 @@ function ServiceCard({ service, onSelect }) {
   )
 }
 
+function ServiceRow({ service, index, onSelect }) {
+  return (
+    <button
+      type="button"
+      className="srv-row rv"
+      style={{ transitionDelay: `${index * 0.06}s` }}
+      data-srv={service.id}
+      aria-haspopup="dialog"
+      aria-label={`${service.title}: Details öffnen`}
+      onClick={() => onSelect(service)}
+    >
+      <span className="srv-row-num">{service.number}</span>
+      <span className="srv-row-main">
+        <span className="srv-row-title-line">
+          <h3>{service.title}</h3>
+          {service.placeholder && <span className="srv-row-badge">Demnächst</span>}
+        </span>
+        <span className="srv-row-tags">{service.tags.join(' · ')}</span>
+      </span>
+      <span className="srv-row-glyph" aria-hidden="true"><ServiceGlyph serviceId={service.id} /></span>
+      <span className="srv-row-cta">
+        <span className="srv-row-cta-label">Mehr erfahren</span>
+        <i aria-hidden="true">→</i>
+      </span>
+    </button>
+  )
+}
+
+// The rows mount and unmount with the desktop breakpoint, so they need their own
+// observer — the global one in useRevealAnimations only collects .rv elements once.
+function ServiceRows({ items, onSelect }) {
+  const listRef = useRef(null)
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return undefined
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          entry.target.classList.add('on')
+          observer.unobserve(entry.target)
+        })
+      },
+      { threshold: 0.15 },
+    )
+
+    list.querySelectorAll('.srv-row').forEach((row) => observer.observe(row))
+    return () => observer.disconnect()
+  }, [items])
+
+  return (
+    <div className="srv-rows" ref={listRef}>
+      {items.map((service, index) => (
+        <ServiceRow key={service.id} service={service} index={index} onSelect={onSelect} />
+      ))}
+    </div>
+  )
+}
+
 function ServiceModal({ service, onClose }) {
   const closeButtonRef = useRef(null)
   useBodyLock(Boolean(service))
@@ -377,6 +438,15 @@ function ServiceModal({ service, onClose }) {
       <div className="srv-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <button ref={closeButtonRef} type="button" className="srv-modal-close" aria-label="Schließen" onClick={onClose}>×</button>
         <div className="srv-modal-visual">
+          {serviceImages[service.id] && (
+            <img
+              className="srv-modal-photo"
+              src={serviceImages[service.id]}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          )}
           <span className="srv-modal-kicker">FEM Service · {service.number}</span>
           <span className="srv-modal-glyph"><ServiceGlyph serviceId={service.id} /></span>
           <span className="srv-modal-number" aria-hidden="true">{service.number}</span>
@@ -411,6 +481,10 @@ function ServiceModal({ service, onClose }) {
   )
 }
 
+// Platzhalter bleiben vorerst ausgeblendet. Die Zeilen-Ansicht könnte sie tragen —
+// ServiceRow rendert dafür ein "Demnächst"-Badge — nur fehlt dem 07er-Slot noch
+// der echte Name. Sobald der steht: placeholder-Flag in data.js entfernen, oder
+// hier auf `services` wechseln, um den Slot vorab anzuteasern.
 const visibleServices = services.filter((service) => !service.placeholder)
 
 function Services() {
@@ -427,14 +501,6 @@ function Services() {
   }, [])
   const swipeHandlers = useSwipe(previous, next)
 
-  const serviceCards = visibleServices.map((service) => (
-    <ServiceCard
-      key={service.id}
-      service={service}
-      onSelect={setSelectedService}
-    />
-  ))
-
   return (
     <>
       <section className="services" id="treatments">
@@ -445,29 +511,39 @@ function Services() {
             <p className="services-sub">Wähle eine Behandlung und entdecke alle Details.</p>
           </div>
 
-          <div className="srv-grid" {...(isMobile ? swipeHandlers : {})}>
-            {isMobile ? (
-              <div className="slider-track" style={{ transform: `translateX(-${current * 100}%)` }}>
-                {serviceCards}
+          {isMobile ? (
+            <>
+              <div className="srv-grid" {...swipeHandlers}>
+                <div className="slider-track" style={{ transform: `translateX(-${current * 100}%)` }}>
+                  {visibleServices.map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      onSelect={setSelectedService}
+                    />
+                  ))}
+                </div>
               </div>
-            ) : serviceCards}
-          </div>
 
-          <div className="srv-mobile-nav">
-            <div className="mob-dots srv-dots">
-              {visibleServices.map((service, index) => (
-                <button
-                  type="button"
-                  className={`mob-dot${index === current ? ' active' : ''}`}
-                  aria-label={`${service.title} anzeigen`}
-                  key={service.id}
-                  onClick={() => setCurrent(index)}
-                />
-              ))}
-            </div>
-            <p className="mob-counter srv-counter">{current + 1} / {visibleServices.length}</p>
-            <p className="mob-swipe-hint">← Wischen für mehr →</p>
-          </div>
+              <div className="srv-mobile-nav">
+                <div className="mob-dots srv-dots">
+                  {visibleServices.map((service, index) => (
+                    <button
+                      type="button"
+                      className={`mob-dot${index === current ? ' active' : ''}`}
+                      aria-label={`${service.title} anzeigen`}
+                      key={service.id}
+                      onClick={() => setCurrent(index)}
+                    />
+                  ))}
+                </div>
+                <p className="mob-counter srv-counter">{current + 1} / {visibleServices.length}</p>
+                <p className="mob-swipe-hint">← Wischen für mehr →</p>
+              </div>
+            </>
+          ) : (
+            <ServiceRows items={visibleServices} onSelect={setSelectedService} />
+          )}
 
           <div className="services-cta"><BookingLink className="link-arrow">Alle Preise auf Treatwell →</BookingLink></div>
         </div>
