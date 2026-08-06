@@ -1,0 +1,130 @@
+.imp-hero {
+  padding: 10rem 3.5rem 4rem;
+  background: var(--cream);
+  min-height: auto;
+}
+
+.imp-hero .tag {
+  margin-bottom: .8rem;
+}
+
+.imp-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.18;
+  color: var(--warm);
+  margin-bottom: .5rem;
+}
+
+.imp-hero h1 em {
+  font-style: italic;
+}
+
+.imp-hero .line {
+  margin-top: 1.2rem;
+}
+
+.imp-content {
+  padding: 4rem 3.5rem 5rem;
+  max-width: 860px;
+}
+
+.imp-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--warm);
+  margin: 2.8rem 0 .8rem;
+  line-height: 1.3;
+}
+
+.imp-content h2:first-child {
+  margin-top: 0;
+}
+
+.imp-content p,
+.imp-content li {
+  font-size: .88rem;
+  line-height: 2;
+  color: var(--warm-lt);
+}
+
+.imp-content a {
+  color: var(--sand);
+  text-decoration: none;
+  transition: color .3s;
+}
+
+.imp-content a:hover {
+  color: var(--warm);
+}
+
+.imp-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.imp-content ul li {
+  padding-left: 1.2rem;
+  position: relative;
+}
+
+.imp-content ul li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--sand);
+  font-weight: 600;
+}
+
+.imp-content .imp-note {
+  font-size: .78rem;
+  color: var(--taupe);
+  font-style: italic;
+  margin-top: .5rem;
+  line-height: 1.8;
+}
+
+.imp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .6rem;
+  font-weight: 400;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sand);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  padding: .6rem 1.4rem;
+  border-radius: 50px;
+  transition: all .4s var(--ease-out);
+  margin-top: 2.5rem;
+}
+
+.imp-back:hover {
+  border-color: var(--sand);
+  color: var(--warm);
+  transform: translateX(-4px);
+}
+
+@media (max-width: 960px) {
+  .imp-hero {
+    padding: 8rem 1.5rem 3rem;
+  }
+
+  .imp-content {
+    padding: 3rem 1.5rem 4rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .imp-hero {
+    padding: 7rem 1rem 2.5rem;
+  }
+
+  .imp-content {
+    padding: 2.5rem 1rem 3rem;
+  }
+}
