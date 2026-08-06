@@ -49,9 +49,18 @@ function isExpired(voucher, now) {
  * @returns {'voided'|'refunded'|'fully_redeemed'|'expired'|'partially_redeemed'|'open'}
  */
 export function voucherState(voucher, redemptions, now) {
-  if (voucher.status !== 'active') return voucher.status
+  return stateFromBalance(voucher, balanceCents(voucher, redemptions), now)
+}
 
-  const balance = balanceCents(voucher, redemptions)
+/**
+ * Wie voucherState, aber mit bereits bekanntem Saldo.
+ *
+ * Für Listen: dort liefert die View voucher_balances den Saldo pro Zeile
+ * schon mit, und alle Buchungen aller Gutscheine nachzuladen, nur um ihn
+ * erneut auszurechnen, wäre Unfug.
+ */
+export function stateFromBalance(voucher, balance, now) {
+  if (voucher.status !== 'active') return voucher.status
   if (balance <= 0) return 'fully_redeemed'
   if (isExpired(voucher, now)) return 'expired'
   if (balance < voucher.original_amount_cents) return 'partially_redeemed'

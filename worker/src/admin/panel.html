@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>FEM Gutscheine</title>
+<style>
+  /* Systemschriften statt Google Fonts: kein externer Request, sofort da,
+     auch bei schlechtem WLAN an der Kassa. */
+  :root {
+    --bg: #fdfbf8; --card: #fff; --cream: #f5f0ea;
+    --sand: #c9995e; --sand-lt: #dcc4a0; --warm: #4a3f38;
+    --taupe: #968a80; --line: rgba(201,153,94,.22);
+    --ok: #4d7c5a; --warn: #a15d4c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--warm); line-height: 1.5;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 1.2rem 1rem 4rem; }
+
+  header { display: flex; align-items: baseline; gap: .8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  h1 { font-size: 1.4rem; font-weight: 500; letter-spacing: -.01em; }
+  .whoami { font-size: .72rem; color: var(--taupe); margin-left: auto; }
+  .devbadge { background: var(--warn); color: #fff; border-radius: 4px; padding: .1rem .4rem; font-size: .65rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .6rem; margin-bottom: 1.2rem; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .8rem .9rem; }
+  .stat b { display: block; font-size: 1.35rem; font-weight: 600; letter-spacing: -.02em; }
+  .stat span { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--taupe); }
+
+  .tools { display: flex; gap: .5rem; margin-bottom: .9rem; flex-wrap: wrap; }
+  input[type=search], input[type=text], input[type=number] {
+    font: inherit; color: inherit; background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px; padding: .6rem .8rem;
+  }
+  input[type=search] { flex: 1; min-width: 200px; }
+  input:focus-visible { outline: 2px solid var(--sand); outline-offset: 1px; }
+
+  .filters { display: flex; gap: .35rem; flex-wrap: wrap; }
+  .filters button {
+    font: inherit; font-size: .8rem; cursor: pointer; background: var(--card);
+    border: 1px solid var(--line); border-radius: 50px; padding: .45rem .9rem; color: var(--taupe);
+  }
+  .filters button[aria-pressed=true] { background: var(--sand); border-color: var(--sand); color: #fff; }
+
+  .list { display: flex; flex-direction: column; gap: .5rem; }
+  .row {
+    display: grid; grid-template-columns: 1fr auto; gap: .2rem .8rem; align-items: center;
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .8rem .9rem;
+  }
+  .row:hover, .row:focus-visible { border-color: var(--sand-lt); outline: none; }
+  .row code { font-size: .92rem; font-weight: 600; letter-spacing: .04em; }
+  .row .meta { grid-column: 1; font-size: .76rem; color: var(--taupe); }
+  .row .amt { grid-row: 1 / span 2; text-align: right; font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
+  .row .amt small { display: block; font-size: .68rem; font-weight: 400; color: var(--taupe); }
+
+  .pill { display: inline-block; font-size: .62rem; text-transform: uppercase; letter-spacing: .08em;
+          padding: .15rem .5rem; border-radius: 50px; border: 1px solid; vertical-align: 1px; }
+  .s-open { color: var(--ok); border-color: rgba(77,124,90,.4); }
+  .s-partially_redeemed { color: var(--sand); border-color: var(--sand-lt); }
+  .s-fully_redeemed, .s-expired { color: var(--taupe); border-color: var(--line); }
+  .s-refunded, .s-voided { color: var(--warn); border-color: rgba(161,93,76,.4); }
+
+  dialog { border: 0; border-radius: 14px; padding: 0; max-width: 560px; width: calc(100% - 1.6rem);
+           background: var(--card); color: inherit; }
+  dialog::backdrop { background: rgba(32,25,21,.55); }
+  .dlg { padding: 1.3rem; }
+  .dlg h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: .03em; }
+  .dlg .sub { font-size: .8rem; color: var(--taupe); margin-bottom: 1rem; }
+  .balance { background: var(--cream); border-radius: 10px; padding: .9rem 1rem; margin-bottom: 1rem; }
+  .balance b { font-size: 1.8rem; font-weight: 600; letter-spacing: -.02em; }
+  .balance span { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--taupe); display: block; }
+  .kv { font-size: .82rem; display: grid; grid-template-columns: auto 1fr; gap: .25rem .9rem; margin-bottom: 1rem; }
+  .kv dt { color: var(--taupe); }
+
+  .hist { border-top: 1px solid var(--line); margin-top: .4rem; }
+  .hist li { display: flex; align-items: center; gap: .6rem; padding: .55rem 0; border-bottom: 1px solid var(--line); font-size: .8rem; }
+  .hist .h-amt { font-weight: 600; min-width: 5.5rem; }
+  .hist .rev { color: var(--warn); }
+  .hist .who { color: var(--taupe); flex: 1; font-size: .74rem; }
+
+  .redeem { border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 1rem; }
+  .redeem .line { display: flex; gap: .5rem; margin-bottom: .6rem; flex-wrap: wrap; }
+  .redeem input[type=number] { width: 7rem; font-size: 1.05rem; }
+  .redeem input[type=text] { flex: 1; min-width: 8rem; }
+  button.act { font: inherit; cursor: pointer; border-radius: 8px; padding: .65rem 1.1rem; border: 1px solid var(--sand); background: var(--sand); color: #fff; font-weight: 500; }
+  button.act:disabled { opacity: .45; cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--taupe); border-color: var(--line); font-size: .74rem; padding: .3rem .6rem; }
+  .msg { font-size: .82rem; padding: .6rem .8rem; border-radius: 8px; margin-top: .7rem; }
+  .msg.err { background: rgba(161,93,76,.1); color: var(--warn); }
+  .msg.ok { background: rgba(77,124,90,.1); color: var(--ok); }
+  .empty, .loading { text-align: center; color: var(--taupe); padding: 2.5rem 1rem; font-size: .85rem; }
+  .close { position: absolute; top: .7rem; right: .8rem; background: none; border: 0; font-size: 1.6rem; color: var(--taupe); cursor: pointer; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>FEM Gutscheine</h1>
+    <span class="whoami" id="whoami"></span>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tools">
+    <input type="search" id="q" placeholder="Code, Name oder E-Mail suchen…" autocomplete="off">
+  </div>
+  <div class="filters" id="filters">
+    <button data-status="" aria-pressed="true">Alle</button>
+    <button data-status="open" aria-pressed="false">Offen</button>
+    <button data-status="partial" aria-pressed="false">Teilweise</button>
+    <button data-status="redeemed" aria-pressed="false">Eingelöst</button>
+    <button data-status="refunded" aria-pressed="false">Storniert</button>
+  </div>
+
+  <div class="list" id="list"><p class="loading">Lädt…</p></div>
+</div>
+
+<dialog id="dlg"><button class="close" aria-label="Schließen" onclick="dlg.close()">×</button><div class="dlg" id="dlgBody"></div></dialog>
+
+<script>
+const eur = new Intl.NumberFormat('de-AT', { style: 'currency', currency: 'EUR' })
+const money = (cents) => eur.format((cents ?? 0) / 100)
+const when = (iso) => iso ? new Date(iso).toLocaleString('de-AT', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
+const LABEL = {
+  open: 'Offen', partially_redeemed: 'Teilweise', fully_redeemed: 'Eingelöst',
+  expired: 'Abgelaufen', refunded: 'Storniert', voided: 'Storniert',
+}
+
+let status = ''
+let query = ''
+
+async function api(path, options) {
+  const res = await fetch(path, { headers: { 'content-type': 'application/json' }, ...options })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw Object.assign(new Error(data.reason || res.statusText), { data })
+  return data
+}
+
+async function loadStats() {
+  const s = await api('/api/admin/stats')
+  document.getElementById('stats').innerHTML = [
+    ['Verkauft', money(s.soldCents), s.total + ' Gutscheine'],
+    ['Offener Wert', money(s.outstandingCents), 'noch einzulösen'],
+    ['Eingelöst', money(s.redeemedCents), 'bereits verbraucht'],
+    ['Storniert', s.refundedCount, 'rückerstattet'],
+  ].map(([label, big, sub]) => `<div class="stat"><span>${label}</span><b>${big}</b><span>${sub}</span></div>`).join('')
+}
+
+async function loadList() {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  if (query) params.set('q', query)
+  const { vouchers } = await api('/api/admin/vouchers?' + params)
+  const list = document.getElementById('list')
+
+  if (!vouchers.length) {
+    list.innerHTML = '<p class="empty">Keine Gutscheine gefunden.</p>'
+    return
+  }
+
+  list.innerHTML = vouchers.map((v) => `
+    <button class="row" data-code="${esc(v.code)}">
+      <code>${esc(v.code)}</code>
+      <span class="amt">${money(v.balanceCents)}<small>von ${money(v.originalCents)}</small></span>
+      <span class="meta">
+        <span class="pill s-${v.state}">${LABEL[v.state] || v.state}</span>
+        ${esc(v.recipient || '—')}${v.treatmentLabel ? ' · ' + esc(v.treatmentLabel) : ''} · ${when(v.issuedAt)}
+      </span>
+    </button>`).join('')
+
+  list.querySelectorAll('.row').forEach((row) => {
+    row.onclick = () => openVoucher(row.dataset.code)
+  })
+}
+
+async function openVoucher(code, byToken) {
+  const path = byToken ? '/api/admin/by-token/' + encodeURIComponent(byToken)
+                       : '/api/admin/vouchers/' + encodeURIComponent(code)
+  const { voucher: v, redemptions } = await api(path)
+  const canRedeem = v.state === 'open' || v.state === 'partially_redeemed'
+
+  document.getElementById('dlgBody').innerHTML = `
+    <h2>${esc(v.code)}</h2>
+    <p class="sub"><span class="pill s-${v.state}">${LABEL[v.state] || v.state}</span>
+      ${v.kind === 'treatment' ? esc(v.treatmentLabel) : 'Wertgutschein'}</p>
+
+    <div class="balance"><span>Restwert</span><b>${money(v.balanceCents)}</b>
+      <span>von ${money(v.originalCents)} · ${v.debitCount} Buchung(en)</span></div>
+
+    <dl class="kv">
+      <dt>Für</dt><dd>${esc(v.recipient || '—')}</dd>
+      <dt>Von</dt><dd>${esc(v.sender || '—')}</dd>
+      ${v.message ? `<dt>Nachricht</dt><dd>„${esc(v.message)}"</dd>` : ''}
+      <dt>Gekauft</dt><dd>${when(v.issuedAt)}</dd>
+      <dt>Käufer</dt><dd>${esc(v.buyerEmail || '—')}</dd>
+      ${v.voidedAt ? `<dt>Storniert</dt><dd>${when(v.voidedAt)} — ${esc(v.voidReason || '')}</dd>` : ''}
+    </dl>
+
+    ${redemptions.length ? `<ul class="hist">${redemptions.map((r) => `
+      <li>
+        <span class="h-amt ${r.reversesId ? 'rev' : ''}">${r.reversesId ? '+' : '−'}${money(Math.abs(r.amountCents))}</span>
+        <span class="who">${when(r.redeemedAt)} · ${esc(r.staffId)}${r.note ? ' · ' + esc(r.note) : ''}</span>
+        ${!r.reversesId && !redemptions.some((x) => x.reversesId === r.id)
+          ? `<button class="act ghost" data-reverse="${r.id}">rückgängig</button>` : ''}
+      </li>`).join('')}</ul>` : ''}
+
+    ${canRedeem ? `
+      <form class="redeem" id="redeemForm">
+        <div class="line">
+          <input type="number" id="amt" step="0.01" min="0.01" max="${(v.balanceCents / 100).toFixed(2)}"
+                 placeholder="0,00" required inputmode="decimal">
+          <button type="button" class="act ghost" id="allBtn">Ganzer Restwert</button>
+        </div>
+        <div class="line">
+          <input type="text" id="note" placeholder="Notiz (optional), z. B. Head Spa" maxlength="200">
+          <button type="submit" class="act" id="go">Abbuchen</button>
+        </div>
+      </form>` : `<p class="msg err">Dieser Gutschein kann nicht eingelöst werden (${LABEL[v.state] || v.state}).</p>`}
+    <div id="msg"></div>`
+
+  const dlg = document.getElementById('dlg')
+  if (!dlg.open) dlg.showModal()
+
+  document.querySelectorAll('[data-reverse]').forEach((btn) => {
+    btn.onclick = async () => {
+      if (!confirm('Diese Buchung wirklich rückgängig machen?')) return
+      btn.disabled = true
+      try {
+        await api('/api/admin/redemptions/' + btn.dataset.reverse + '/reverse', {
+          method: 'POST',
+          body: JSON.stringify({ idempotencyKey: crypto.randomUUID() }),
+        })
+        await Promise.all([openVoucher(v.code), loadList(), loadStats()])
+      } catch (err) {
+        document.getElementById('msg').innerHTML = '<p class="msg err">' + esc(err.message) + '</p>'
+        btn.disabled = false
+      }
+    }
+  })
+
+  const form = document.getElementById('redeemForm')
+  if (!form) return
+
+  document.getElementById('allBtn').onclick = () => {
+    document.getElementById('amt').value = (v.balanceCents / 100).toFixed(2)
+  }
+
+  // Ein Schlüssel pro Formular, nicht pro Absenden: schickt der Browser
+  // denselben Vorgang zweimal, weist die Datenbank den zweiten ab, statt
+  // ein zweites Mal abzuziehen.
+  const idempotencyKey = crypto.randomUUID()
+
+  form.onsubmit = async (event) => {
+    event.preventDefault()
+    const cents = Math.round(parseFloat(document.getElementById('amt').value) * 100)
+    const msg = document.getElementById('msg')
+    if (!Number.isSafeInteger(cents) || cents <= 0) {
+      msg.innerHTML = '<p class="msg err">Bitte einen gültigen Betrag eingeben.</p>'
+      return
+    }
+    if (!confirm(money(cents) + ' von ' + v.code + ' abbuchen?')) return
+
+    const go = document.getElementById('go')
+    go.disabled = true
+    try {
+      const res = await api('/api/admin/vouchers/' + v.id + '/redeem', {
+        method: 'POST',
+        body: JSON.stringify({ amountCents: cents, note: document.getElementById('note').value, idempotencyKey }),
+      })
+      msg.innerHTML = '<p class="msg ok">Abgebucht. Neuer Restwert: ' + money(res.balanceCents) + '</p>'
+      await Promise.all([loadList(), loadStats()])
+      setTimeout(() => openVoucher(v.code), 900)
+    } catch (err) {
+      msg.innerHTML = '<p class="msg err">' + esc(err.message) + '</p>'
+      go.disabled = false
+    }
+  }
+}
+
+let timer
+document.getElementById('q').oninput = (event) => {
+  clearTimeout(timer)
+  timer = setTimeout(() => { query = event.target.value.trim(); loadList() }, 250)
+}
+
+document.getElementById('filters').onclick = (event) => {
+  const btn = event.target.closest('button')
+  if (!btn) return
+  status = btn.dataset.status
+  document.querySelectorAll('#filters button').forEach((b) => b.setAttribute('aria-pressed', b === btn))
+  loadList()
+}
+
+// Aus dem QR-Code kommend: direkt den Gutschein öffnen.
+const token = new URLSearchParams(location.search).get('token')
+
+Promise.all([loadStats(), loadList()])
+  .then(() => token && openVoucher(null, token))
+  .catch((err) => {
+    document.getElementById('list').innerHTML = '<p class="empty">Fehler: ' + esc(err.message) + '</p>'
+  })
+</script>
+</body>
+</html>

@@ -15,11 +15,27 @@
     }
   ],
 
+  // Das Panel wird als Textmodul eingebunden, nicht gebaut.
+  // fallthrough, damit Wranglers Standardregeln (.txt, .sql) erhalten bleiben.
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+
   "vars": {
     // Ursprünge, die /api/checkout aus dem Browser aufrufen dürfen.
     // Im Betrieb laufen Seite und Worker gleichursprünglich, dann leer.
     "ALLOWED_ORIGINS": "http://localhost:8000,http://127.0.0.1:8000",
-    "PUBLIC_SITE_URL": "http://localhost:8000"
+    "PUBLIC_SITE_URL": "http://localhost:8000",
+
+    // NUR für die lokale Entwicklung. In der Cloud muss das auf "access"
+    // stehen, sonst ist das Panel offen im Netz. Bewusst eine eigene
+    // Variable statt "kein Header = offen": ein Konfigurationsfehler soll
+    // sperren, nicht öffnen.
+    "ADMIN_AUTH_MODE": "dev",
+    "ADMIN_DEV_EMAIL": "jenny@fembeauty.at"
+
+    // Im Betrieb stattdessen setzen:
+    //   "ADMIN_AUTH_MODE": "access",
+    //   "ACCESS_TEAM_DOMAIN": "<team>.cloudflareaccess.com",
+    //   "ACCESS_AUD": "<Application Audience Tag aus Zero Trust>"
   }
 
   // Secrets stehen NICHT hier, sondern lokal in .dev.vars und
