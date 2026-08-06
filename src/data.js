@@ -1,5 +1,6 @@
 export const BOOKING_URL = 'https://trea.tw/uc3hWqqxxVC9uu2Yj'
 
+
 // Grenzen für Gutscheinwerte. Bewusst hier und nicht in der Komponente:
 // der Worker importiert dieselben Werte, damit Client- und Serverprüfung
 // nicht auseinanderlaufen können. Die Prüfung im Browser ist Komfort,

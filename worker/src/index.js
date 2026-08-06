@@ -4,6 +4,7 @@ import { getStats, getVoucher, listVouchers, redeemVoucher, reverseRedemption } 
 import { authenticate } from './admin/auth.js'
 import { handleCheckout } from './checkout.js'
 import { allowedOrigin, corsHeaders, error, json, withCors } from './http.js'
+import { getBySession, getPdf } from './public.js'
 import { handleWebhook } from './webhook.js'
 
 function createStripe(env) {
@@ -96,6 +97,32 @@ export default {
       } catch (err) {
         console.error('admin fehlgeschlagen —', err.stack ?? err.message)
         return error('admin_failed', 500)
+      }
+    }
+
+    // Status nach dem Bezahlen, für die Danke-Seite.
+    const bySession = url.pathname.match(/^\/api\/voucher\/by-session\/([^/]+)$/)
+    if (bySession && request.method === 'GET') {
+      try {
+        return withCors(
+          await getBySession(env, createStripe(env), decodeURIComponent(bySession[1])),
+          origin,
+        )
+      } catch (err) {
+        console.error('by-session fehlgeschlagen —', err.stack ?? err.message)
+        return withCors(error('lookup_failed', 500), origin)
+      }
+    }
+
+    // PDF-Download. Bewusst ohne CORS-Kopfzeilen: das ist ein direkter
+    // Link oder Download, kein fetch aus einer anderen Seite heraus.
+    const pdf = url.pathname.match(/^\/api\/voucher\/([^/]+)\/pdf$/)
+    if (pdf && request.method === 'GET') {
+      try {
+        return await getPdf(request, env, decodeURIComponent(pdf[1]))
+      } catch (err) {
+        console.error('PDF fehlgeschlagen —', err.stack ?? err.message)
+        return error('pdf_failed', 500)
       }
     }
 

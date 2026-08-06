@@ -66,7 +66,7 @@ export async function handleCheckout(request, env, stripe) {
     // Damit die Metadaten auch am PaymentIntent hängen — nützlich bei
     // Rückerstattungen, die nur den PaymentIntent referenzieren.
     payment_intent_data: { metadata: toMetadata(order) },
-    success_url: `${env.PUBLIC_SITE_URL}/gutschein/danke?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${env.PUBLIC_SITE_URL}/danke.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${env.PUBLIC_SITE_URL}/#vouchers`,
     locale: 'de',
   })
