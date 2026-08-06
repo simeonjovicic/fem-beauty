@@ -36,10 +36,9 @@
     <link rel="preload" as="image" href="/hero-mobile-v1.webp" media="(max-width: 768px)" fetchpriority="high" />
     <link rel="preload" as="image" href="/hero-640.webp" imagesrcset="/hero-640.webp 640w, /hero-1080.webp 1080w, /hero-1920.webp 1920w" imagesizes="100vw" media="(min-width: 769px)" fetchpriority="high" />
     <link rel="preload" as="image" href="/foto-store-4.webp" fetchpriority="high" />
-    <link rel="preload" as="image" href="/foto-store-2.webp" fetchpriority="low" />
-    <link rel="preload" as="image" href="/foto-store-3.webp" fetchpriority="low" />
-    <link rel="preload" as="image" href="/foto-store-0.webp" fetchpriority="low" />
-    <link rel="preload" as="image" href="/foto-store-1.webp" fetchpriority="low" />
+    <!-- Die Galeriebilder wurden vorgeladen, weil das Laufband alle sofort in
+         Bewegung zeigte. Als statisches Raster stehen sie unterhalb des Falzes
+         und laden per loading="lazy" — ein Preload wuerde das aushebeln. -->
 
     <script type="application/ld+json">
       {

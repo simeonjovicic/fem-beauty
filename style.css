@@ -1107,29 +1107,24 @@ h2 em {
 .gallery {
     padding: 0;
     overflow: hidden;
-    background: var(--white);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent)
+    background: var(--white)
 }
 
+/* Statisches Raster, eine Spalte je Bild. Der Randverlauf (mask-image) ist
+   weg: er blendete die Kanten des Laufbands aus und wuerde hier nur das
+   erste und letzte Bild grundlos beschneiden. */
 .gallery-track {
-    display: flex;
-    width: max-content;
-    animation: galleryFlow 72s linear infinite;
-    will-change: transform
-}
-
-.gallery-group {
-    display: flex;
-    gap: 3px;
-    padding-right: 3px
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px
 }
 
 .gallery-item {
     appearance: none;
-    flex: 0 0 clamp(300px, 25vw, 520px);
-    width: clamp(300px, 25vw, 520px);
-    height: clamp(280px, 28vw, 440px);
+    width: 100%;
+    /* Feste Hoehe statt vw-Kopplung, die die Kacheln auf breiten Schirmen
+       auf 400px wachsen liess. Etwas flacher als die 300px des Originals. */
+    height: 270px;
     padding: 0;
     border: 0;
     background: var(--cream);
@@ -1155,16 +1150,7 @@ h2 em {
     outline-offset: -4px
 }
 
-.gallery:hover .gallery-track,
-.gallery:focus-within .gallery-track {
-    animation-play-state: paused
-}
 
-@keyframes galleryFlow {
-    to {
-        transform: translateX(-50%)
-    }
-}
 
 /* ═══ BRANDS MARQUEE ═══════════════════ */
 .brands-marquee {
@@ -1247,6 +1233,16 @@ h2 em {
     margin-bottom: 3rem
 }
 
+/* Nur Dachzeile, kein Raster darunter: unten knapper, damit die Head-Spa-
+   Sektion direkt anschliesst statt in einer Luecke zu haengen. */
+.services-intro {
+    padding: 6rem 0 2.5rem
+}
+
+.services-intro .services-head {
+    margin-bottom: 0
+}
+
 .services-sub {
     font-size: .82rem;
     color: var(--taupe);
@@ -1259,6 +1255,7 @@ h2 em {
     margin-top: 3rem
 }
 
+/* Sechs Services, drei Spalten: zwei volle Reihen ohne Rest. */
 .srv-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1273,21 +1270,14 @@ h2 em {
 }
 
 .srv-card {
-    appearance: none;
     width: 100%;
-    padding: 0;
-    border: 0;
     background: var(--bg);
     color: inherit;
-    font: inherit;
-    text-align: inherit;
-    cursor: pointer;
     position: relative;
     overflow: hidden;
     min-height: 320px;
     min-width: 0;
-    transition: background .35s var(--ease), color .35s var(--ease);
-    outline: none
+    transition: background .35s var(--ease), color .35s var(--ease)
 }
 
 .srv-card::after {
@@ -1309,24 +1299,46 @@ h2 em {
 }
 
 .srv-card:hover::after,
-.srv-card:focus-visible::after {
+.srv-card:focus-within::after {
     transform: scaleX(1)
 }
 
-.srv-card:focus-visible {
-    box-shadow: inset 0 0 0 2px rgba(201, 153, 94, .45)
-}
-
 .srv-card-front {
+    /* Traegt seit dem Umbau auf Aufklappen die Button-Rolle: die Karte selbst
+       ist ein <div>, weil im aufgeklappten Panel Schliessen-Button und
+       Buchungs-Link liegen — verschachtelte Buttons waren nicht zulaessig. */
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    width: 100%;
     padding: 2.5rem 1.5rem;
     height: 100%;
-    min-height: inherit
+    min-height: inherit;
+    transition: opacity .4s var(--ease-out), transform .4s var(--ease-out)
+}
+
+.srv-card-front:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba(201, 153, 94, .45)
+}
+
+/* Schmales Desktop-Fenster: hier sind die Karten der Viererreihe am engsten,
+   und der laengste Name waere sonst breiter als der Textbereich. Lieber den
+   seitlichen Innenabstand kuerzen als die Schrift noch kleiner machen. */
+@media (min-width: 961px) and (max-width: 1180px) {
+    .srv-card-front {
+        padding-left: .85rem;
+        padding-right: .85rem
+    }
 }
 
 .srv-num {
@@ -1355,7 +1367,7 @@ h2 em {
 }
 
 .srv-card:hover .srv-icon,
-.srv-card:focus-visible .srv-icon {
+.srv-card:focus-within .srv-icon {
     color: var(--white);
     background: var(--sand);
     border-color: var(--sand);
@@ -1363,13 +1375,16 @@ h2 em {
 }
 
 .srv-card-front h3 {
-    max-width: 16ch;
+    /* Kein max-width mehr und nowrap: die Service-Namen sollen einzeilig
+       stehen. Die Groesse haengt an vw, weil das Raster mit dem Viewport
+       skaliert — der Abzug deckt das feste Innenabstands-Budget der Karte. */
     margin-bottom: .9rem;
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.35rem, 1.5vw, 1.7rem);
+    font-size: clamp(.92rem, calc(1.75vw - 4.5px), 1.5rem);
     font-weight: 400;
     color: var(--warm);
-    line-height: 1.28
+    line-height: 1.28;
+    white-space: nowrap
 }
 
 .srv-hint {
@@ -1399,184 +1414,550 @@ h2 em {
     transform: translate(2px, -1px)
 }
 
-/* ─── Services: editorial rows (Desktop/Tablet) ─── */
-.srv-rows {
-    border-top: 1px solid var(--line)
+/* ── Aufgeklappter Zustand ────────────────
+   Das Panel deckt die Karte ab, statt sie wachsen zu lassen — so bleibt das
+   Raster in Ruhe und nichts darunter springt. */
+.srv-card-expanded {
+    position: absolute;
+    inset: 0;
+    background: var(--warm);
+    color: var(--white);
+    /* Seitlich knapper als zuvor (1.8rem): jedes gesparte Pixel Innenabstand
+       wird Textbreite, und in der schmalen Viererreihe entscheidet die ueber
+       die Zeilenzahl — billiger als die Karte weiter wachsen zu lassen. */
+    padding: 2.2rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    /* safe center: bei zu langem Text kippt die Ausrichtung auf flex-start,
+       statt den Anfang aus dem scrollbaren Bereich zu schieben. */
+    justify-content: safe center;
+    overflow-y: auto;
+    /* Sichtbare, schmale Leiste: bei kleiner Karte und grosser Schrift liegt
+       ein Teil der Beschreibung unterhalb des Rands — ohne Leiste gibt es auf
+       macOS keinen Hinweis darauf, dass da noch etwas kommt. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .35) transparent;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
+    pointer-events: none;
+    z-index: 5
 }
 
-.srv-row {
-    appearance: none;
-    position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
+.srv-card.open .srv-card-expanded {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto
+}
+
+.srv-card.open .srv-card-front {
+    opacity: 0;
+    transform: translateY(-20px)
+}
+
+.srv-close {
+    position: absolute;
+    top: .6rem;
+    right: .7rem;
+    display: inline-flex;
     align-items: center;
-    gap: 2.2rem;
-    width: 100%;
-    padding: 2.1rem 1.6rem;
-    border: 0;
-    border-bottom: 1px solid var(--line);
+    justify-content: center;
+    min-width: 34px;
+    min-height: 34px;
+    padding: .5rem;
+    border: none;
     background: transparent;
-    color: inherit;
-    font: inherit;
-    text-align: left;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, .5);
     cursor: pointer;
-    overflow: hidden;
-    outline: none;
-    transition: background .4s var(--ease), padding-left .45s var(--ease-out), opacity .7s var(--ease-out), transform .7s var(--ease-out)
+    transition: color .3s;
+    z-index: 2
 }
 
-.srv-row::after {
+.srv-close:hover,
+.srv-close:focus-visible {
+    color: #fff;
+    outline: none
+}
+
+.srv-card-expanded .srv-num {
+    color: var(--sand-lt);
+    margin-bottom: .6rem
+}
+
+.srv-card-expanded h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: .8rem;
+    line-height: 1.3
+}
+
+.srv-card-expanded p {
+    /* Groesser als zuvor (.78rem). Der etwas engere Zeilenabstand faengt
+       einen Teil des Hoehenzuwachses ab — bei groesserer Schrift braucht es
+       ohnehin weniger Durchschuss, um ruhig zu wirken. */
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .75);
+    margin-bottom: 1.2rem
+}
+
+.srv-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    margin-bottom: 1.2rem
+}
+
+.srv-tags span {
+    font-size: .5rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(255, 255, 255, .15);
+    padding: .2rem .5rem;
+    border-radius: 50px
+}
+
+.srv-book {
+    align-self: flex-start;
+    font-size: .55rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--sand-lt);
+    text-decoration: none;
+    transition: color .3s
+}
+
+.srv-book:hover,
+.srv-book:focus-visible {
+    color: #fff
+}
+
+/* ═══ GUTSCHEIN — Teaser-Band ═══════════
+   Ersetzt den ausgerollten Konfigurator auf der Startseite (1397px, 1,7
+   Bildschirme auf dem Handy); der liegt jetzt auf /gutscheine.html.
+   Dunkel, weil links und rechts davon Bewertungen und Team beide cream
+   sind — hell waere das Band dort als eigene Sektion nicht lesbar. */
+.voucher-teaser {
+    position: relative;
+    background: var(--warm);
+    padding: 5.5rem 0;
+    overflow: hidden
+}
+
+/* Millimeterraster und warmer Lichtkegel wie im Head-Spa-Panel, damit die
+   Flaeche nicht tot wirkt. Negativer z-index: liegt unter dem Inhalt. */
+.voucher-teaser::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(120% 90% at 22% 15%, rgba(220, 196, 160, .16), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(220, 196, 160, .045) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(90deg, rgba(220, 196, 160, .045) 0 1px, transparent 1px 34px);
+    z-index: 0;
+    pointer-events: none
+}
+
+.voucher-teaser-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 3.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: 4rem;
+    align-items: center
+}
+
+/* ── Kartenstapel ── */
+.vt-stack {
+    position: relative;
+    aspect-ratio: 1 / .92
+}
+
+.vt-card {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 1.62 / 1;
+    border-radius: 13px;
+    padding: 1.15rem 1.3rem;
+    overflow: hidden
+}
+
+/* Hintere Karte steht fuer den Behandlungsgutschein — nur angedeutet. */
+.vt-card-back {
+    top: 0;
+    background: linear-gradient(150deg, #5b4e45, #463b34);
+    border: 1px solid rgba(220, 196, 160, .18);
+    transform: rotate(-7deg) translateX(-6%);
+    display: flex;
+    align-items: flex-start
+}
+
+.vt-card-kicker {
+    font-size: .46rem;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(220, 196, 160, .6)
+}
+
+.vt-card-front {
+    bottom: 0;
+    background:
+        radial-gradient(130% 150% at 12% 8%, rgba(220, 196, 160, .26), transparent 58%),
+        linear-gradient(155deg, #514740, #3f352f);
+    background-color: #443a33;
+    box-shadow: 0 22px 48px rgba(20, 15, 12, .42);
+    transform: rotate(3.5deg) translateX(5%);
+    display: grid;
+    grid-template-rows: auto 1fr auto
+}
+
+.vt-card-front::after {
+    content: '';
+    position: absolute;
+    inset: .5rem;
+    border: 1px solid rgba(220, 196, 160, .3);
+    border-radius: 9px;
+    pointer-events: none
+}
+
+.vt-card-top {
+    font-size: .46rem;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(220, 196, 160, .8)
+}
+
+.vt-card-mark {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2rem;
+    line-height: 1;
+    color: #fff;
+    align-self: center
+}
+
+.vt-card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: .46rem;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(220, 196, 160, .8)
+}
+
+/* ── Textspalte ── */
+.voucher-teaser-body .tag {
+    color: var(--sand-lt)
+}
+
+.voucher-teaser-body h2 {
+    color: #fff;
+    margin-bottom: .2rem
+}
+
+.voucher-teaser-body h2 em {
+    color: var(--sand-lt)
+}
+
+.voucher-teaser-body .line {
+    background: rgba(220, 196, 160, .35)
+}
+
+.voucher-teaser-body p {
+    font-size: .92rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, .72);
+    margin-bottom: 1.4rem;
+    max-width: 48ch
+}
+
+.vt-points {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem
+}
+
+.vt-points li {
+    position: relative;
+    padding-left: 1rem;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    color: rgba(255, 255, 255, .62)
+}
+
+.vt-points li::before {
     content: '';
     position: absolute;
     left: 0;
-    bottom: -1px;
-    width: 100%;
-    height: 1px;
-    background: var(--sand);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform .55s var(--ease-out)
+    top: .48em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sand)
 }
 
-.srv-row:hover,
-.srv-row:focus-visible {
-    background: #faf7f3;
-    padding-left: 2.5rem
+@media(max-width:960px) {
+    .voucher-teaser-inner {
+        grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+        gap: 2.5rem;
+        padding: 0 2.5rem
+    }
 }
 
-.srv-row:hover::after,
-.srv-row:focus-visible::after {
-    transform: scaleX(1)
+@media(max-width:768px) {
+    .voucher-teaser {
+        padding: 3.4rem 0
+    }
+
+    .voucher-teaser-inner {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0 1.4rem
+    }
+
+    /* Klein halten: das Band soll anreissen, nicht die Seite verlaengern —
+       den Platz fuer die grosse Karte hat jetzt /gutscheine.html. */
+    .vt-stack {
+        width: 205px;
+        margin: 0 auto
+    }
+
+    .vt-points {
+        gap: .4rem 1.2rem;
+        margin-bottom: 1.6rem
+    }
 }
 
-.srv-row:focus-visible {
-    box-shadow: inset 0 0 0 2px rgba(201, 153, 94, .45)
+/* ═══ GUTSCHEIN — Seiten-Hero ═══════════ */
+.gutscheine-hero {
+    padding: 9rem 3.5rem 3rem;
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center
 }
 
-.srv-row-num {
+.gutscheine-hero h1 {
     font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: .95rem;
-    color: var(--sand);
-    line-height: 1;
-    min-width: 2.2ch
-}
-
-.srv-row-main {
-    display: flex;
-    flex-direction: column;
-    gap: .55rem;
-    min-width: 0
-}
-
-.srv-row-title-line {
-    display: flex;
-    align-items: center;
-    gap: .9rem;
-    flex-wrap: wrap
-}
-
-.srv-row-main h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+    font-size: clamp(2.1rem, 4.5vw, 3.2rem);
     font-weight: 400;
     color: var(--warm);
-    line-height: 1.2
+    line-height: 1.15;
+    margin: .5rem 0
 }
 
-.srv-row-badge {
-    font-size: .5rem;
-    font-weight: 500;
-    letter-spacing: .22em;
-    text-transform: uppercase;
-    color: var(--sand);
-    border: 1px solid var(--sand-lt);
-    border-radius: 50px;
-    padding: .32rem .7rem;
-    line-height: 1;
-    white-space: nowrap
+.gutscheine-hero .line {
+    margin: 1.4rem auto
 }
 
-.srv-row-tags {
-    font-size: .62rem;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--soft);
-    line-height: 1.6;
-    opacity: .55;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: opacity .4s var(--ease), color .4s var(--ease)
+.gutscheine-hero p {
+    font-size: .92rem;
+    line-height: 1.9;
+    color: var(--warm-lt)
 }
 
-.srv-row:hover .srv-row-tags,
-.srv-row:focus-visible .srv-row-tags {
-    opacity: 1;
-    color: var(--taupe)
+@media(max-width:768px) {
+    .gutscheine-hero {
+        padding: 7rem 1.4rem 2rem
+    }
 }
 
-.srv-row-glyph {
+/* ═══ HEAD SPA — Signature Treatment ════
+   Eigene Sektion statt Kachel im Services-Raster. Randlos und dunkel, damit
+   sie sich klar von den Cream-Nachbarn absetzt — dieselbe Sprache wie das
+   aufgeklappte Service-Panel, nur in gross. */
+.headspa {
     display: grid;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    color: var(--sand);
-    font-size: 1.5rem;
-    opacity: 0;
-    transform: translateX(-8px) scale(.92);
-    transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), border-color .35s var(--ease)
+    grid-template-columns: 42% 1fr;
+    background: var(--warm);
+    color: var(--white);
+    position: relative;
+    overflow: hidden
 }
 
-.srv-row:hover .srv-row-glyph,
-.srv-row:focus-visible .srv-row-glyph {
-    opacity: 1;
-    transform: none;
-    border-color: var(--sand-lt)
+.headspa-visual {
+    position: relative;
+    overflow: hidden
 }
 
-.srv-row-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: .7rem;
-    font-size: .58rem;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: var(--soft);
-    white-space: nowrap;
-    transition: color .35s var(--ease)
+/* Absolut positioniert, damit das Bild keine Hoehe in die Rasterzeile
+   einbringt: mit height:100% gegen eine automatisch hohe Zelle faellt es
+   sonst auf seine Naturhoehe zurueck und streckt die Sektion (bei 2560px
+   auf ueber 1400px). So bestimmt allein der Text die Hoehe. */
+.headspa-visual img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Duotone: das Foto soll die Flaeche tragen, nicht mit dem Text um
+       Aufmerksamkeit konkurrieren. */
+    filter: grayscale(.55) brightness(.82) sepia(.18)
 }
 
-.srv-row:hover .srv-row-cta,
-.srv-row:focus-visible .srv-row-cta {
-    color: var(--sand)
+.headspa-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, rgba(74, 63, 56, .18), rgba(74, 63, 56, .85))
 }
 
-.srv-row-cta-label {
-    opacity: 0;
-    transform: translateX(6px);
-    transition: opacity .4s var(--ease-out), transform .4s var(--ease-out)
+.headspa-body {
+    padding: 5.5rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center
 }
 
-.srv-row:hover .srv-row-cta-label,
-.srv-row:focus-visible .srv-row-cta-label {
-    opacity: 1;
-    transform: none
+.headspa-body .tag {
+    color: var(--sand-lt)
 }
 
-.srv-row-cta i {
-    font-family: 'Outfit', sans-serif;
+.headspa-body h2 {
+    color: #fff;
+    margin-bottom: .2rem
+}
+
+.headspa-body h2 em {
+    color: var(--sand-lt)
+}
+
+.headspa-body .line {
+    background: rgba(220, 196, 160, .35)
+}
+
+.headspa-lead {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.05rem, 1.3vw, 1.3rem);
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--sand-lt);
+    margin-bottom: 1rem
+}
+
+.headspa-desc {
     font-size: .95rem;
-    font-style: normal;
-    letter-spacing: 0;
-    transition: transform .4s var(--ease-out)
+    line-height: 1.9;
+    color: rgba(255, 255, 255, .72);
+    margin-bottom: 2rem;
+    max-width: 52ch
 }
 
-.srv-row:hover .srv-row-cta i,
-.srv-row:focus-visible .srv-row-cta i {
-    transform: translateX(4px)
+.headspa-variants {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+    max-width: 34rem
+}
+
+.headspa-variants li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: baseline;
+    gap: 1rem;
+    padding: .95rem 0;
+    border-top: 1px solid rgba(255, 255, 255, .12)
+}
+
+.headspa-variants li:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, .12)
+}
+
+.headspa-variant-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: #fff
+}
+
+.headspa-variant-dur {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--soft)
+}
+
+.headspa-variant-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--sand-lt);
+    min-width: 4.5ch;
+    text-align: right
+}
+
+.headspa-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: 2rem
+}
+
+.headspa-tags span {
+    font-size: .5rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .55);
+    border: 1px solid rgba(255, 255, 255, .15);
+    padding: .3rem .7rem;
+    border-radius: 50px
+}
+
+.headspa-cta .btn-p {
+    align-self: flex-start
+}
+
+@media(max-width:960px) {
+    .headspa {
+        grid-template-columns: 1fr
+    }
+
+    /* Gestapelt gibt es keine Rasterzeile mehr, an der sich height:100% des
+       Bildes ausrichten koennte — ohne feste Hoehe waechst es auf seine
+       Naturhoehe (bei 900px Breite ueber 1200px). */
+    .headspa-visual {
+        height: clamp(260px, 34vw, 340px);
+        min-height: 0
+    }
+
+    .headspa-body {
+        padding: 3.5rem 2.5rem
+    }
+}
+
+@media(max-width:600px) {
+    .headspa-visual {
+        height: clamp(200px, 52vw, 260px)
+    }
+
+    .headspa-body {
+        padding: 2.8rem 1.4rem
+    }
+
+    .headspa-variants li {
+        grid-template-columns: 1fr auto;
+        row-gap: .2rem
+    }
+
+    .headspa-variant-dur {
+        grid-column: 1;
+        grid-row: 2
+    }
+
+    .headspa-variant-price {
+        grid-row: 1 / span 2
+    }
 }
 
 /* Service modal */
@@ -1638,7 +2019,6 @@ h2 em {
 
 .srv-modal-visual {
     position: relative;
-    isolation: isolate;
     min-height: 500px;
     overflow: hidden;
     display: flex;
@@ -1648,44 +2028,16 @@ h2 em {
     color: var(--white)
 }
 
-/* Schichtung von unten: --warm als Fallback, Foto, Duotone + Raster, Ringe.
-   Negative z-index malen über den eigenen Hintergrund, aber unter den Inhalt. */
-.srv-modal-photo {
-    position: absolute;
-    inset: 0;
-    z-index: -3;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(.32) sepia(.2) brightness(.66) contrast(1.04)
-}
-
 .srv-modal-visual::before {
     content: '';
     position: absolute;
-    inset: 0;
-    z-index: -2;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
-        linear-gradient(200deg, rgba(74, 63, 56, .5), rgba(74, 63, 56, .88) 64%);
-    background-size: 52px 52px, 52px 52px, cover;
-    pointer-events: none
-}
-
-.srv-modal-visual::after {
-    content: '';
-    position: absolute;
-    z-index: -1;
+    top: 23%;
     left: 50%;
-    top: 44%;
-    width: min(72%, 320px);
-    aspect-ratio: 1;
-    border: 1px solid rgba(220, 196, 160, .18);
+    width: 310px;
+    height: 310px;
+    border: 1px solid rgba(220, 196, 160, .16);
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 58px rgba(220, 196, 160, .04), 0 0 0 116px rgba(220, 196, 160, .022);
-    pointer-events: none
+    transform: translate(-50%, -50%)
 }
 
 .srv-modal-kicker {
@@ -1708,18 +2060,14 @@ h2 em {
     display: grid;
     place-items: center;
     color: var(--sand-lt);
-    font-size: 2rem;
-    /* Hält den Hairline-Glyph auch über unruhigen Bildstellen lesbar. */
-    background: rgba(38, 30, 25, .26);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px)
+    font-size: 2rem
 }
 
 .srv-modal-number {
     position: absolute;
     right: -1rem;
     bottom: -3.7rem;
-    color: rgba(255, 255, 255, .07);
+    color: rgba(255, 255, 255, .035);
     font-family: 'Playfair Display', serif;
     font-size: 15rem;
     font-style: italic;
@@ -2133,12 +2481,11 @@ button.reviews-src-pill {
 }
 
 /* ═══ VOUCHER SHOP — Editorial configurator ══════════════ */
-/* Randlos wie .story und .contact — die Sektion ist der Split, kein Rahmen,
-   kein Ruheschatten. Die Trennung zu den Cream-Nachbarn oben und unten
-   übernimmt der Farbwechsel der hellen Hälfte, nicht mehr eine Kontur. */
 .voucher-shop {
     position: relative;
+    isolation: isolate;
     overflow: hidden;
+    padding: 7rem 3.5rem;
     background: var(--bg)
 }
 
@@ -2149,11 +2496,42 @@ body.voucher-shop-visible .float-cta {
     transform: translateY(18px) !important
 }
 
+.voucher-shop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: linear-gradient(rgba(201, 153, 94, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 153, 94, .035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    pointer-events: none
+}
+
+.voucher-shop::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    right: -14rem;
+    top: -16rem;
+    width: 42rem;
+    height: 42rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(220, 196, 160, .16), rgba(220, 196, 160, 0) 68%);
+    pointer-events: none
+}
+
 .voucher-shop-inner {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1.08fr) minmax(430px, .92fr);
-    min-height: 760px
+    min-height: 760px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--white);
+    box-shadow: 0 34px 90px rgba(74, 63, 56, .065)
+}
+
+.voucher-shop-inner-treatment {
+    min-height: 900px
 }
 
 .voucher-showcase {
@@ -2164,7 +2542,7 @@ body.voucher-shop-visible .float-cta {
     flex-direction: column;
     overflow: hidden;
     padding: 2.2rem 2.5rem 2.4rem;
-    background: var(--warm);
+    background: #493d35;
     color: var(--white)
 }
 
@@ -2497,8 +2875,7 @@ body.voucher-shop-visible .float-cta {
     min-width: 0;
     flex-direction: column;
     justify-content: center;
-    padding: clamp(3.5rem, 5.2vw, 5.5rem);
-    background: var(--white)
+    padding: clamp(3.5rem, 5.2vw, 5.5rem)
 }
 
 .voucher-config h2 {
@@ -2631,14 +3008,6 @@ body.voucher-shop-visible .float-cta {
     margin: 0;
     padding: 0;
     border: 0
-}
-
-/* Der Treatment-Picker baut ~320px (3 Reihen à 84px), der Wert-Picker ~193px.
-   Beide reservieren dieselbe Höhe, damit der Wechsel zwischen den Modi die
-   Sektion nicht mehr um ~140px springen lässt. */
-.voucher-amount-picker,
-.voucher-treatment-picker {
-    min-height: 320px
 }
 
 .voucher-treatment-options {
@@ -3033,7 +3402,7 @@ body.voucher-shop-visible .float-cta {
     justify-content: space-between;
     overflow: hidden;
     padding: 2rem;
-    background: var(--warm);
+    background: #493d35;
     color: var(--white)
 }
 
@@ -3656,6 +4025,10 @@ body.voucher-shop-visible .float-cta {
 }
 
 @media(max-width:1100px) {
+    .voucher-shop {
+        padding: 5.5rem 1.5rem
+    }
+
     .voucher-shop-inner {
         grid-template-columns: minmax(0, 1fr) minmax(390px, .9fr)
     }
@@ -3666,6 +4039,10 @@ body.voucher-shop-visible .float-cta {
 
     .voucher-config {
         padding: 3.5rem 2.8rem
+    }
+
+    .voucher-shop-inner-treatment {
+        min-height: 880px
     }
 
     .voucher-benefits {
@@ -3679,14 +4056,10 @@ body.voucher-shop-visible .float-cta {
 
 @media(max-width:900px) {
     .voucher-shop-inner {
-        grid-template-columns: 1fr;
-        min-height: 0
+        grid-template-columns: 1fr
     }
 
-    /* Gestapelt schiebt der Moduswechsel nichts mehr seitlich weg —
-       die reservierte Höhe kostet hier nur Leerraum. */
-    .voucher-amount-picker,
-    .voucher-treatment-picker {
+    .voucher-shop-inner-treatment {
         min-height: 0
     }
 
@@ -3745,6 +4118,14 @@ body.voucher-shop-visible .float-cta {
 }
 
 @media(max-width:600px) {
+    .voucher-shop {
+        padding: 4rem 1rem
+    }
+
+    .voucher-shop-inner {
+        border-radius: 14px
+    }
+
     .voucher-showcase {
         min-height: 430px;
         padding: 1.4rem
@@ -5115,20 +5496,12 @@ footer {
         display: none
     }
 
-    .srv-row {
-        gap: 1.4rem;
-        padding: 1.7rem 1.1rem
+    .srv-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
     }
 
-    .srv-row:hover,
-    .srv-row:focus-visible {
-        padding-left: 1.7rem
-    }
-
-    /* Zu eng für Glyph + Label — Pfeil trägt die Affordanz allein. */
-    .srv-row-glyph,
-    .srv-row-cta-label {
-        display: none
+    .srv-card {
+        min-height: 280px
     }
 
     .srv-modal {
@@ -5395,25 +5768,20 @@ footer {
         transform: none
     }
 
-    /* --- GALLERY: one-row continuous flow --- */
-    .gallery {
-        -webkit-mask-image: none;
-        mask-image: none
-    }
-
+    /* --- GALLERY: statisches Raster, zwei Spalten --- */
     .gallery-track {
-        animation-duration: 58s
-    }
-
-    .gallery-group {
-        gap: 2px;
-        padding-right: 2px
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2px
     }
 
     .gallery-item {
-        flex-basis: 82vw;
-        width: 82vw;
-        height: clamp(320px, 96vw, 400px)
+        height: clamp(180px, 46vw, 260px)
+    }
+
+    /* Auf Mobile kommt das Portrait dazu — ungerade Anzahl. Das letzte Bild
+       fuellt die Reihe, statt eine leere Zelle stehen zu lassen. */
+    .gallery-item:last-child {
+        grid-column: span 2
     }
 
     /* --- SERVICES: original cards as mobile slider --- */
@@ -5442,8 +5810,32 @@ footer {
         padding: 2.5rem 2rem
     }
 
+    /* Einzeilig auch auf dem Handy: hier ist die Karte zwar volle Breite,
+       aber die Schrift deutlich groesser als am Desktop. Der Abzug deckt
+       den festen Innenabstand, damit der laengste Name bis 320px passt. */
     .srv-grid .srv-card-front h3 {
-        font-size: clamp(1.55rem, 7vw, 1.8rem)
+        font-size: clamp(1rem, calc(7.9vw - 9.5px), 1.8rem)
+    }
+
+    /* Aufgeklappt auf dem Handy: von oben lesen statt mittig, der Text ist
+       hier fast immer laenger als die Karte hoch ist. */
+    .srv-card-expanded {
+        padding: 2.6rem 2rem 2rem;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch
+    }
+
+    .srv-card-expanded .srv-num {
+        display: none
+    }
+
+    .srv-card-expanded h3 {
+        font-size: 1.35rem
+    }
+
+    .srv-card-expanded p {
+        font-size: 1.02rem;
+        line-height: 1.65
     }
 
     .srv-mobile-nav {
@@ -5499,11 +5891,10 @@ footer {
         padding: 2rem
     }
 
-    /* Nur der Ring wird kleiner — Raster und Duotone bleiben vollflächig. */
-    .srv-modal-visual::after {
-        top: 40%;
+    .srv-modal-visual::before {
+        top: 38%;
         width: 230px;
-        box-shadow: 0 0 0 40px rgba(220, 196, 160, .04), 0 0 0 80px rgba(220, 196, 160, .022)
+        height: 230px
     }
 
     .srv-modal-glyph {

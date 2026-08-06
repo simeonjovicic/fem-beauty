@@ -605,7 +605,7 @@ export default function VoucherShop() {
   return (
     <>
       <section ref={sectionRef} className="voucher-shop" id="vouchers">
-        <div className="voucher-shop-inner">
+        <div className={`voucher-shop-inner voucher-shop-inner-${kind}`}>
           <div className="voucher-showcase">
             <div className="voucher-showcase-top">
               <span>FEM Gift Edition</span>

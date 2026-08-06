@@ -148,7 +148,7 @@ function Problem({ title, text }) {
       <div className="line" />
       <p className="danke-lead">{text}</p>
       <div className="danke-actions">
-        <a className="btn-p" href="/#vouchers">Zurück zum Gutschein</a>
+        <a className="btn-p" href="/gutscheine.html">Zurück zum Gutschein</a>
         <a className="link-arrow" href={BOOKING_URL} target="_blank" rel="noopener noreferrer">Termin buchen →</a>
       </div>
       <p className="danke-note">

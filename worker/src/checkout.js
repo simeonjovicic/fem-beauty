@@ -67,7 +67,9 @@ export async function handleCheckout(request, env, stripe) {
     // Rückerstattungen, die nur den PaymentIntent referenzieren.
     payment_intent_data: { metadata: toMetadata(order) },
     success_url: `${env.PUBLIC_SITE_URL}/danke.html?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.PUBLIC_SITE_URL}/#vouchers`,
+    // Zurück zum Konfigurator, nicht zum Teaser-Band auf der Startseite —
+    // wer abbricht, will dort weitermachen, wo er war.
+    cancel_url: `${env.PUBLIC_SITE_URL}/gutscheine.html`,
     locale: 'de',
   })
 
