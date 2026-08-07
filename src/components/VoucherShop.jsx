@@ -188,7 +188,7 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
         ))}
       </div>
       <div className={`voucher-custom-value${selection.presetAmount === null ? ' active' : ''}`}>
-        <label htmlFor={`${idPrefix}-custom-amount`}>Eigener Betrag</label>
+        <label htmlFor={`${idPrefix}-custom-amount`}>Oder eigener Betrag</label>
         <div className="voucher-custom-input">
           <input
             id={`${idPrefix}-custom-amount`}
@@ -507,11 +507,9 @@ export default function VoucherShop() {
             <button type="button" className="vshop-back" onClick={goBack}>Zurück</button>
           ) : <span />}
 
+          {/* Betrag unter dem Knopf statt daneben: nebeneinander lasen sich
+              Angabe und Handlung wie zwei gleichrangige Elemente. */}
           <div className="vshop-nav-end">
-            <span className="vshop-running">
-              {step < 2 ? 'Zwischensumme' : 'Gesamt'}
-              <strong>{formatCurrency(effectiveAmount)}</strong>
-            </span>
             {step < 2 ? (
               <button type="button" className="vshop-submit" onClick={goNext}>
                 <span>Weiter</span><Icon name="arrow" />
@@ -522,6 +520,10 @@ export default function VoucherShop() {
                 {!processing && <Icon name="lock" />}
               </button>
             )}
+            <span className="vshop-running">
+              <span>{step < 2 ? 'Zwischensumme' : 'Gesamt'}</span>
+              <strong>{formatCurrency(effectiveAmount)}</strong>
+            </span>
           </div>
         </div>
       </div>

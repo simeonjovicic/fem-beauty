@@ -2972,36 +2972,52 @@ button.reviews-src-pill {
 }
 
 /* ── Navigation ── */
+/* Klebt am unteren Fensterrand, solange die Gutschein-Sektion sichtbar ist:
+   Knopf und Betrag bleiben damit erreichbar, ohne ans Seitenende scrollen zu
+   muessen. Moeglich, weil .voucher-shop overflow-x:clip nutzt statt hidden —
+   clip erzeugt keinen Scrollcontainer und hebelt sticky nicht aus.
+   Der eigene Hintergrund ist noetig, sonst scrollt der Inhalt sichtbar
+   darunter durch. */
 .vshop-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    margin-top: 1.1rem
+    margin-top: 1.1rem;
+    padding: .9rem 0 1rem;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -10px 20px -12px rgba(74, 63, 56, .18)
 }
 
 .vshop-nav-end {
     display: flex;
-    align-items: center;
-    gap: 1.4rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .7rem;
     margin-left: auto
 }
 
-/* Der Betrag laeuft in der Navigationszeile mit, damit er beim Weiterklicken
-   sichtbar bleibt, ohne dafuer eine eigene Spalte zu brauchen. */
+/* Der Betrag laeuft mit, damit er beim Weiterklicken sichtbar bleibt.
+   Unter dem Knopf und mit deutlicher Beschriftung — nebeneinander wirkte er
+   wie ein gleichrangiges zweites Element neben der Handlung. */
 .vshop-running {
     display: flex;
     align-items: baseline;
-    gap: .6rem;
-    font-size: .9rem;
+    gap: .5rem;
+    font-size: .92rem;
     color: var(--warm-lt);
     white-space: nowrap
 }
 
 .vshop-running strong {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
-    font-weight: 400;
+    font-family: 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-size: 1.15rem;
+    font-weight: 500;
     color: var(--warm)
 }
 
@@ -3126,18 +3142,22 @@ button.reviews-src-pill {
        der Button soll die volle Breite als Ziel bieten. */
     .vshop-nav {
         flex-wrap: wrap;
-        gap: .9rem
+        gap: .7rem;
+        padding: .8rem 0 .9rem;
+        /* Bis an die Sektionsraender ziehen, damit die Leiste auf dem Handy
+           als durchgehender Balken liest statt als eingerueckter Kasten. */
+        margin-inline: -1.2rem;
+        padding-inline: 1.2rem
     }
 
     .vshop-nav-end {
         width: 100%;
-        flex-direction: column-reverse;
         align-items: stretch;
-        gap: .8rem
+        gap: .7rem
     }
 
     .vshop-running {
-        justify-content: space-between
+        justify-content: center
     }
 
     .vshop-submit {
@@ -4049,23 +4069,27 @@ body.voucher-shop-visible .float-cta {
     font-weight: 400
 }
 
+/* Deutlicher abgesetzt als zuvor: der Block ging zwischen den vier
+   Betragsknoepfen fast unter. Kraeftigerer Rahmen, mehr Innenraum und ein
+   eigener Abstand nach oben. */
 .voucher-custom-value {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    margin-top: .8rem;
-    padding: .8rem 1rem;
-    border: 1px solid var(--line);
+    margin-top: 1.2rem;
+    padding: 1.05rem 1.2rem;
+    border: 1px solid var(--sand-lt);
     border-radius: 8px;
     background: var(--white);
-    transition: border-color .3s, background .3s
+    transition: border-color .3s, background .3s, box-shadow .3s
 }
 
 .voucher-custom-value.active,
 .voucher-custom-value:focus-within {
-    border-color: var(--sand-lt);
-    background: #fffcf8
+    border-color: var(--sand);
+    background: #fffcf8;
+    box-shadow: 0 0 0 3px rgba(201, 153, 94, .12)
 }
 
 .voucher-custom-value > label {
@@ -4075,9 +4099,18 @@ body.voucher-shop-visible .float-cta {
 
 .voucher-custom-input {
     display: flex;
-    width: 116px;
-    align-items: center;
-    border-bottom: 1px solid var(--sand-lt)
+    width: 132px;
+    align-items: baseline;
+    gap: .3rem;
+    padding: .2rem .7rem .3rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    transition: border-color .3s
+}
+
+.voucher-custom-value:focus-within .voucher-custom-input {
+    border-color: var(--sand)
 }
 
 .voucher-custom-input input {
@@ -4088,8 +4121,12 @@ body.voucher-shop-visible .float-cta {
     outline: 0;
     background: transparent;
     color: var(--warm);
-    font-family: 'Playfair Display', serif;
-    font-size: 1.05rem
+    /* Gleiche Ziffern wie die Betragsknoepfe: Outfit mit Tabellenziffern.
+       Playfair stand hier als einziges Feld noch auf der Antiqua. */
+    font-family: 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-weight: 300;
+    font-size: 1.35rem
 }
 
 .voucher-custom-input input::placeholder {
@@ -4098,7 +4135,7 @@ body.voucher-shop-visible .float-cta {
 
 .voucher-custom-input span {
     color: var(--sand);
-    font-size: .75rem
+    font-size: 1rem
 }
 
 .voucher-amount-hint {
