@@ -9,17 +9,25 @@ const ImpressumPage = lazy(() => import('./ImpressumPage'))
 const GutscheinePage = lazy(() => import('./GutscheinePage'))
 const DankePage = lazy(() => import('./DankePage'))
 
-const PAGES = [
-  ['/impressum.html', ImpressumPage],
-  ['/gutscheine.html', GutscheinePage],
-  ['/danke.html', DankePage],
-]
+const PAGES = {
+  impressum: ImpressumPage,
+  gutscheine: GutscheinePage,
+  danke: DankePage,
+}
 
+// Ohne Endung abgleichen: Cloudflare Pages leitet /seite.html per 308 auf
+// /seite um. Ein Abgleich auf ".html" schlug danach fehl, und die App zeigte
+// die Startseite, obwohl der Server die richtige Datei ausgeliefert hatte.
+// Deckt /gutscheine.html, /gutscheine und /gutscheine/ gleichermassen ab.
 export default function App() {
-  const { pathname } = window.location
-  const match = PAGES.find(([suffix]) => pathname.endsWith(suffix))
-  if (!match) return <HomePage />
+  const slug = window.location.pathname
+    .replace(/\/+$/, '')
+    .split('/')
+    .pop()
+    .replace(/\.html$/, '')
 
-  const Page = match[1]
+  const Page = PAGES[slug]
+  if (!Page) return <HomePage />
+
   return <Suspense fallback={null}><Page /></Suspense>
 }
