@@ -1597,7 +1597,7 @@ h2 em {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url('/voucher-bg.webp');
+    background-image: url('/voucher-bg-v2.webp');
     background-size: cover;
     background-position: left center;
     background-repeat: no-repeat;
