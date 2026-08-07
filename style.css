@@ -247,12 +247,17 @@ nav.scrolled .nav-logo {
 }
 
 .nav-links a {
-    font-size: .65rem;
-    font-weight: 400;
-    letter-spacing: .16em;
+    /* Kraeftiger und heller als zuvor (.65rem / 400 / 70%) — die Navigation
+       ging auf dem hellen Teil des Titelbilds unter. Die Groesse liegt
+       bewusst zwischen beiden Staenden: das Gewicht traegt die Praesenz,
+       nicht die Punktgroesse. */
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, .7);
+    color: rgba(255, 255, 255, .92);
     text-decoration: none;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .45);
     transition: color .3s;
     position: relative
 }
@@ -260,10 +265,10 @@ nav.scrolled .nav-logo {
 .nav-links a::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: -6px;
     left: 0;
     width: 0;
-    height: 1px;
+    height: 2px;
     background: var(--sand);
     transition: width .4s var(--ease-out)
 }
@@ -273,7 +278,8 @@ nav.scrolled .nav-logo {
 }
 
 nav.scrolled .nav-links a {
-    color: var(--taupe)
+    color: var(--warm);
+    text-shadow: none
 }
 
 .nav-links a:hover {
@@ -502,6 +508,40 @@ h2 em {
     overflow: hidden;
     display: flex;
     align-items: stretch
+}
+
+/* KI-Kennzeichnung am Titelbild. Bewusst hell statt dunkel: das Bild ist an
+   dieser Stelle nahezu schwarz (gemessen rgb 3/2/1), dunkle Schrift kaeme auf
+   einen Kontrast von 1,36 und waere unsichtbar. Gedeckte helle Schrift bleibt
+   zurueckhaltend und ist trotzdem lesbar. Links oberhalb des Logos, das erst
+   bei 26px beginnt. */
+.hero-ai-note {
+    position: absolute;
+    top: .5rem;
+    left: .9rem;
+    z-index: 3;
+    font-family: 'Outfit', sans-serif;
+    font-size: .58rem;
+    font-weight: 400;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    /* Wie am Head-Spa-Bild: soft-light statt fester Farbe, damit der Hinweis
+       auf den hellen wie dunklen Stellen des Titelbilds gleich zurueckhaltend
+       bleibt. Vorher lag er bei Kontrast 12,5 bis 20,7.
+       Fuer eine deutlich lesbare Kennzeichnung genuegt es, die drei Zeilen
+       unten durch color: rgba(255,255,255,.38) zu ersetzen. */
+    color: #9a9a9a;
+    mix-blend-mode: exclusion;
+    opacity: .3;
+    pointer-events: none
+}
+
+@media(max-width:768px) {
+    .hero-ai-note {
+        top: .35rem;
+        left: .6rem;
+        font-size: .52rem
+    }
 }
 
 .hero-bg {
@@ -1149,7 +1189,6 @@ h2 em {
     outline: 2px solid var(--sand);
     outline-offset: -4px
 }
-
 
 
 /* ═══ BRANDS MARQUEE ═══════════════════ */
@@ -1873,18 +1912,46 @@ h2 em {
         margin-bottom: 1.5rem
     }
 
-    /* Nebeneinander mit Trennstrichen brechen die drei Merkmale hier
-       unschoen um — untereinander ohne Striche. */
+    /* Drei Spalten nebeneinander statt untereinander. Icon ueber den Text
+       gesetzt: nebeneinander bliebe fuer "Perfekt als Geschenk" bei rund
+       110px Spaltenbreite zu wenig Platz. */
     .vt-features {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: .7rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        /* start statt center: die aeusseren Texte laufen zweizeilig, mittig
+           ausgerichtet saessen die Icons dann auf drei verschiedenen Hoehen. */
+        align-items: start;
+        gap: 0;
         margin-bottom: 1.8rem
     }
 
+    .vt-features li {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: .4rem;
+        padding-inline: .35rem;
+        font-size: .76rem;
+        line-height: 1.3
+    }
+
     .vt-features li + li {
-        padding-left: 0;
-        border-left: 0
+        padding-left: .35rem;
+        border-left: 1px solid rgba(220, 196, 160, .28)
+    }
+
+    .vt-features svg {
+        font-size: 1.05rem
+    }
+
+    /* Volle Breite und zentriert: unter den drei mittig gesetzten Merkmalen
+       wirkte der linksbuendige Knopf in Textbreite verloren, und als
+       wichtigstes Ziel der Sektion darf er die ganze Breite nutzen. */
+    .vt-cta {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        padding-inline: 1.2rem
     }
 }
 
@@ -1937,6 +2004,47 @@ h2 em {
 .headspa-visual {
     position: relative;
     overflow: hidden
+}
+
+/* KI-Kennzeichnung am Head-Spa-Bild. Auf Wunsch in der Bildfarbe gehalten:
+   der Grund misst dort rgb(83,68,55), der Text liegt knapp darueber. Das ist
+   bewusst so gewaehlt und bleibt hinter dem zurueck, was Artikel 50 mit
+   "klar und unterscheidbar" meint — siehe Notiz im Impressum.
+   Fuer eine deutliche Kennzeichnung genuegt es, die Farbe auf
+   rgba(255,255,255,.38) zu setzen, wie beim Titelbild. */
+.headspa-ai-note {
+    position: absolute;
+    top: .5rem;
+    left: .9rem;
+    z-index: 2;
+    font-family: 'Outfit', sans-serif;
+    font-size: .58rem;
+    font-weight: 400;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    /* soft-light statt fester Farbe: der Bildausschnitt wechselt mit dem
+       Breakpoint — gestapelt liegt oben links ein heller Bereich, wo eine
+       feste dunkle Farbe deutlich sichtbar wurde (Kontrast 6,9 statt 1,2).
+       Der Mischmodus haelt den Hinweis auf hellem wie dunklem Grund gleich
+       zurueckhaltend. */
+    color: #9a9a9a;
+    mix-blend-mode: exclusion;
+    opacity: .3;
+    pointer-events: none
+}
+
+@media(max-width:960px) {
+    .headspa-ai-note {
+        top: .35rem;
+        left: .6rem;
+        font-size: .52rem;
+        /* Gestapelt zeigt der Bildausschnitt oben links eine fast weisse
+           Wand — heller Text greift dort in keinem Mischmodus. Deshalb hier
+           ein gedeckter dunkler Ton statt der Mischung. */
+        color: rgba(38, 30, 24, .3);
+        mix-blend-mode: normal;
+        opacity: 1
+    }
 }
 
 /* Absolut positioniert, damit das Bild keine Hoehe in die Rasterzeile
@@ -6538,20 +6646,14 @@ footer {
         transform: none
     }
 
-    /* --- GALLERY: statisches Raster, zwei Spalten --- */
+    /* --- GALLERY: zwei Spalten, Hoehe wie vor dem Umbau --- */
     .gallery-track {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 2px
     }
 
     .gallery-item {
-        height: clamp(180px, 46vw, 260px)
-    }
-
-    /* Auf Mobile kommt das Portrait dazu — ungerade Anzahl. Das letzte Bild
-       fuellt die Reihe, statt eine leere Zelle stehen zu lassen. */
-    .gallery-item:last-child {
-        grid-column: span 2
+        height: 200px
     }
 
     /* --- SERVICES: original cards as mobile slider --- */
@@ -6985,5 +7087,15 @@ footer {
     .lightbox-close {
         top: 1rem;
         right: 1.5rem;
+    }
+}
+
+/* Galerie, zweite Stufe auf schmalen Schirmen — wie vor dem Umbau, wo die
+   Kacheln ab 560px von 200 auf 160px gingen. Bewusst am Dateiende: der
+   768er-Block weiter oben setzt dieselbe Eigenschaft, und bei gleicher
+   Spezifitaet gewinnt die spaetere Regel. */
+@media(max-width:560px) {
+    .gallery-item {
+        height: 160px
     }
 }

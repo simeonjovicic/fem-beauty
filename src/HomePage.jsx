@@ -76,6 +76,9 @@ function HeroTrust() {
 function Hero() {
   return (
     <section className="hero" id="top">
+      {/* Kennzeichnung am Bild selbst, nicht nur im Impressum: die
+          Transparenzpflicht verlangt den Hinweis beim ersten Kontakt. */}
+      <span className="hero-ai-note">AI generated</span>
       <div className="hero-bg">
         <picture>
           <source media="(max-width: 768px)" srcSet="/hero-mobile-v1.webp" />
@@ -191,23 +194,17 @@ const galleryImages = [
   ['/foto-store-1.webp', 800, 600, 'FEM Beauty Logo und Empfangsbereich'],
 ]
 
-const mobileGalleryImage = [
-  '/foto-store-4.webp',
-  599,
-  800,
-  'FEM Beauty Salon Eingangsbereich — Ramperstorffergasse 51, Wien 1050',
-]
-
 function Gallery({ openImage }) {
-  const isMobile = useMediaQuery('(max-width: 768px)')
-  const visibleImages = isMobile ? [...galleryImages, mobileGalleryImage] : galleryImages
+  // Auf Mobile lag hier zusaetzlich das Portrait aus der Story-Sektion, was
+  // fuenf Bilder ergab und damit eine unvollstaendige Reihe. Wie vor dem
+  // Umbau sind es wieder vier — ein glattes Zweier-Raster.
 
   // Statisches Raster statt Laufband: die zweite, aria-hidden Kopie der Bilder
   // war nur noetig, damit die Endlosbewegung nahtlos umschlug.
   return (
     <section className="gallery" aria-label="Einblicke in den Salon">
       <div className="gallery-track">
-        {visibleImages.map(([src, width, height, alt]) => (
+        {galleryImages.map(([src, width, height, alt]) => (
           <button
             type="button"
             className="gallery-item"
@@ -435,6 +432,7 @@ function HeadSpa() {
   return (
     <section className="headspa" id="headspa">
       <div className="headspa-visual">
+        <span className="headspa-ai-note">AI generated</span>
         <img
           src="/headspa.webp"
           width="1000"

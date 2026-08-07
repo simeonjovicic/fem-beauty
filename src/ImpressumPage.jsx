@@ -50,7 +50,25 @@ export default function ImpressumPage() {
           <p>Die Inhalte dieser Website — insbesondere Texte, Bilder, Fotos und Grafiken — sind urheberrechtlich geschützt. Das Urheberrecht liegt, soweit nicht ausdrücklich anders gekennzeichnet, bei FEM Beauty / Zhenyi Cai. Jede Vervielfältigung, Bearbeitung oder Verbreitung bedarf der schriftlichen Zustimmung.</p>
 
           <h2>Bildnachweis</h2>
-          <p>Alle Fotos auf dieser Website sind Eigentum von FEM Beauty Wien oder wurden mit Zustimmung der abgebildeten Personen veröffentlicht.</p>
+          <p>Die Fotos dieser Website sind Eigentum von FEM Beauty Wien oder wurden mit Zustimmung der abgebildeten Personen veröffentlicht.</p>
+
+          <h2>Hinweis zu KI-generierten Inhalten</h2>
+          <p>
+            Folgende Bilder dieser Website wurden mit generativer künstlicher
+            Intelligenz erstellt: das Titelbild der Startseite in der Desktop-
+            und der Mobilfassung sowie das Bild der Head-Spa-Sektion. Sie dienen
+            der Veranschaulichung unserer Behandlungen und zeigen keine realen
+            Kundinnen, Kunden oder Mitarbeiterinnen unseres Salons.
+          </p>
+          <p>
+            Alle übrigen Fotos sind echte Aufnahmen aus unserem Salon in der
+            Ramperstorffergasse 51.
+          </p>
+          <p>
+            Wir kommen damit den Transparenzpflichten nach Artikel 50 der
+            Verordnung (EU) 2024/1689 über künstliche Intelligenz nach, die seit
+            2. August 2026 anwendbar sind.
+          </p>
 
           <a href="/" className="imp-back">← Zurück zur Startseite</a>
         </section>
