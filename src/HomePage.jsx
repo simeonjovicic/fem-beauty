@@ -436,10 +436,10 @@ function HeadSpa() {
     <section className="headspa" id="headspa">
       <div className="headspa-visual">
         <img
-          src="/foto-store-0.webp"
-          width="600"
-          height="800"
-          alt="Ruheraum im FEM Kosmetiksalon Wien — Setting der japanischen Head Spa"
+          src="/headspa.webp"
+          width="1000"
+          height="1250"
+          alt="Japanische Head Spa bei FEM Beauty Wien — Kopfhautbehandlung mit warmem Wasser am Spa-Becken"
           loading="lazy"
           decoding="async"
         />
@@ -474,42 +474,86 @@ function HeadSpa() {
   )
 }
 
-// Zwei gestapelte Karten statt einer: der Shop kennt Wert- und
-// Behandlungsgutschein, und die Wahl ist das Verkaufsargument. Rein
-// dekorativ und in CSS gebaut — ein Import der echten VoucherArtwork
-// zoege den ganzen Konfigurator ins Bundle der Startseite.
+// Eigene, kleine Icons statt eines Imports aus VoucherShop — der Shop liegt
+// auf /gutscheine.html und soll nicht ins Bundle der Startseite zurueck.
+function VtIcon({ name }) {
+  const common = {
+    width: '1em', height: '1em', viewBox: '0 0 24 24', fill: 'none',
+    stroke: 'currentColor', strokeWidth: '1.4',
+    strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+  }
+
+  if (name === 'gift') {
+    return (
+      <svg {...common}>
+        <path d="M4 10.5h16V20H4zM3 7.5h18v3H3zM12 7.5V20" />
+        <path d="M12 7.5H8.8C6.3 7.5 5.6 4 8 3.9c2.1-.1 4 3.6 4 3.6ZM12 7.5h3.2c2.5 0 3.2-3.5.8-3.6-2.1-.1-4 3.6-4 3.6Z" />
+      </svg>
+    )
+  }
+
+  if (name === 'clock') {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8.6" />
+        <path d="M12 7.3V12l3.2 2" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg {...common}>
+      <path d="M12 20s-7-4.4-7-9.2A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.8C19 15.6 12 20 12 20Z" />
+    </svg>
+  )
+}
+
+const VT_FEATURES = [
+  ['gift', 'Perfekt als Geschenk'],
+  ['clock', 'Flexibel einlösbar'],
+  ['heart', 'Rundum wohltuend'],
+]
+
 function VoucherTeaser() {
   return (
     <section className="voucher-teaser" id="vouchers">
       <div className="voucher-teaser-inner">
-        <div className="vt-stack rv" aria-hidden="true">
+        {/* Zwei gepraegte Karten, in CSS gebaut. Kein Import aus VoucherShop:
+            der Konfigurator liegt auf /gutscheine.html und soll nicht ins
+            Bundle der Startseite zurueck. */}
+        <div className="vt-stack" aria-hidden="true">
           <div className="vt-card vt-card-back">
-            <span className="vt-card-kicker">Behandlung</span>
+            <span className="vt-card-kicker">Zeit für dich.</span>
+            <span className="vt-card-seal">f</span>
           </div>
           <div className="vt-card vt-card-front">
-            <span className="vt-card-top">FEM Gift Edition</span>
-            <span className="vt-card-mark">Fem</span>
+            <span className="vt-card-kicker">Gutschein</span>
+            <span className="vt-card-mark">fem</span>
             <span className="vt-card-foot">
-              <span>Gutschein</span>
-              <span>Wien · 1050</span>
+              <span>Head Spa</span>
+              <span>No. 0001</span>
             </span>
           </div>
         </div>
 
-        <div className="voucher-teaser-body">
-          <span className="tag rv">FEM Gutscheine</span>
-          <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
-          <div className="line anim-line" />
-          <p className="rv d2">
-            Ein frei wählbarer Wertgutschein oder eine ganz bestimmte Behandlung —
-            persönlich gestaltet und sofort digital bereit.
-          </p>
-          <ul className="vt-points rv d2">
-            <li>Persönlich gestaltbar</li>
-            <li>Digital oder druckbereit</li>
-            <li>Flexibel einlösbar</li>
-          </ul>
-          <a className="btn-p rv d3" href="/gutscheine.html">Gutschein kaufen →</a>
+        <div className="vt-content">
+        <span className="vt-kicker rv">Ihr Gutschein</span>
+        <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
+        <div className="vt-rule rv d1" />
+        <p className="rv d2">
+          Eine wohltuende Auszeit, schenken oder selbst genießen.<br />
+          Head Spa — pure Entspannung für Kopfhaut, Haar und Sinne.
+        </p>
+
+        <ul className="vt-features rv d2">
+          {VT_FEATURES.map(([icon, label]) => (
+            <li key={label}><VtIcon name={icon} />{label}</li>
+          ))}
+        </ul>
+
+          <a className="vt-cta rv d3" href="/gutscheine.html">
+            Gutschein kaufen <i aria-hidden="true">→</i>
+          </a>
         </div>
       </div>
     </section>
@@ -621,13 +665,77 @@ function ReviewCard({ review, interactive = true }) {
   )
 }
 
+const REVIEW_PAGE_MS = 5200
+
 function Reviews() {
   const [filter, setFilter] = useState(null)
+  const [page, setPage] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  // Verbleibende Zeit bis zum naechsten Wechsel und der Zeitpunkt, an dem
+  // sie zuletzt zu laufen begann. startedRef === null heisst: haelt gerade.
+  const remainingRef = useRef(REVIEW_PAGE_MS)
+  const startedRef = useRef(null)
 
   const filtered = filter ? reviews.filter((review) => review.platform === filter) : reviews
+  const perPage = isMobile ? 1 : 2
+
+  // Seiten zu je zwei Karten. Der Sprung geht damit immer um eine volle
+  // Seite — genau das unterscheidet ihn vom fruehen Endlosband, das nie
+  // stillstand und bei dem man nie zu Ende gelesen hatte.
+  const pages = []
+  for (let index = 0; index < filtered.length; index += perPage) {
+    pages.push(filtered.slice(index, index + perPage))
+  }
+
+  // Filterwechsel oder Breakpoint-Wechsel aendern die Seitenzahl — ohne
+  // Ruecksprung stuende man sonst auf einer Seite, die es nicht mehr gibt.
+  // Anpassung waehrend des Renderns statt im Effect: so wird nie ein
+  // Zwischenstand mit ungueltiger Seite gezeichnet.
+  const pagingKey = `${filter || 'all'}-${perPage}`
+  const [lastPagingKey, setLastPagingKey] = useState(pagingKey)
+  if (pagingKey !== lastPagingKey) {
+    setLastPagingKey(pagingKey)
+    setPage(0)
+  }
+
+  // Der Zeitgeber laeuft als setTimeout ueber die jeweils verbleibende Zeit,
+  // nicht als festes Intervall. Zwei Gruende:
+  // – Beim Zeigen auf die Sektion wird nur angehalten. Die Restzeit bleibt
+  //   erhalten, beim Verlassen laeuft sie weiter, statt von vorn zu beginnen.
+  // – Ein Klick auf die Pfeile setzt die Restzeit bewusst auf die volle
+  //   Dauer (siehe go), sonst spraenge die Seite gleich wieder weiter.
+  useEffect(() => {
+    if (pages.length < 2) return undefined
+
+    if (paused) {
+      if (startedRef.current !== null) {
+        remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startedRef.current))
+        startedRef.current = null
+      }
+      return undefined
+    }
+
+    startedRef.current = Date.now()
+    const timer = window.setTimeout(() => {
+      startedRef.current = null
+      remainingRef.current = REVIEW_PAGE_MS
+      setPage((current) => (current + 1) % pages.length)
+    }, remainingRef.current)
+
+    return () => window.clearTimeout(timer)
+  }, [paused, pages.length, page])
 
   const toggleFilter = (platform) => {
     setFilter((active) => (active === platform ? null : platform))
+  }
+
+  // Manuell geblaettert heisst: volle Zeit fuer die neue Seite, sonst liefe
+  // die Restzeit der alten weiter und die neue waere sofort wieder weg.
+  const go = (next) => {
+    remainingRef.current = REVIEW_PAGE_MS
+    startedRef.current = null
+    setPage((current) => (current + next + pages.length) % pages.length)
   }
 
   const totalLabel = filter === 'treatwell'
@@ -661,25 +769,63 @@ function Reviews() {
           </div>
         </div>
 
-        <div className="reviews-flow" aria-label="Automatisch fließende Kundenbewertungen">
+        <div
+          className="reviews-flow"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+        >
           <div
             className="reviews-flow-track"
-            key={filter || 'all'}
-            style={{ '--reviews-flow-duration': `${Math.max(80, filtered.length * 8)}s` }}
+            style={{ transform: `translateX(-${page * 100}%)` }}
           >
-            {[0, 1].map((copyIndex) => (
-              <div className="reviews-flow-group" aria-hidden={copyIndex === 1} key={copyIndex}>
-                {filtered.map((review, reviewIndex) => (
+            {pages.map((group, pageIndex) => (
+              <div
+                className="reviews-page"
+                key={`${filter || 'all'}-${pageIndex}`}
+                inert={pageIndex !== page}
+              >
+                {group.map((review, reviewIndex) => (
                   <ReviewCard
                     review={review}
-                    interactive={copyIndex === 0}
-                    key={`${copyIndex}-${review.name}-${reviewIndex}`}
+                    interactive
+                    key={`${review.name}-${reviewIndex}`}
                   />
                 ))}
               </div>
             ))}
           </div>
         </div>
+
+        {pages.length > 1 && (
+          <div className="reviews-pager">
+            <button type="button" className="reviews-pager-arrow" aria-label="Vorherige Bewertungen" onClick={() => go(-1)}>←</button>
+            {/* Zaehler statt Punkten: bei 24 Bewertungen waeren es je nach
+                Breite 12 bis 24 Punkte — als Fortschritt nicht mehr lesbar
+                und als Ziel zu klein zum Treffen. */}
+            <div className="reviews-pager-status">
+              <p className="reviews-pager-count" aria-live="polite">
+                <strong>{page + 1}</strong> / {pages.length}
+              </p>
+              {/* Laeuft bis zum naechsten Wechsel. Der Schluessel haengt nur
+                  an der Seite, nicht am Pausenzustand: beim Zeigen friert die
+                  Animation ein und laeuft danach weiter — genau wie der
+                  Zeitgeber. Mit paused im Schluessel spraenge sie auf null. */}
+              <div className="reviews-progress" aria-hidden="true">
+                <span
+                  key={page}
+                  style={{
+                    animationDuration: `${REVIEW_PAGE_MS}ms`,
+                    animationPlayState: paused ? 'paused' : 'running',
+                  }}
+                />
+              </div>
+            </div>
+            <button type="button" className="reviews-pager-arrow" aria-label="Nächste Bewertungen" onClick={() => go(1)}>→</button>
+          </div>
+        )}
+
         <div className="reviews-cta"><BookingLink className="link-arrow">Alle Bewertungen lesen →</BookingLink></div>
       </div>
     </section>

@@ -1539,44 +1539,51 @@ h2 em {
 }
 
 /* ═══ GUTSCHEIN — Teaser-Band ═══════════
-   Ersetzt den ausgerollten Konfigurator auf der Startseite (1397px, 1,7
-   Bildschirme auf dem Handy); der liegt jetzt auf /gutscheine.html.
-   Dunkel, weil links und rechts davon Bewertungen und Team beide cream
-   sind — hell waere das Band dort als eigene Sektion nicht lesbar. */
+   Randloses dunkles Band, links die gepraegten Karten, rechts der Text. */
 .voucher-teaser {
     position: relative;
-    background: var(--warm);
-    padding: 5.5rem 0;
-    overflow: hidden
+    background: #3f362f;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: 600px
 }
 
-/* Millimeterraster und warmer Lichtkegel wie im Head-Spa-Panel, damit die
-   Flaeche nicht tot wirkt. Negativer z-index: liegt unter dem Inhalt. */
+/* Hintergrundbild statt nachgebauter Textur: Raster, Lichtkegel und der
+   Pflanzenschatten links stecken darin. Mit Verlaeufen war besonders der
+   Schatten nicht glaubwuerdig herzustellen.
+   cover + links ausgerichtet, damit der Schatten auch auf schmalen Schirmen
+   an seiner Stelle bleibt statt weggeschnitten zu werden. */
 .voucher-teaser::before {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(120% 90% at 22% 15%, rgba(220, 196, 160, .16), transparent 60%),
-        repeating-linear-gradient(0deg, rgba(220, 196, 160, .045) 0 1px, transparent 1px 34px),
-        repeating-linear-gradient(90deg, rgba(220, 196, 160, .045) 0 1px, transparent 1px 34px);
-    z-index: 0;
+    background-image: url('/voucher-bg.webp');
+    background-size: cover;
+    background-position: left center;
+    background-repeat: no-repeat;
     pointer-events: none
 }
 
+/* Bahn wie im Commit-Stand: 1120px breit, 360px-Spalte fuer die Karten.
+   Die volle Sektion bleibt randlos, nur der Inhalt ist gefasst. */
 .voucher-teaser-inner {
     position: relative;
     z-index: 1;
-    max-width: 1120px;
+    width: 100%;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 0 3.5rem;
     display: grid;
-    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-    gap: 3.5rem;
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    gap: 5rem;
     align-items: center
 }
 
-/* ── Kartenstapel ── */
+/* ── Kartenpaar (Geometrie unveraendert aus 061fc1f) ──
+   Gegenlaeufig gekippt: hintere nach links, vordere nach rechts. Das faechert
+   den Stapel auf, statt ihn nur zu versetzen — der Grund, warum die Rueckkarte
+   dort klar lesbar ist und in meiner Zwischenfassung verschwand. */
 .vt-stack {
     position: relative;
     aspect-ratio: 1 / .92
@@ -1587,194 +1594,297 @@ h2 em {
     left: 0;
     width: 100%;
     aspect-ratio: 1.62 / 1;
-    border-radius: 13px;
-    padding: 1.15rem 1.3rem;
+    border-radius: 14px;
+    padding: 1.35rem 1.5rem;
     overflow: hidden
 }
 
-/* Hintere Karte steht fuer den Behandlungsgutschein — nur angedeutet. */
-/* Deutlich heller als die vordere Karte und als der Sektionsgrund (#4a3f38),
-   damit der Stapel als zwei Karten lesbar ist statt als eine mit Schatten. */
 .vt-card-back {
     top: 0;
-    background: linear-gradient(150deg, #77675b, #5c4e45);
-    border: 1px solid rgba(220, 196, 160, .3);
+    /* Einen Schritt zurueck vom hellen Grau — der Sprung zur schwarzen Karte
+       war mit 5,08 zu hart. Dreistufiger Verlauf statt zweier Endpunkte gibt
+       der Flaeche eine Woelbung statt einer geraden Neigung. */
+    background: linear-gradient(150deg, #8a7b6b 0%, #6f6154 55%, #5c5046 100%);
+    border: 1px solid rgba(255, 246, 234, .26);
     transform: rotate(-7deg) translateX(-6%);
-    display: flex;
-    align-items: flex-start
+    /* Kicker und Siegel in der oberen Zeile: unten rechts lag das Siegel
+       vollstaendig unter der Vorderkarte. */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-content: start;
+    /* Geschichtet statt einfach: enger Kontaktschatten plus weiter
+       Umgebungsschatten laesst die Karte liegen statt schweben. */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 252, 246, .16),
+        inset 0 -18px 34px rgba(38, 28, 20, .22),
+        0 2px 6px rgba(24, 17, 12, .32),
+        0 16px 36px rgba(24, 17, 12, .3)
 }
 
-.vt-card-kicker {
-    font-size: .46rem;
-    letter-spacing: .24em;
-    text-transform: uppercase;
-    color: rgba(220, 196, 160, .6)
+/* Weicher Lichtstreifen quer ueber die Karte — laesst die Flaeche wie
+   mattes Material wirken statt wie eingefaerbtes Rechteck. Absolut
+   positioniert, damit das Pseudoelement keine Rasterzeile belegt. */
+.vt-card-back::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(116deg, transparent 22%, rgba(255, 252, 246, .1) 40%, transparent 56%);
+    pointer-events: none
+}
+
+.vt-card-seal {
+    justify-self: end;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .42);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: .95rem;
+    color: rgba(255, 255, 255, .9)
 }
 
 .vt-card-front {
     bottom: 0;
+    /* Nicht mehr fast Schwarz: ein tiefes, warmes Anthrazit traegt Licht und
+       wirkt wie ein echter Kartenkoerper — reines Schwarz saeuft ab. */
     background:
-        /* Eng gefasst und in der Ecke gehalten: grossflaechig hellte der
-           Reflex die Karte bis zur Mitte auf, sie wurde damit heller als der
-           Sektionsgrund und war als Karte nicht mehr zu erkennen. */
-        radial-gradient(78% 88% at 10% 6%, rgba(220, 196, 160, .2), transparent 46%),
-        linear-gradient(155deg, #3f362f, #2b2420);
-    background-color: #332c27;
-    box-shadow: 0 22px 48px rgba(16, 12, 10, .5);
+        radial-gradient(78% 88% at 10% 6%, rgba(220, 196, 160, .13), transparent 46%),
+        linear-gradient(155deg, #2e2721 0%, #1d1815 52%, #15110f 100%);
+    background-color: #1e1a16;
+    /* Umriss traegt hier den Kontrast, nicht die Flaeche. */
+    border: 1px solid rgba(255, 246, 234, .14);
+    box-shadow:
+        /* Lichtkante oben, Abdunklung zu den Raendern: gibt der Karte Tiefe
+           statt einer gleichmaessig gefuellten Flaeche. */
+        inset 0 1px 0 rgba(255, 246, 234, .09),
+        inset 0 0 52px rgba(0, 0, 0, .45),
+        0 3px 8px rgba(24, 16, 11, .45),
+        0 20px 44px rgba(24, 16, 11, .45),
+        0 46px 80px rgba(24, 16, 11, .3);
     transform: rotate(3.5deg) translateX(5%);
     display: grid;
     grid-template-rows: auto 1fr auto
 }
 
-.vt-card-front::after {
+.vt-card-front::before {
     content: '';
     position: absolute;
-    inset: .5rem;
-    border: 1px solid rgba(220, 196, 160, .3);
-    border-radius: 9px;
+    inset: 0;
+    background: linear-gradient(118deg, transparent 24%, rgba(255, 246, 234, .06) 41%, transparent 57%);
     pointer-events: none
 }
 
-.vt-card-top {
-    font-size: .46rem;
+.vt-card-front::after {
+    content: '';
+    position: absolute;
+    inset: .6rem;
+    border: 1px solid rgba(216, 190, 150, .38);
+    border-radius: 10px;
+    pointer-events: none
+}
+
+.vt-card-kicker {
+    font-family: 'Outfit', sans-serif;
+    font-size: .58rem;
     letter-spacing: .24em;
     text-transform: uppercase;
-    color: rgba(220, 196, 160, .8)
+    color: rgba(222, 200, 168, .9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .55)
+}
+
+.vt-card-back .vt-card-kicker {
+    color: rgba(255, 255, 255, .86)
 }
 
 .vt-card-mark {
     font-family: 'Playfair Display', serif;
     font-style: italic;
-    font-size: 2rem;
+    font-size: 2.4rem;
     line-height: 1;
     color: #fff;
-    align-self: center
+    align-self: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .45)
 }
 
 .vt-card-foot {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: .46rem;
+    gap: 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: .58rem;
     letter-spacing: .24em;
     text-transform: uppercase;
-    color: rgba(220, 196, 160, .8)
+    color: rgba(226, 205, 173, .95)
 }
 
-/* ── Textspalte ── */
-.voucher-teaser-body .tag {
+/* ── Text ── */
+.vt-content {
+    position: relative;
+    z-index: 1;
+    padding: 5.6rem 0;
+    max-width: none
+}
+
+.vt-kicker {
+    display: block;
+    margin-bottom: 1.6rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .32em;
+    text-transform: uppercase;
     color: var(--sand-lt)
 }
 
-.voucher-teaser-body h2 {
-    color: #fff;
-    margin-bottom: .2rem
-}
-
-.voucher-teaser-body h2 em {
-    color: var(--sand-lt)
-}
-
-.voucher-teaser-body .line {
-    background: rgba(220, 196, 160, .35)
-}
-
-.voucher-teaser-body p {
-    font-size: .92rem;
-    line-height: 1.9;
-    color: rgba(255, 255, 255, .72);
+.vt-content h2 {
     margin-bottom: 1.4rem;
-    max-width: 48ch
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.6vw, 3.3rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: #fff
 }
 
-.vt-points {
+.vt-content h2 em {
+    font-style: italic;
+    color: var(--sand-lt)
+}
+
+.vt-rule {
+    width: 78px;
+    height: 1px;
+    margin-bottom: 1.9rem;
+    background: rgba(220, 196, 160, .55)
+}
+
+.vt-content p {
+    margin-bottom: 1.9rem;
+    font-size: 1.02rem;
+    line-height: 1.95;
+    color: rgba(255, 255, 255, .8)
+}
+
+/* ── Merkmale ── */
+.vt-features {
     list-style: none;
-    margin: 0 0 2rem;
+    margin: 0 0 2.2rem;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem 1.5rem
+    align-items: center;
+    gap: .8rem 1.9rem
 }
 
-.vt-points li {
-    position: relative;
-    padding-left: 1rem;
-    font-size: .72rem;
-    letter-spacing: .04em;
-    color: rgba(255, 255, 255, .62)
+.vt-features li {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .95rem;
+    color: rgba(255, 255, 255, .82)
 }
 
-.vt-points li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: .48em;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--sand)
+/* Trennstrich zwischen den Merkmalen, nicht davor oder dahinter. */
+.vt-features li + li {
+    padding-left: 1.9rem;
+    border-left: 1px solid rgba(220, 196, 160, .28)
 }
 
-@media(max-width:960px) {
+.vt-features svg {
+    font-size: 1.15rem;
+    color: var(--sand-lt)
+}
+
+/* ── Button ── */
+.vt-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.05rem 2.4rem;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #e0bb84, #c9995e);
+    /* Weiss auf dem Goldton erreicht nur 2,56 — deutlich unter dem
+       Mindestwert 4,5. Dunkle Schrift haelt die Optik und kommt auf 5,7. */
+    color: #2e2723;
+    font-family: 'Outfit', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: filter .3s var(--ease), transform .3s var(--ease-out), box-shadow .3s
+}
+
+.vt-cta:hover,
+.vt-cta:focus-visible {
+    filter: brightness(1.07);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(201, 153, 94, .3);
+    outline: none
+}
+
+.vt-cta i {
+    font-style: normal;
+    transition: transform .3s var(--ease-out)
+}
+
+.vt-cta:hover i {
+    transform: translateX(4px)
+}
+
+@media(max-width:1100px) {
     .voucher-teaser-inner {
-        grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
-        gap: 2.2rem;
-        padding: 0 2.5rem
+        grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
+        gap: 3.4rem;
+        padding: 0 2.2rem
     }
 }
 
-@media(max-width:768px) {
+@media(max-width:860px) {
+    /* Gestapelt: nebeneinander bliebe fuer Karten und Text zu wenig Breite. */
     .voucher-teaser {
-        padding: 2.6rem 0
-    }
-
-    /* Karte neben den Text statt darueber: gestapelt kostet der Kartenstapel
-       rund 190px zusaetzliche Hoehe, und die Seite soll kuerzer werden, nicht
-       laenger. Nebeneinander traegt er nichts zur Hoehe bei. */
-    .voucher-teaser-inner {
-        grid-template-columns: 158px minmax(0, 1fr);
-        gap: 1.1rem;
-        padding: 0 1.4rem;
-        align-items: start
-    }
-
-    .vt-stack {
-        margin-top: .3rem
-    }
-
-    .voucher-teaser-body p {
-        margin-bottom: 1.1rem
-    }
-
-    .vt-points {
-        gap: .3rem 1rem;
-        margin-bottom: 1.4rem;
-        font-size: .95em
-    }
-}
-
-@media(max-width:420px) {
-    /* Zu eng fuer zwei Spalten — hier wandert die Karte doch nach oben,
-       dafuer deutlich kleiner. */
-    .voucher-teaser {
-        padding: 2.2rem 0
+        min-height: 0
     }
 
     .voucher-teaser-inner {
         grid-template-columns: 1fr;
-        gap: 1.1rem
+        gap: 2.2rem;
+        padding: 3.2rem 1.5rem 3.6rem
     }
 
     .vt-stack {
-        width: 182px;
-        margin: 0 auto
+        width: min(78%, 300px);
+        margin-inline: auto
     }
 
-    /* Die drei Vorteile umbrechen hier auf drei Zeilen und kosten rund 70px.
-       Auf dem Handy war die Seitenlaenge das Problem — sie stehen vollstaendig
-       auf /gutscheine.html, einen Klick entfernt. */
-    .vt-points {
-        display: none
+    .vt-content {
+        padding: 0
+    }
+
+    .vt-content h2,
+    .vt-content p {
+        margin-bottom: 1.3rem
+    }
+
+    .vt-rule {
+        margin-bottom: 1.5rem
+    }
+
+    /* Nebeneinander mit Trennstrichen brechen die drei Merkmale hier
+       unschoen um — untereinander ohne Striche. */
+    .vt-features {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .7rem;
+        margin-bottom: 1.8rem
+    }
+
+    .vt-features li + li {
+        padding-left: 0;
+        border-left: 0
     }
 }
 
@@ -1839,16 +1949,21 @@ h2 em {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Duotone: das Foto soll die Flaeche tragen, nicht mit dem Text um
-       Aufmerksamkeit konkurrieren. */
-    filter: grayscale(.55) brightness(.82) sepia(.18)
+    /* Zurueckgenommen: die frueheren Werte (grayscale .55, brightness .82)
+       waren fuer ein generisches Salonfoto gedacht, das nicht auffallen
+       sollte. Das echte Head-Spa-Motiv ist von sich aus warm und ruhig und
+       soll erkennbar bleiben — gemessen lag es vorher bei 29% Helligkeit
+       und einem Tonwertumfang von nur 64 der 255 Stufen. */
+    filter: grayscale(.15) brightness(.96) sepia(.06)
 }
 
 .headspa-visual::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(105deg, rgba(74, 63, 56, .18), rgba(74, 63, 56, .85))
+    /* Nur noch so viel Abdunkelung, dass die Kante zur Textspalte weich
+       bleibt — vorher deckte der Verlauf bis zu 85%. */
+    background: linear-gradient(105deg, rgba(74, 63, 56, .06), rgba(74, 63, 56, .5))
 }
 
 .headspa-body {
@@ -2327,49 +2442,139 @@ button.reviews-src-pill {
 }
 
 /* ── Continuous desktop flow ── */
+/* Beschneidung am Kartenrand statt an der Fensterkante. Vorher zog ein
+   negativer Aussenabstand die Bahn auf volle Fensterbreite und der seitliche
+   Innenabstand holte die Karten zurueck — overflow:hidden beschneidet aber am
+   Padding-Rand, also erst an der Fensterkante. Die naechste Seite fuellte
+   damit exakt den Randstreifen, der als Abstand gedacht war.
+   clip statt hidden, damit kein Scrollcontainer entsteht und die Schatten
+   der Karten nach oben und unten sichtbar bleiben. */
 .reviews-flow {
-    overflow: hidden;
-    margin-inline: calc(var(--reviews-gutter) * -1);
-    padding: .8rem var(--reviews-gutter) 1.2rem;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 3.5rem, #000 calc(100% - 3.5rem), transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 3.5rem, #000 calc(100% - 3.5rem), transparent)
+    overflow-x: clip;
+    overflow-y: visible;
+    padding: .8rem 0 1.2rem
 }
 
+/* Seitenweise statt Endlosband: eine Seite ist genau so breit wie der
+   sichtbare Bereich, der Sprung geht um volle 100%. */
 .reviews-flow-track {
     display: flex;
-    width: max-content;
-    animation: reviewsFlow var(--reviews-flow-duration, 120s) linear infinite;
+    transition: transform .55s var(--ease-out);
     will-change: transform
 }
 
-.reviews-flow-group {
-    display: flex;
-    align-items: stretch;
+.reviews-page {
+    flex: 0 0 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.2rem;
-    padding-right: 1.2rem
-}
-
-.reviews-flow:hover .reviews-flow-track,
-.reviews-flow:focus-within .reviews-flow-track {
-    animation-play-state: paused
+    align-items: stretch
 }
 
 .reviews-flow .review-card {
     display: flex;
-    flex: 0 0 clamp(360px, 42vw, 600px);
     flex-direction: column;
-    width: clamp(360px, 42vw, 600px);
+    width: auto;
     min-height: 290px
+}
+
+/* Ungerade Anzahl: die letzte Karte allein in halber Breite saehe nach
+   Fehler aus, also nimmt sie die ganze Zeile ein. */
+.reviews-page > .review-card:only-child {
+    grid-column: 1 / -1
+}
+
+/* ── Seitenwechsel ── */
+.reviews-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    margin-top: 1.6rem
+}
+
+.reviews-pager-arrow {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--white);
+    color: var(--warm-lt);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color .3s, color .3s, transform .3s var(--ease-out)
+}
+
+.reviews-pager-arrow:hover,
+.reviews-pager-arrow:focus-visible {
+    border-color: var(--sand);
+    color: var(--warm);
+    outline: none;
+    transform: translateY(-2px)
+}
+
+.reviews-pager-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem
+}
+
+/* Zeigt an, wann der naechste Wechsel kommt — sonst wirkt der Sprung
+   unvermittelt, und wer gerade liest, wird ueberrascht. */
+.reviews-progress {
+    width: 92px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--line);
+    overflow: hidden
+}
+
+.reviews-progress span {
+    display: block;
+    height: 100%;
+    background: var(--sand);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation-name: reviewsProgress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards
+}
+
+@keyframes reviewsProgress {
+    to {
+        transform: scaleX(1)
+    }
+}
+
+/* Ohne Bewegung keine laufende Anzeige — sie waere sonst das einzige, was
+   sich auf der Seite noch bewegt. */
+@media (prefers-reduced-motion: reduce) {
+    .reviews-progress span {
+        animation: none;
+        transform: scaleX(1)
+    }
+}
+
+.reviews-pager-count {
+    min-width: 4.5ch;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: .95rem;
+    color: var(--warm-lt)
+}
+
+.reviews-pager-count strong {
+    font-weight: 500;
+    color: var(--warm)
 }
 
 .reviews-flow .review-author {
     margin-top: auto
-}
-
-@keyframes reviewsFlow {
-    to {
-        transform: translateX(-50%)
-    }
 }
 
 /* ── Review card ── */
@@ -6499,21 +6704,19 @@ footer {
     }
 
     /* --- REVIEWS: continuous mobile flow --- */
+    /* Seitlich 0 wie am Desktop — den Rand stellt .reviews-inner. */
     .reviews-flow {
-        display: block;
-        padding: .6rem 1.5rem 1rem;
-        -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
-        mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent)
+        padding: .6rem 0 1rem
     }
 
-    .reviews-flow-group {
-        gap: .75rem;
-        padding-right: .75rem
+    /* Eine Karte pro Seite — zwei nebeneinander waeren hier unlesbar. */
+    .reviews-page {
+        grid-template-columns: 1fr;
+        gap: .75rem
     }
 
     .reviews-flow .review-card {
-        flex-basis: 82vw;
-        width: 82vw;
+        width: auto;
         min-height: 0;
         padding: 1.3rem 1.2rem
     }
