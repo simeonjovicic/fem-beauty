@@ -8,11 +8,13 @@ import HomePage from './HomePage'
 const ImpressumPage = lazy(() => import('./ImpressumPage'))
 const GutscheinePage = lazy(() => import('./GutscheinePage'))
 const DankePage = lazy(() => import('./DankePage'))
+const AdminPage = lazy(() => import('./AdminPage'))
 
 const PAGES = {
   impressum: ImpressumPage,
   gutscheine: GutscheinePage,
   danke: DankePage,
+  admin: AdminPage,
 }
 
 // Ohne Endung abgleichen: Cloudflare Pages leitet /seite.html per 308 auf

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover ist Voraussetzung dafuer, dass env(safe-area-inset-*)
+         in admin.css ueberhaupt etwas anderes als 0 liefert. Ohne das Attribut
+         legt Safari den Inhalt selbst in den sicheren Bereich, mit ihm liegt
+         die Verantwortung beim Stylesheet — dort ist sie eingeloest. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Panel — FEM Gutscheine</title>
+    <!-- Kein canonical, keine og-Tags, kein Sitemap-Eintrag: diese Seite
+         zeigt Kundendaten und gehoert in keinen Index. Der Worker setzt
+         fuer /admin zusaetzlich den Header x-robots-tag. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="same-origin" />
+    <link rel="icon" type="image/jpeg" href="/img-logo.jpg" />
+    <link rel="apple-touch-icon" href="/img-logo.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&amp;family=Outfit:wght@200;300;400;500&amp;display=swap" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
