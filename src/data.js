@@ -9,10 +9,10 @@ export const VOUCHER_MIN_AMOUNT = 25
 export const VOUCHER_MAX_AMOUNT = 500
 export const VOUCHER_MAX_MESSAGE_LENGTH = 180
 
-// Curated treatments with a clear fixed price in FEM's public booking menu.
-// Keeping this list intentionally small makes a treatment voucher feel selected,
-// while the regular value voucher remains available for every other service.
-export const voucherTreatments = [
+// Alle drei Varianten bleiben in der Signature-Sektion sichtbar. Der
+// Gutschein-Konfigurator nimmt daraus bewusst nur eine stellvertretende
+// Variante, damit Head Spa dort nicht die halbe Auswahl belegt.
+export const headSpaTreatments = [
   {
     id: 'head-spa-pure-balance',
     category: 'Head Spa',
@@ -37,13 +37,20 @@ export const voucherTreatments = [
     duration: '100 Min.',
     price: 155,
   },
+]
+
+// Kuratierte Auswahl mit festen Preisen: sechs unterschiedliche Leistungen
+// statt drei nahezu identischer Head-Spa-Karten. Ein Wertgutschein bleibt fuer
+// alle anderen Varianten und Services verfuegbar.
+export const voucherTreatments = [
+  headSpaTreatments[0],
   {
-    id: 'hydro-glow',
+    id: 'hydro-peel',
     category: 'Gesicht',
-    title: 'Hydro Glow',
+    title: 'Hydro Peel',
     variant: 'High-Tech Facial',
-    duration: '70 Min.',
-    price: 120,
+    duration: '75 Min.',
+    price: 100,
   },
   {
     id: 'japanische-manikuere',
@@ -60,6 +67,22 @@ export const voucherTreatments = [
     variant: 'Vital · Pure',
     duration: '30 Min.',
     price: 48,
+  },
+  {
+    id: 'ipl-haarentfernung-achseln',
+    category: 'Laser',
+    title: 'IPL Haarentfernung',
+    variant: 'Achseln',
+    duration: '15 Min.',
+    price: 40,
+  },
+  {
+    id: 'wimpernlifting-mit-faerben',
+    category: 'Wimpern',
+    title: 'Wimpernlifting',
+    variant: 'Mit Färben',
+    duration: '60 Min.',
+    price: 65,
   },
 ]
 
@@ -120,7 +143,7 @@ export const services = [
 
 // Eigene Sektion statt Kachel im Raster: Head Spa ist das Signature-Treatment
 // und traegt als einziges mehrere buchbare Varianten. Die stehen bereits in
-// voucherTreatments — hier nur die Beschreibung, die Varianten leitet die
+// headSpaTreatments — hier nur die Beschreibung, die Varianten leitet die
 // Komponente von dort ab, damit Preise nicht an zwei Stellen gepflegt werden.
 export const headSpa = {
   id: 'headspa',

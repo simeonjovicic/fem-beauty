@@ -3,7 +3,7 @@ import { Footer, Header, Loader } from './components/Chrome'
 // Bewusst kein Import aus VoucherShop: der Konfigurator lebt jetzt auf
 // /gutscheine.html, und das Band bringt seine Grafik selbst mit. Sonst
 // laege der ganze Shop wieder im Bundle der Startseite.
-import { BOOKING_URL, headSpa, reviews, services, voucherTreatments } from './data'
+import { BOOKING_URL, headSpa, headSpaTreatments, reviews, services } from './data'
 import {
   useBodyLock,
   useMediaQuery,
@@ -406,11 +406,6 @@ function Services() {
   )
 }
 
-// Die Varianten kommen aus voucherTreatments statt aus einer eigenen Liste:
-// dort stehen sie mit Dauer und Preis bereits gepflegt, und zwei Quellen fuer
-// denselben Preis laufen frueher oder spaeter auseinander.
-const headSpaVariants = voucherTreatments.filter((t) => t.category === 'Head Spa')
-
 // Dachzeile fuer den gesamten Behandlungsteil: steht ueber Head Spa und traegt
 // deshalb auch den #treatments-Anker — der Bereich beginnt hier, nicht erst
 // beim Kartenraster.
@@ -433,14 +428,21 @@ function HeadSpa() {
     <section className="headspa" id="headspa">
       <div className="headspa-visual">
         <span className="headspa-ai-note">AI generated</span>
-        <img
-          src="/headspa.webp"
-          width="1000"
-          height="1250"
-          alt="Japanische Head Spa bei FEM Beauty Wien — Kopfhautbehandlung mit warmem Wasser am Spa-Becken"
-          loading="lazy"
-          decoding="async"
-        />
+        <picture>
+          <source
+            media="(max-width: 960px)"
+            srcSet="/hero-facial-640.webp 640w, /hero-facial-1080.webp 1080w, /hero-facial-1672.webp 1672w"
+            sizes="100vw"
+          />
+          <img
+            src="/hero-facial-mobile.webp"
+            width="941"
+            height="1672"
+            alt="Gesichtsbehandlung bei FEM Beauty Wien — eine Kosmetikerin trägt sanft eine Gesichtsmaske auf"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
       </div>
 
       <div className="headspa-body">
@@ -451,7 +453,7 @@ function HeadSpa() {
         <p className="headspa-desc rv d2">{headSpa.description}</p>
 
         <ul className="headspa-variants rv d3">
-          {headSpaVariants.map((variant) => (
+          {headSpaTreatments.map((variant) => (
             <li key={variant.id}>
               <span className="headspa-variant-name">{variant.variant}</span>
               <span className="headspa-variant-dur">{variant.duration}</span>

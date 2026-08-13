@@ -93,8 +93,10 @@ function Icon({ name }) {
   if (name === 'treatment') {
     return (
       <svg {...commonProps}>
-        <path d="M12 21s7-3.6 7-10.2A3.8 3.8 0 0 0 12 8.7a3.8 3.8 0 0 0-7 2.1C5 17.4 12 21 12 21Z" />
-        <path d="M12 3.2c.4 2.3 1.6 3.5 3.9 3.9C13.6 7.5 12.4 8.7 12 11c-.4-2.3-1.6-3.5-3.9-3.9 2.3-.4 3.5-1.6 3.9-3.9Z" />
+        <path d="M12 19.5c-2.4-2.8-2.4-6.2 0-9 2.4 2.8 2.4 6.2 0 9Z" />
+        <path d="M11.6 18.8c-3.1-.8-5.2-3-5.6-6.4 2.8.2 4.8 1.5 6 3.8" />
+        <path d="M12.4 18.8c3.1-.8 5.2-3 5.6-6.4-2.8.2-4.8 1.5-6 3.8" />
+        <path d="M6.4 16.1c-1.4-.2-2.6-.1-3.6.3 1.4 3 4.5 4.7 9.2 4.7s7.8-1.7 9.2-4.7c-1-.4-2.2-.5-3.6-.3" />
       </svg>
     )
   }
@@ -502,10 +504,12 @@ export default function VoucherShop() {
           )}
         </div>
 
-        <div className="vshop-nav">
+        <div className={`vshop-nav${step > 0 ? ' has-back' : ''}`}>
           {step > 0 ? (
-            <button type="button" className="vshop-back" onClick={goBack}>Zurück</button>
-          ) : <span />}
+            <button type="button" className="vshop-back" onClick={goBack}>
+              <Icon name="arrow" /><span>Zurück</span>
+            </button>
+          ) : null}
 
           {/* Betrag unter dem Knopf statt daneben: nebeneinander lasen sich
               Angabe und Handlung wie zwei gleichrangige Elemente. */}
