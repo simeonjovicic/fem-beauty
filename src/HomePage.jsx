@@ -438,7 +438,9 @@ function HeadSpa() {
         <span className="headspa-ai-note">AI generated</span>
         <picture>
           <img
-            src="/NewGesichtsbehanldung.png"
+            src="/facial-treatment-real-v2.webp"
+            width="1122"
+            height="1402"
             alt="Gesichtsbehandlung bei FEM Beauty Wien — eine Kosmetikerin trägt sanft eine Gesichtsmaske auf"
             loading="lazy"
             decoding="async"
@@ -585,25 +587,24 @@ function VoucherTeaser() {
             <h2>Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
             <div className="vt2-rule" />
             <p>
-              Schenke Entspannung, Pflege und Wohlbefinden - mit einem Gutschein von fem.
-              Für besondere Menschen und besondere Momente.
+              Schenke Zeit für Wohlbefinden – als Wertgutschein oder für eine Wunschbehandlung.
             </p>
 
             <ul className="vt2-features">
               <li>
                 <span><VtIcon name="heart" /></span>
-                <strong>Für jede Behandlung</strong>
-                <small>Einlösbar für alle Behandlungen und Produkte bei fem.</small>
+                <strong>Für alles bei FEM</strong>
+                <small>Behandlung oder Produkt.</small>
               </li>
               <li>
                 <span><VtIcon name="clock" /></span>
-                <strong>Flexibel einlösbar</strong>
-                <small>Gültig 3 Jahre ab Kaufdatum - Termin nach Wunsch.</small>
+                <strong>3 Jahre gültig</strong>
+                <small>Termin frei wählbar.</small>
               </li>
               <li>
                 <span><VtIcon name="gift" /></span>
-                <strong>Wunderschön verpackt</strong>
-                <small>Auf Wunsch in edler Geschenkverpackung erhältlich.</small>
+                <strong>Schön verpackt</strong>
+                <small>Auf Wunsch als Geschenk.</small>
               </li>
             </ul>
 
