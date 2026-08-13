@@ -1,4 +1,4 @@
-export const BOOKING_URL = 'https://trea.tw/uc3hWqqxxVC9uu2Yj'
+export const BOOKING_URL = 'https://buchung.treatwell.at/ort/fem/?utm_source=widget&utm_medium=partners&utm_campaign=website_sharing'
 
 
 // Grenzen für Gutscheinwerte. Bewusst hier und nicht in der Komponente:
@@ -92,7 +92,7 @@ export const services = [
     number: '01',
     title: 'Gesichtsbehandlungen',
     expandedTitle: 'Gesichts\u00ADbehandlungen',
-    summary: 'Individuelle Hautpflege — von klassischer Kosmetik bis zu modernen High-Tech Treatments.',
+    summary: 'Individuelle Hautpflege — klassisch bis High-Tech.',
     description:
       'Klassische Gesichtspflege, Fruchtsäure-Treatments, Körperbehandlungen sowie innovative High-Tech Methoden: Hydro Peel, Carbon Laser, HIFU & Radiofrequenz. Individuelle Hautanalyse mit iS Clinical, Babor & Fillmed.',
     tags: ['Klassisch', 'Fruchtsäure', 'Hydro Peel', 'Carbon Laser', 'HIFU', 'Radiofrequenz'],

@@ -4,7 +4,7 @@ import { useBodyLock } from '../hooks'
 
 const navigation = [
   ['story', 'Salon'],
-  ['headspa', 'Head Spa'],
+  ['headspa', 'Gesicht'],
   ['treatments', 'Services'],
   ['reviews', 'Bewertungen'],
   // Eigene Seite statt Sektionsanker — siehe sectionHref().

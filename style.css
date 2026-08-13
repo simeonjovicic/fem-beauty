@@ -2177,7 +2177,10 @@ h2 em {
 }
 
 .headspa-cta .btn-p {
-    align-self: flex-start
+    align-self: flex-start;
+    font-size: .64rem;
+    min-width: 18rem;
+    text-align: center
 }
 
 @media(max-width:960px) {

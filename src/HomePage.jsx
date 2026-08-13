@@ -3,7 +3,7 @@ import { Footer, Header, Loader } from './components/Chrome'
 // Bewusst kein Import aus VoucherShop: der Konfigurator lebt jetzt auf
 // /gutscheine.html, und das Band bringt seine Grafik selbst mit. Sonst
 // laege der ganze Shop wieder im Bundle der Startseite.
-import { BOOKING_URL, headSpa, headSpaTreatments, reviews, services } from './data'
+import { BOOKING_URL, reviews, services } from './data'
 import {
   useBodyLock,
   useMediaQuery,
@@ -424,20 +424,21 @@ function ServicesIntro() {
 }
 
 function HeadSpa() {
+  const facial = services.find((service) => service.id === 'face')
+  const facialHighlights = [
+    ['Klassische Gesichtspflege', 'individuell abgestimmt'],
+    ['Hydro Peel', '75 Min.'],
+    ['Carbon Laser', 'High-Tech Facial'],
+    ['HIFU & Radiofrequenz', 'straffende Methoden'],
+  ]
+
   return (
     <section className="headspa" id="headspa">
       <div className="headspa-visual">
         <span className="headspa-ai-note">AI generated</span>
         <picture>
-          <source
-            media="(max-width: 960px)"
-            srcSet="/hero-facial-640.webp 640w, /hero-facial-1080.webp 1080w, /hero-facial-1672.webp 1672w"
-            sizes="100vw"
-          />
           <img
-            src="/hero-facial-mobile.webp"
-            width="941"
-            height="1672"
+            src="/NewGesichtsbehanldung.png"
             alt="Gesichtsbehandlung bei FEM Beauty Wien — eine Kosmetikerin trägt sanft eine Gesichtsmaske auf"
             loading="lazy"
             decoding="async"
@@ -446,28 +447,27 @@ function HeadSpa() {
       </div>
 
       <div className="headspa-body">
-        <span className="tag rv">Signature Treatment</span>
-        <h2 className="rv d1">Japanische <em>Head Spa.</em></h2>
+        <span className="tag rv">Hautpflege & High-Tech</span>
+        <h2 className="rv d1">Gesichts<em>behandlungen.</em></h2>
         <div className="line anim-line" />
-        <p className="headspa-lead rv d2">{headSpa.summary}</p>
-        <p className="headspa-desc rv d2">{headSpa.description}</p>
+        <p className="headspa-lead rv d2">{facial.summary}</p>
+        <p className="headspa-desc rv d2">{facial.description}</p>
 
         <ul className="headspa-variants rv d3">
-          {headSpaTreatments.map((variant) => (
-            <li key={variant.id}>
-              <span className="headspa-variant-name">{variant.variant}</span>
-              <span className="headspa-variant-dur">{variant.duration}</span>
-              <span className="headspa-variant-price">{variant.price} €</span>
+          {facialHighlights.map(([name, detail]) => (
+            <li key={name}>
+              <span className="headspa-variant-name">{name}</span>
+              <span className="headspa-variant-dur">{detail}</span>
             </li>
           ))}
         </ul>
 
         <div className="headspa-tags rv d3">
-          {headSpa.tags.map((tag) => <span key={tag}>{tag}</span>)}
+          {facial.tags.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
 
         <div className="headspa-cta rv d3">
-          <BookingLink className="btn-p">Head Spa buchen</BookingLink>
+          <BookingLink className="btn-p">Gesichtsbehandlung buchen</BookingLink>
         </div>
       </div>
     </section>
