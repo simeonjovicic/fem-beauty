@@ -1579,6 +1579,49 @@ h2 em {
 
 /* ═══ GUTSCHEIN — Teaser-Band ═══════════
    Randloses dunkles Band, links die gepraegten Karten, rechts der Text. */
+.voucher-preview {
+    position: relative;
+    background: #f2eee6
+}
+
+.voucher-toggle {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    z-index: 5;
+    display: inline-flex;
+    gap: .25rem;
+    padding: .25rem;
+    border: 1px solid rgba(55, 43, 35, .16);
+    border-radius: 999px;
+    background: rgba(255, 252, 246, .84);
+    box-shadow: 0 12px 32px rgba(31, 24, 19, .12);
+    transform: translateX(-50%);
+    backdrop-filter: blur(12px)
+}
+
+.voucher-toggle button {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(45, 35, 28, .62);
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: .66rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    line-height: 1;
+    padding: .62rem .9rem;
+    text-transform: uppercase;
+    transition: background .25s var(--ease), color .25s var(--ease)
+}
+
+.voucher-toggle button.active {
+    background: #2b211a;
+    color: #fff8ef
+}
+
 .voucher-teaser {
     position: relative;
     background: #3f362f;
@@ -1874,6 +1917,253 @@ h2 em {
     transform: translateX(4px)
 }
 
+.voucher-teaser-alt {
+    position: relative;
+    min-height: 600px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: #fffdfa;
+    color: #1f1a16
+}
+
+/* Verlauf und Foto in einer Layer-Liste: der Weissverlauf liegt ueber dem Bild
+   und blendet es zur Mitte hin aus. Die vielen Stops sind Absicht — ein linearer
+   Alpha-Verlauf zeigt auf dieser Flaechengroesse sichtbare Baender.
+
+   Groesse ueber die Breite (100% auto), nicht ueber die Hoehe: die Sektion ist
+   inhaltsgetrieben unterschiedlich hoch, und bei hoehenbasierter Skalierung
+   wanderte die Gutscheinkarte auf schmaleren Desktops unter die Schrift. So
+   sitzt sie immer an derselben relativen Stelle. Die zweite Layer federt die
+   Ober- und Unterkante des Bildes in den Hintergrund aus, damit dort keine
+   harte Kante steht, wenn das Bild die Sektionshoehe nicht ganz fuellt. */
+.voucher-teaser-alt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right,
+            #fffdfa 0%,
+            #fffdfa 27%,
+            rgba(255, 253, 250, .96) 33%,
+            rgba(255, 253, 250, .84) 38%,
+            rgba(255, 253, 250, .58) 43%,
+            rgba(255, 253, 250, .28) 48%,
+            rgba(255, 253, 250, 0) 53%),
+        linear-gradient(to bottom,
+            #fffdfa 0%,
+            rgba(255, 253, 250, .55) 7%,
+            rgba(255, 253, 250, 0) 15%,
+            rgba(255, 253, 250, 0) 85%,
+            rgba(255, 253, 250, .55) 93%,
+            #fffdfa 100%),
+        url('/gutschein-background-2.png') right center / 100% auto no-repeat;
+    pointer-events: none
+}
+
+/* Links am Viewport verankert statt zentriert: das Bild sitzt rechts, der Text
+   soll die freie Flaeche von ganz links nutzen. */
+.voucher-teaser-alt-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 5.7rem 3.5rem 4.8rem clamp(1.75rem, 4vw, 4.5rem)
+}
+
+.vt2-kicker {
+    display: block;
+    margin-bottom: 1.6rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: .74rem;
+    font-weight: 500;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: rgba(31, 26, 22, .78)
+}
+
+.voucher-teaser-alt h2 {
+    margin: 0 0 1.45rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.6rem, 4.2vw, 4.15rem);
+    font-weight: 400;
+    line-height: 1.16;
+    color: #171310
+}
+
+.voucher-teaser-alt h2 em {
+    color: #9a876f;
+    font-style: italic
+}
+
+.vt2-rule {
+    width: 86px;
+    height: 1px;
+    margin: 0 0 1.75rem;
+    background: rgba(122, 103, 82, .42)
+}
+
+.voucher-teaser-alt p {
+    max-width: 430px;
+    margin: 0 0 2.65rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.02rem;
+    letter-spacing: .035em;
+    line-height: 1.55;
+    color: rgba(28, 23, 19, .84)
+}
+
+.vt2-features {
+    width: min(100%, 660px);
+    margin: 0 0 2.45rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+}
+
+.vt2-features li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    padding: 0 1.35rem;
+    text-align: center
+}
+
+.vt2-features li + li {
+    border-left: 1px solid rgba(77, 62, 50, .18)
+}
+
+.vt2-features span {
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(87, 67, 52, .12);
+    color: #231b15
+}
+
+.vt2-features svg {
+    width: 1.3rem;
+    height: 1.3rem
+}
+
+.vt2-features strong {
+    margin-bottom: .55rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: .86rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #1c1713
+}
+
+.vt2-features small {
+    font-family: 'Outfit', sans-serif;
+    font-size: .76rem;
+    line-height: 1.55;
+    color: rgba(28, 23, 19, .68)
+}
+
+.vt2-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    min-width: 17.8rem;
+    padding: 1.18rem 2rem;
+    border-radius: 7px;
+    background: #2a211a;
+    color: #fff8ef;
+    font-family: 'Outfit', sans-serif;
+    font-size: .73rem;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(41, 31, 24, .18);
+    transition: transform .3s var(--ease-out), background .3s var(--ease)
+}
+
+.vt2-cta:hover,
+.vt2-cta:focus-visible {
+    background: #3a2c22;
+    transform: translateY(-2px);
+    outline: none
+}
+
+.vt2-cta i {
+    font-style: normal;
+    transition: transform .3s var(--ease-out)
+}
+
+.vt2-cta:hover i {
+    transform: translateX(4px)
+}
+
+/* Das Bild skaliert mit der Fensterbreite, die Gutscheinkarte ruecht also nach
+   links mit. Damit die dritte Merkmalspalte nicht auf der Karte landet, wird
+   die Merkmalreihe hier schmaler. */
+@media(max-width:1500px) {
+    .vt2-features {
+        width: min(100%, 520px);
+        margin-bottom: 2.2rem
+    }
+
+    .vt2-features li {
+        padding: 0 .8rem
+    }
+
+    .vt2-features span {
+        width: 2.9rem;
+        height: 2.9rem;
+        margin-bottom: .8rem
+    }
+
+    .vt2-features strong {
+        font-size: .8rem
+    }
+
+    .vt2-features small {
+        font-size: .72rem
+    }
+}
+
+/* Unter ~1150px reicht die Breite fuer Text neben der Karte nicht mehr: das
+   Bild wandert randlos unter den Text, der Verlauf blendet seine Oberkante
+   nach oben aus. --vt2-img-h ist die Bildhoehe bei voller Breite
+   (Seitenverhaeltnis ~2.67) und haelt Verlauf und Innenabstand synchron. */
+@media(max-width:1150px) {
+    .voucher-teaser-alt {
+        --vt2-img-h: 37.5vw;
+        min-height: 0;
+        align-items: flex-start
+    }
+
+    .voucher-teaser-alt::before {
+        background:
+            linear-gradient(to top,
+                rgba(255, 253, 250, 0) calc(var(--vt2-img-h) - 15vw),
+                rgba(255, 253, 250, .35) calc(var(--vt2-img-h) - 9vw),
+                rgba(255, 253, 250, .85) calc(var(--vt2-img-h) - 3vw),
+                #fffdfa var(--vt2-img-h)),
+            url('/gutschein-background-2.png') center bottom / 100% auto no-repeat
+    }
+
+    .voucher-teaser-alt-content {
+        padding: 5.2rem 2rem calc(var(--vt2-img-h) + 2rem)
+    }
+
+    .voucher-teaser-alt p {
+        max-width: 34rem
+    }
+
+    .vt2-features {
+        width: min(100%, 620px)
+    }
+}
+
 @media(max-width:1100px) {
     .voucher-teaser-inner {
         grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
@@ -1952,6 +2242,40 @@ h2 em {
         width: 100%;
         justify-content: center;
         padding-inline: 1.2rem
+    }
+
+    .voucher-toggle {
+        top: .75rem
+    }
+
+    .voucher-teaser-alt-content {
+        padding: 5.2rem 1.5rem calc(var(--vt2-img-h) + 2rem)
+    }
+
+    .voucher-teaser-alt p {
+        margin-bottom: 2rem
+    }
+
+    .vt2-features {
+        width: 100%;
+        margin-bottom: 1.8rem
+    }
+
+    .vt2-features li {
+        padding: 0 .55rem
+    }
+
+    .vt2-features strong {
+        font-size: .78rem
+    }
+
+    .vt2-features small {
+        font-size: .72rem
+    }
+
+    .vt2-cta {
+        width: 100%;
+        min-width: 0
     }
 }
 

@@ -515,48 +515,105 @@ const VT_FEATURES = [
 ]
 
 function VoucherTeaser() {
+  const [variant, setVariant] = useState('current')
+
   return (
-    <section className="voucher-teaser" id="vouchers">
-      <div className="voucher-teaser-inner">
-        {/* Zwei gepraegte Karten, in CSS gebaut. Kein Import aus VoucherShop:
-            der Konfigurator liegt auf /gutscheine.html und soll nicht ins
-            Bundle der Startseite zurueck. */}
-        <div className="vt-stack" aria-hidden="true">
-          <div className="vt-card vt-card-back">
-            <span className="vt-card-kicker">Zeit für dich.</span>
-            <span className="vt-card-seal">f</span>
-          </div>
-          <div className="vt-card vt-card-front">
-            <span className="vt-card-kicker">Gutschein</span>
-            <span className="vt-card-mark">fem</span>
-            <span className="vt-card-foot">
-              <span>Head Spa</span>
-              <span>No. 0001</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="vt-content">
-        <span className="vt-kicker rv">Ihr Gutschein</span>
-        <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
-        <div className="vt-rule rv d1" />
-        <p className="rv d2">
-          Eine wohltuende Auszeit, schenken oder selbst genießen.<br />
-          Head Spa — pure Entspannung für Kopfhaut, Haar und Sinne.
-        </p>
-
-        <ul className="vt-features rv d2">
-          {VT_FEATURES.map(([icon, label]) => (
-            <li key={label}><VtIcon name={icon} />{label}</li>
-          ))}
-        </ul>
-
-          <a className="vt-cta rv d3" href="/gutscheine.html">
-            Gutschein kaufen <i aria-hidden="true">→</i>
-          </a>
-        </div>
+    <div className="voucher-preview" id="vouchers">
+      <div className="voucher-toggle" aria-label="Gutschein Sektion Variante">
+        <button
+          type="button"
+          className={variant === 'current' ? 'active' : undefined}
+          onClick={() => setVariant('current')}
+        >
+          Aktuell
+        </button>
+        <button
+          type="button"
+          className={variant === 'new' ? 'active' : undefined}
+          onClick={() => setVariant('new')}
+        >
+          Neu
+        </button>
       </div>
-    </section>
+
+      {variant === 'current' ? (
+        <section className="voucher-teaser">
+          <div className="voucher-teaser-inner">
+            {/* Zwei gepraegte Karten, in CSS gebaut. Kein Import aus VoucherShop:
+                der Konfigurator liegt auf /gutscheine.html und soll nicht ins
+                Bundle der Startseite zurueck. */}
+            <div className="vt-stack" aria-hidden="true">
+              <div className="vt-card vt-card-back">
+                <span className="vt-card-kicker">Zeit für dich.</span>
+                <span className="vt-card-seal">f</span>
+              </div>
+              <div className="vt-card vt-card-front">
+                <span className="vt-card-kicker">Gutschein</span>
+                <span className="vt-card-mark">fem</span>
+                <span className="vt-card-foot">
+                  <span>Head Spa</span>
+                  <span>No. 0001</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="vt-content">
+              <span className="vt-kicker rv">Ihr Gutschein</span>
+              <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
+              <div className="vt-rule rv d1" />
+              <p className="rv d2">
+                Eine wohltuende Auszeit, schenken oder selbst genießen.<br />
+                Head Spa — pure Entspannung für Kopfhaut, Haar und Sinne.
+              </p>
+
+              <ul className="vt-features rv d2">
+                {VT_FEATURES.map(([icon, label]) => (
+                  <li key={label}><VtIcon name={icon} />{label}</li>
+                ))}
+              </ul>
+
+              <a className="vt-cta rv d3" href="/gutscheine.html">
+                Gutschein kaufen <i aria-hidden="true">→</i>
+              </a>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="voucher-teaser-alt">
+          <div className="voucher-teaser-alt-content">
+            <span className="vt2-kicker">FEM Gutschein</span>
+            <h2>Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
+            <div className="vt2-rule" />
+            <p>
+              Schenke Entspannung, Pflege und Wohlbefinden - mit einem Gutschein von fem.
+              Für besondere Menschen und besondere Momente.
+            </p>
+
+            <ul className="vt2-features">
+              <li>
+                <span><VtIcon name="heart" /></span>
+                <strong>Für jede Behandlung</strong>
+                <small>Einlösbar für alle Behandlungen und Produkte bei fem.</small>
+              </li>
+              <li>
+                <span><VtIcon name="clock" /></span>
+                <strong>Flexibel einlösbar</strong>
+                <small>Gültig 3 Jahre ab Kaufdatum - Termin nach Wunsch.</small>
+              </li>
+              <li>
+                <span><VtIcon name="gift" /></span>
+                <strong>Wunderschön verpackt</strong>
+                <small>Auf Wunsch in edler Geschenkverpackung erhältlich.</small>
+              </li>
+            </ul>
+
+            <a className="vt2-cta" href="/gutscheine.html">
+              Gutschein kaufen <i aria-hidden="true">→</i>
+            </a>
+          </div>
+        </section>
+      )}
+    </div>
   )
 }
 
