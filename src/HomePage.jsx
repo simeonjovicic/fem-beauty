@@ -518,9 +518,37 @@ const VT_FEATURES = [
 
 function VoucherTeaser() {
   const [variant, setVariant] = useState('current')
+  const previewRef = useRef(null)
+
+  // Beim Umschalten werden die Sektionen neu gemountet. useRevealAnimations
+  // sammelt die .rv-Knoten nur einmal beim ersten Render ein, die neuen
+  // Elemente blieben also auf opacity 0 — der Text war nach dem Zurueckschalten
+  // weg. Darum hier die eigenen .rv-Knoten nach jedem Variantenwechsel selbst
+  // beobachten.
+  useEffect(() => {
+    const root = previewRef.current
+    if (!root) return undefined
+
+    const targets = root.querySelectorAll('.rv:not(.on)')
+    if (!targets.length) return undefined
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          entry.target.classList.add('on')
+          observer.unobserve(entry.target)
+        })
+      },
+      { threshold: 0.06, rootMargin: '0px 0px -30px 0px' },
+    )
+
+    targets.forEach((element) => observer.observe(element))
+    return () => observer.disconnect()
+  }, [variant])
 
   return (
-    <div className="voucher-preview" id="vouchers">
+    <div className="voucher-preview" id="vouchers" ref={previewRef}>
       <div className="voucher-toggle" aria-label="Gutschein Sektion Variante">
         <button
           type="button"
