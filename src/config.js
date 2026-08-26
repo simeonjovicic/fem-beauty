@@ -5,9 +5,15 @@
 // import.meta.env gibt es nur in Vite; in workerd ist es undefined und
 // hat den Worker beim Start umgebracht, als es dort stand.
 
-// In der Entwicklung läuft Vite auf :8000 und der Worker auf :8787.
-// Im Betrieb bedient derselbe Ursprung beides, dann bleibt der Pfad relativ.
-export const API_BASE = import.meta.env.DEV ? 'http://localhost:8787' : ''
+// Leer, und zwar überall: im Betrieb liefert ein einziger Worker Seite
+// und API aus, lokal reicht Vite /api/* an den Worker durch (siehe
+// vite.config.js). Damit ist der Pfad immer relativ und es gibt keinen
+// Unterschied mehr zwischen Entwicklung, Vorschau und Produktion.
+//
+// Vorher stand hier eine Fallunterscheidung auf import.meta.env.DEV. Sie
+// funktionierte im Dev-Server und brach in der Vorschau: dort ist DEV
+// false, der Aufruf ging an den Vorschauserver und lief in ein 404.
+export const API_BASE = ''
 
 // Stripe-Gebühren für EWR-Karten, nur zur Anzeige im Panel. Der tatsächlich
 // abgezogene Betrag steht in Stripes Abrechnung; hier geht es allein um eine
