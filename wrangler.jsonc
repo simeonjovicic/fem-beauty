@@ -12,8 +12,13 @@
       // ein Vorschlag und hätte hier eine Umbenennung überall erzwungen.
       "binding": "DB",
       "database_name": "fem-gutscheine",
-      // Echte Datenbank in der Region EEUR. Für `--local` ist der Wert
-      // ohne Belang, dort liegt eine eigene SQLite-Datei.
+      // Echte Datenbank in der Region EEUR.
+      //
+      // Achtung beim Ändern: der lokale Zustand unter .wrangler/state ist
+      // nach dieser ID abgelegt. Eine neue ID heißt deshalb auch lokal
+      // leere Tabellen — nach einem Wechsel muss das Schema mit
+      // `wrangler d1 execute fem-gutscheine --local --file worker/schema.sql`
+      // erneut angewendet werden.
       "database_id": "106c17f4-25f9-4420-837c-6bdc5386e02f"
     }
   ],
