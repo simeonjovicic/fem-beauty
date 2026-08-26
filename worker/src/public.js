@@ -66,7 +66,11 @@ export async function getPdf(request, env, token) {
   return new Response(bytes, {
     headers: {
       'content-type': 'application/pdf',
-      'content-disposition': `inline; filename="FEM-Gutschein-${voucher.code}.pdf"`,
+      // attachment statt inline: der Gutschein soll auf dem Geraet landen,
+      // nicht in einem Tab, den man versehentlich schliesst. Auf dem
+      // Telefon ist der Unterschied deutlich — inline oeffnet je nach
+      // Browser eine Vorschau ohne sichtbaren Weg zum Speichern.
+      'content-disposition': `attachment; filename="Gutschein-${voucher.code}.pdf"`,
       // Der Inhalt ist stabil, aber personenbezogen — kein geteilter Cache.
       'cache-control': 'private, max-age=300',
       'x-robots-tag': 'noindex, nofollow',

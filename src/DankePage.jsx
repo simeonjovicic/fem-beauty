@@ -105,8 +105,15 @@ function VoucherReady({ voucher }) {
       </div>
 
       <div className="danke-actions">
-        <a className="btn-p" href={`${API_BASE}/api/voucher/${encodeURIComponent(voucher.token)}/pdf`} target="_blank" rel="noopener noreferrer">
-          Gutschein als PDF öffnen
+        {/* Kein target="_blank": die Antwort kommt als attachment, ein neuer
+            Tab bliebe leer zurueck. `download` schlaegt dem Browser zusaetzlich
+            den Dateinamen vor. */}
+        <a
+          className="btn-p"
+          href={`${API_BASE}/api/voucher/${encodeURIComponent(voucher.token)}/pdf`}
+          download={`Gutschein-${voucher.code}.pdf`}
+        >
+          Gutschein herunterladen
         </a>
         <a className="link-arrow" href="/">Zurück zur Seite</a>
       </div>

@@ -25,6 +25,55 @@
     --ease-out: cubic-bezier(.19, 1, .22, 1);
 }
 
+/* ─── Seitenwechsel ────────────────────────
+   Ein Wechsel zwischen Startseite, Gutscheinen und Impressum soll gleiten
+   statt weiss aufzublitzen. Das sind eigenstaendige Dokumente — kein
+   Client-Routing, jede Seite ist ein eigener Vite-Einstiegspunkt —, und
+   genau dafuer gibt es dokumentuebergreifende View Transitions.
+
+   Ohne JavaScript: die At-Regel genuegt, der Browser macht den Rest. Wer
+   sie nicht unterstuetzt, navigiert wie bisher; es faellt nichts aus.
+   Gilt nur fuer gleichen Ursprung, der Sprung zu Stripe bleibt also
+   unberuehrt. */
+@view-transition {
+    navigation: auto;
+}
+
+@keyframes pageSlideOut {
+    to {
+        opacity: 0;
+        transform: translateX(-3%)
+    }
+}
+
+@keyframes pageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%)
+    }
+}
+
+/* Die alte Seite weicht nur leicht und blendet ab, die neue kommt ganz
+   von rechts. Zwei gleich weite Wege sahen nach Karussell aus; so fuehrt
+   die Bewegung das Auge zur neuen Seite. */
+::view-transition-old(root) {
+    animation: .28s var(--ease) both pageSlideOut
+}
+
+::view-transition-new(root) {
+    animation: .42s var(--ease-out) both pageSlideIn
+}
+
+/* Die globale Regel weiter unten setzt animation-duration ueber `*`, und
+   diese Pseudoelemente trifft der Universalselektor nicht. Deshalb hier
+   noch einmal ausdruecklich. */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none
+    }
+}
+
 html {
     scroll-behavior: smooth
 }
