@@ -84,7 +84,22 @@ async function issueVoucher(env, session, now) {
       : `webhook: ${session.id} war bereits verarbeitet — ${voucher.code}`,
   )
 
-  // TODO(Schritt 3): PDF erzeugen und per Resend versenden.
+  // TODO(Schritt 3): Versand.
+  //
+  // Inhalt und Layout stehen: buildVoucherPdf() aus ./pdf.js erzeugt den
+  // Anhang, emailPlan() aus ./email.js sagt, wer welche der beiden Mails
+  // bekommt, buildVoucherEmail() baut sie. Beide sind im Panel unter
+  // /admin#vorlagen ansehbar. Was fehlt, ist ausschliesslich der Transport.
+  //
+  // Beim Anschluss zu beachten:
+  //   * Nur bei created === true senden. Stripe wiederholt Webhooks, und
+  //     eine zweite Mail an dieselbe Kundin waere kein harmloser Doppelklick.
+  //   * `email_sent_at` und `email_last_error` in der Zeile fuehren — die
+  //     Spalten stehen schon im Schema und sind bisher immer NULL.
+  //   * Ein Fehler beim Versand darf keinen 500 ausloesen. Der Gutschein
+  //     existiert dann bereits; ein Retry legte keinen neuen an, wuerde aber
+  //     den Webhook als fehlgeschlagen fuehren. Loggen, in
+  //     email_last_error schreiben, 200 antworten.
   return { created, code: voucher.code }
 }
 

@@ -1,29 +1,38 @@
-import { useEffect, useRef, useState } from 'react'
-import {
-  VOUCHER_MAX_AMOUNT,
-  VOUCHER_MAX_MESSAGE_LENGTH,
-  VOUCHER_MIN_AMOUNT,
-  voucherTreatments,
-} from '../data'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { VOUCHER_MAX_MESSAGE_LENGTH } from '../data'
+import { shopTreatments, useCatalog } from '../voucherCatalog'
 
-const PRESET_AMOUNTS = [50, 100, 150, 200]
-const MIN_AMOUNT = VOUCHER_MIN_AMOUNT
-const MAX_AMOUNT = VOUCHER_MAX_AMOUNT
 const MAX_MESSAGE_LENGTH = VOUCHER_MAX_MESSAGE_LENGTH
-const DEFAULT_TREATMENT_ID = voucherTreatments[0].id
 
-const currencyFormatter = new Intl.NumberFormat('de-AT', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
+// Zwei Formatierer statt einem: Preise sind meistens glatt, und „€ 105,00"
+// liest sich im Konfigurator schwerer als „€ 105". Sobald aber jemand im
+// Panel 89,50 einträgt, müssen die Cent auch dastehen — ein Formatierer mit
+// maximumFractionDigits: 0 machte daraus stillschweigend € 90.
+const wholeFormatter = new Intl.NumberFormat('de-AT', {
+  style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
+})
+const centFormatter = new Intl.NumberFormat('de-AT', {
+  style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2,
 })
 
 function formatCurrency(value) {
-  return currencyFormatter.format(Number.isFinite(value) ? value : 0)
+  const amount = Number.isFinite(value) ? value : 0
+  return Number.isInteger(amount) ? wholeFormatter.format(amount) : centFormatter.format(amount)
 }
 
-function getTreatment(treatmentId) {
-  return voucherTreatments.find(({ id }) => id === treatmentId) ?? voucherTreatments[0]
+function getTreatment(treatments, treatmentId) {
+  return treatments.find(({ id }) => id === treatmentId) ?? treatments[0] ?? null
+}
+
+// Variante und Dauer sind bei selbst angelegten Behandlungen optional. Fest
+// verdrahtetes „${variant} · ${duration}" liesse dann ein nacktes Trennzeichen
+// stehen — hier faellt weg, was leer ist.
+function treatmentName(treatment) {
+  return [treatment.title, treatment.variant].filter(Boolean).join(' · ')
+}
+
+function treatmentDetails(treatment) {
+  return [treatment.variant, treatment.duration].filter(Boolean).join(' · ')
 }
 
 function Icon({ name }) {
@@ -109,14 +118,17 @@ function Icon({ name }) {
   )
 }
 
-function useAmountSelection(initialAmount = 100) {
-  const startsAsPreset = PRESET_AMOUNTS.includes(initialAmount)
+// Grenzen und Schnellwahl kommen als Argument herein, weil sie im Panel
+// aenderbar sind. Der Anfangsbetrag bleibt fest — er ist eine Vorbelegung
+// und keine Regel.
+function useAmountSelection({ presets, min, max }, initialAmount = 100) {
+  const startsAsPreset = presets.includes(initialAmount)
   const [presetAmount, setPresetAmount] = useState(startsAsPreset ? initialAmount : null)
   const [customAmount, setCustomAmount] = useState(startsAsPreset ? '' : String(initialAmount))
 
   const parsedCustomAmount = Number(customAmount.replace(',', '.'))
   const amount = presetAmount ?? (Number.isFinite(parsedCustomAmount) ? parsedCustomAmount : 0)
-  const isValid = amount >= MIN_AMOUNT && amount <= MAX_AMOUNT
+  const isValid = amount >= min && amount <= max
 
   const selectPreset = (value) => {
     setPresetAmount(value)
@@ -129,7 +141,7 @@ function useAmountSelection(initialAmount = 100) {
   }
 
   const setAmount = (value) => {
-    if (PRESET_AMOUNTS.includes(value)) selectPreset(value)
+    if (presets.includes(value)) selectPreset(value)
     else {
       setPresetAmount(null)
       setCustomAmount(String(value))
@@ -140,6 +152,9 @@ function useAmountSelection(initialAmount = 100) {
     amount,
     customAmount,
     isValid,
+    min,
+    max,
+    presets,
     presetAmount,
     selectCustom,
     selectPreset,
@@ -177,7 +192,7 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
     <fieldset className={`voucher-amount-picker${compact ? ' voucher-amount-picker-compact' : ''}`}>
       <legend>Gutscheinwert auswählen</legend>
       <div className="voucher-amount-options">
-        {PRESET_AMOUNTS.map((value) => (
+        {selection.presets.map((value) => (
           <button
             type="button"
             className={selection.presetAmount === value ? 'selected' : undefined}
@@ -210,30 +225,30 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
       </div>
       <p id={`${idPrefix}-amount-hint`} className={`voucher-amount-hint${selection.isValid || selection.amount === 0 ? '' : ' error'}`}>
         {selection.isValid || selection.amount === 0
-          ? `Frei wählbar zwischen ${MIN_AMOUNT} € und ${MAX_AMOUNT} €.`
-          : `Bitte einen Betrag zwischen ${MIN_AMOUNT} € und ${MAX_AMOUNT} € wählen.`}
+          ? `Frei wählbar zwischen ${selection.min} € und ${selection.max} €.`
+          : `Bitte einen Betrag zwischen ${selection.min} € und ${selection.max} € wählen.`}
       </p>
     </fieldset>
   )
 }
 
-function TreatmentPicker({ selectedId, onSelect, compact = false }) {
+function TreatmentPicker({ treatments, selectedId, onSelect, compact = false }) {
   return (
     <fieldset className={`voucher-treatment-picker${compact ? ' voucher-treatment-picker-compact' : ''}`}>
       <legend>Behandlung auswählen</legend>
       <div className="voucher-treatment-options">
-        {voucherTreatments.map((treatment) => (
+        {treatments.map((treatment) => (
           <button
             type="button"
             className={selectedId === treatment.id ? 'selected' : undefined}
             aria-pressed={selectedId === treatment.id}
-            aria-label={`${treatment.title}, ${treatment.variant}, ${treatment.duration}, ${formatCurrency(treatment.price)}`}
+            aria-label={`${treatmentName(treatment)}, ${treatment.duration}, ${formatCurrency(treatment.price)}`}
             onClick={() => onSelect(treatment.id)}
             key={treatment.id}
           >
             <span className="voucher-treatment-category">{treatment.category}</span>
             <strong>{treatment.title}</strong>
-            <small>{treatment.variant} · {treatment.duration}</small>
+            <small>{treatmentDetails(treatment)}</small>
             <span className="voucher-treatment-price">{formatCurrency(treatment.price)}</span>
             <i aria-hidden="true"><Icon name="check" /></i>
           </button>
@@ -259,10 +274,29 @@ const STEPS = [
 // unuebersichtlich. Der Ablauf bleibt auf der Seite — kein Modal, keine
 // zweite Spalte, die um Aufmerksamkeit konkurriert.
 export default function VoucherShop() {
-  const amountSelection = useAmountSelection(100)
+  // Preise und Auswahl kommen aus dem Katalog, nicht mehr fest aus data.js.
+  // Aendert die Inhaberin im Panel etwas, steht es hier sofort — auch ohne
+  // Neuladen, wenn der Shop in einem zweiten Tab offen ist.
+  const catalog = useCatalog()
+
+  const treatments = useMemo(
+    // Der Konfigurator rechnet durchgehend in Euro (das Eingabefeld ist
+    // eines), der Katalog haelt Cent. Umgerechnet wird genau hier, an einer
+    // Stelle, statt in jeder Anzeige.
+    () => shopTreatments(catalog).map((t) => ({ ...t, price: t.priceCents / 100 })),
+    [catalog],
+  )
+
+  const limits = useMemo(() => ({
+    min: catalog.minCents / 100,
+    max: catalog.maxCents / 100,
+    presets: catalog.presetsCents.map((cents) => cents / 100),
+  }), [catalog])
+
+  const amountSelection = useAmountSelection(limits, 100)
   const [step, setStep] = useState(0)
-  const [kind, setKind] = useState('value')
-  const [treatmentId, setTreatmentId] = useState(DEFAULT_TREATMENT_ID)
+  const [kindChoice, setKind] = useState('value')
+  const [treatmentId, setTreatmentId] = useState(null)
   const [recipient, setRecipient] = useState('')
   const [sender, setSender] = useState('')
   const [message, setMessage] = useState('')
@@ -276,8 +310,20 @@ export default function VoucherShop() {
   const timerRef = useRef(null)
   const stepRef = useRef(0)
 
-  const selectedTreatment = getTreatment(treatmentId)
-  const effectiveAmount = kind === 'treatment' ? selectedTreatment.price : amountSelection.amount
+  // Nimmt die Inhaberin *alle* Behandlungen aus dem Shop, gaebe es unter
+  // „Behandlung schenken" nichts zu waehlen. Statt eine leere Auswahl
+  // anzubieten, faellt der Konfigurator dann auf den Wertgutschein zurueck.
+  // Abgeleitet und nicht per Effekt korrigiert: ein useEffect, das setKind
+  // aufruft, zeigte fuer einen Frame die leere Auswahl.
+  const canGiftTreatment = treatments.length > 0
+  const kind = canGiftTreatment && kindChoice === 'treatment' ? 'treatment' : 'value'
+
+  // Gleiche Ueberlegung fuer die Behandlung selbst: wird die gewaehlte
+  // ausgeblendet, greift die erste verbliebene, statt ins Leere zu zeigen.
+  const selectedTreatment = getTreatment(treatments, treatmentId)
+  const effectiveAmount = kind === 'treatment' && selectedTreatment
+    ? selectedTreatment.price
+    : amountSelection.amount
 
   useEffect(() => () => window.clearTimeout(timerRef.current), [])
 
@@ -297,7 +343,7 @@ export default function VoucherShop() {
 
   const problemAt = (index) => {
     if (index === 0 && kind === 'value' && !amountSelection.isValid) {
-      return `Bitte wähle einen Gutscheinwert zwischen ${MIN_AMOUNT} € und ${MAX_AMOUNT} €.`
+      return `Bitte wähle einen Gutscheinwert zwischen ${limits.min} € und ${limits.max} €.`
     }
     if (index === 1) {
       if (!recipient.trim()) return 'Bitte trage den Namen der beschenkten Person ein.'
@@ -343,7 +389,7 @@ export default function VoucherShop() {
             Zahlung werden Gutschein-Code und PDF automatisch erzeugt und versendet.
           </p>
           <div className="vshop-receipt">
-            <span>{kind === 'treatment' ? `${selectedTreatment.title} · ${selectedTreatment.variant}` : 'Wertgutschein'}</span>
+            <span>{kind === 'treatment' ? treatmentName(selectedTreatment) : 'Wertgutschein'}</span>
             <strong>{formatCurrency(effectiveAmount)}</strong>
             <small>FEM–GIFT–PREVIEW</small>
           </div>
@@ -378,15 +424,21 @@ export default function VoucherShop() {
 
           {step === 0 && (
             <>
-              <div className="vshop-field-group">
-                <span className="vshop-label">Gutscheinart</span>
-                <VoucherKindSwitch value={kind} onChange={changeKind} />
-              </div>
+              {canGiftTreatment ? (
+                <div className="vshop-field-group">
+                  <span className="vshop-label">Gutscheinart</span>
+                  <VoucherKindSwitch value={kind} onChange={changeKind} />
+                </div>
+              ) : null}
               <div className="vshop-field-group">
                 {kind === 'value' ? (
                   <AmountPicker selection={amountSelection} idPrefix="vshop" />
                 ) : (
-                  <TreatmentPicker selectedId={treatmentId} onSelect={setTreatmentId} />
+                  <TreatmentPicker
+                    treatments={treatments}
+                    selectedId={selectedTreatment.id}
+                    onSelect={setTreatmentId}
+                  />
                 )}
               </div>
             </>
@@ -469,7 +521,7 @@ export default function VoucherShop() {
               {kind === 'treatment' && (
                 <div className="vshop-row">
                   <span>Behandlung</span>
-                  <span>{selectedTreatment.title} · {selectedTreatment.variant}</span>
+                  <span>{treatmentName(selectedTreatment)}</span>
                 </div>
               )}
               <div className="vshop-row">

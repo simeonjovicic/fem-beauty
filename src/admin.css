@@ -524,7 +524,11 @@
     color: var(--sand);
 }
 
-.adm-submit {
+/* Doppelt qualifiziert, weil `.adm button { background: none }` ganz oben
+   sonst gewinnt: eine Klasse plus Element schlaegt eine Klasse allein,
+   unabhaengig von der Reihenfolge. Ohne das steht der wichtigste Knopf des
+   Panels — "Einloesen" an der Kassa — als Text ohne Flaeche da. */
+.adm .adm-submit {
     width: 100%;
     background: var(--warm);
     color: var(--cream);
@@ -536,7 +540,7 @@
     transition: background .25s var(--ease);
 }
 
-.adm-submit:hover {
+.adm .adm-submit:hover {
     background: var(--sand);
 }
 
@@ -660,10 +664,703 @@
     color: var(--warn);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   Bereichswechsel
+   ═══════════════════════════════════════════════════════════ */
+/* style.css setzt `nav { position: fixed }` fuer die Kopfleiste des
+   oeffentlichen Auftritts — ohne Klasse, also trifft es jedes <nav> auf der
+   Seite. Der .adm-Praefix schuetzt vor Regeln auf Klassen, nicht vor Regeln
+   auf Elementnamen. Deshalb hier ausdruecklich zurueckgesetzt statt das
+   <nav> gegen ein <div> zu tauschen: die Reiterleiste *ist* Navigation und
+   soll fuer Screenreader auch so heissen. */
+.adm-tabs {
+    position: static;
+    z-index: auto;
+    display: flex;
+    justify-content: flex-start;
+    gap: .25rem;
+    padding: 0;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--line);
+    transition: none;
+}
+
+.adm-tabs button {
+    position: relative;
+    padding: .7rem 1.1rem 1rem;
+    font-size: .9rem;
+    color: var(--taupe);
+    transition: color .2s var(--ease);
+}
+
+.adm-tabs button:hover {
+    color: var(--warm);
+}
+
+/* Der Strich sitzt auf der Trennlinie des Containers, nicht darunter —
+   sonst steht unter dem aktiven Reiter eine doppelte Linie. */
+.adm-tabs button[aria-current]::after {
+    content: '';
+    position: absolute;
+    inset: auto 1.1rem -1px;
+    height: 2px;
+    background: var(--sand);
+}
+
+.adm-tabs button[aria-current] {
+    color: var(--warm);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Preise
+   ═══════════════════════════════════════════════════════════ */
+.adm-prices,
+.adm-templates {
+    display: grid;
+    gap: 1rem;
+    /* Platz fuer die Speicherleiste, die ueber dem Inhalt schwebt. */
+    padding-bottom: 4.5rem;
+}
+
+.adm-sub {
+    margin: -.75rem 0 1.25rem;
+    font-size: .85rem;
+    line-height: 1.6;
+    color: var(--taupe);
+}
+
+.adm-explain p {
+    font-size: .9rem;
+    line-height: 1.65;
+    color: var(--warm-lt);
+}
+
+.adm-explain .adm-note strong {
+    color: var(--warm);
+    font-weight: 500;
+}
+
+/* Knopf links, Erklaerung rechts daneben. Die Erklaerung darf umbrechen,
+   der Knopf nicht — deshalb flex-basis nur auf dem Text. */
+.adm-explain-links {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--taupe);
+}
+
+.adm-explain-links span {
+    flex: 1 1 16rem;
+}
+
+/* ── Betragsfeld ──
+   Das Waehrungszeichen liegt als Beschriftung im Feld statt davor: getippt
+   wird nur die Zahl, und ein davorstehendes Zeichen macht aus dem Feld
+   optisch zwei Elemente. */
+.adm-money {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.adm-money input {
+    width: 7.5rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .6rem 2rem .6rem .8rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: border-color .2s var(--ease);
+}
+
+.adm-money input:hover {
+    border-color: var(--sand-lt);
+}
+
+.adm-money i {
+    position: absolute;
+    right: .8rem;
+    font-style: normal;
+    font-size: .85rem;
+    color: var(--taupe);
+    pointer-events: none;
+}
+
+.adm-money-field {
+    display: grid;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--warm-lt);
+}
+
+.adm-limit-row {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.adm-limit-hint {
+    flex: 1 1 12rem;
+    padding-bottom: .7rem;
+    font-size: .78rem;
+    color: var(--taupe);
+}
+
+/* ── Katalog ── */
+.adm-catalog-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.adm-catalog-head h2 {
+    margin-bottom: 1.25rem;
+}
+
+.adm-cat + .adm-cat {
+    margin-top: 1.5rem;
+}
+
+.adm-cat h3 {
+    font-size: .68rem;
+    font-weight: 400;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--soft);
+    padding-bottom: .4rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.adm-price-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(5.5rem, auto);
+    align-items: center;
+    gap: .9rem;
+    padding: .8rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.adm-price-row:last-child {
+    border-bottom: none;
+}
+
+/* Ausgeblendete Leistungen bleiben lesbar, treten aber zurueck. Nicht per
+   opacity auf die ganze Zeile: das Eingabefeld muss bedienbar aussehen,
+   auch wenn die Behandlung gerade nicht im Shop steht. */
+.adm-price-row.is-hidden .adm-price-name {
+    opacity: .55;
+}
+
+.adm-price-name strong {
+    display: block;
+    font-weight: 400;
+    font-size: .95rem;
+}
+
+.adm-price-name small {
+    display: block;
+    margin-top: .15rem;
+    font-size: .78rem;
+    color: var(--taupe);
+}
+
+.adm-price-edit {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.adm-price-edit s {
+    font-size: .8rem;
+    color: var(--soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.adm-price-flag {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    text-align: right;
+    font-size: .68rem;
+    letter-spacing: .06em;
+}
+
+.adm-price-flag em {
+    font-style: normal;
+    color: var(--sand);
+}
+
+.adm-price-flag .adm-muted {
+    color: var(--soft);
+}
+
+.adm-price-flag .adm-bad {
+    color: var(--warn);
+}
+
+.adm-remove {
+    font-size: .68rem;
+    letter-spacing: .06em;
+    color: var(--soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color .2s var(--ease);
+}
+
+.adm-remove:hover {
+    color: var(--warn);
+}
+
+/* ── Vorgemerkt zum Entfernen ──
+   Bleibt stehen, statt zu verschwinden: erst beim Speichern ist es weg,
+   und bis dahin muss man sehen, was man da angeklickt hat. */
+.adm-removed h3 {
+    color: var(--warn);
+}
+
+.adm-price-row.is-removed {
+    grid-template-columns: minmax(0, 1fr) auto;
+    opacity: .7;
+}
+
+.adm-price-row.is-removed .adm-price-name {
+    text-decoration: line-through;
+    text-decoration-color: var(--warn);
+}
+
+/* ── Neue Behandlung ── */
+.adm-add-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-size: .78rem;
+    color: var(--taupe);
+}
+
+.adm-add {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--sand-lt);
+    border-radius: 14px;
+    background: var(--white);
+}
+
+.adm-add h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+}
+
+/* auto-fit statt fester Spaltenzahl: das Formular sitzt in einer Karte,
+   deren Breite von der Fensterbreite abhaengt — eine feste Aufteilung
+   waere entweder am Telefon zu eng oder am Schreibtisch zu leer. */
+.adm-add-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: .9rem;
+}
+
+.adm-text-field {
+    display: grid;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--warm-lt);
+}
+
+.adm-text-field i {
+    font-style: normal;
+    color: var(--soft);
+}
+
+.adm-text-field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .6rem .8rem;
+    transition: border-color .2s var(--ease);
+}
+
+.adm-text-field input:hover {
+    border-color: var(--sand-lt);
+}
+
+/* padding-right ausdruecklich zurueckholen: `.adm-text-field input` oben
+   setzt ein gleichmaessiges Polster und schlaegt dabei `.adm-money input`,
+   dessen rechte Seite den Platz fuer das Euro-Zeichen freihaelt. Ohne das
+   laeuft der Betrag in das Zeichen hinein. */
+.adm-text-field-price .adm-money input {
+    width: 100%;
+    padding-right: 2rem;
+    background: var(--bg);
+}
+
+.adm-add-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: 1.25rem;
+}
+
+.adm-add-actions .adm-submit {
+    width: auto;
+    margin-top: 0;
+    padding: .7rem 1.6rem;
+}
+
+.adm-tag {
+    font-style: normal;
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sand);
+    border: 1px solid var(--sand-lt);
+    border-radius: 4px;
+    padding: .1rem .35rem;
+}
+
+/* ── Schalter ──
+   Ein role="switch" statt einer Checkbox: die Zeile schaltet sofort, es
+   gibt kein Formular, das den Zustand spaeter uebernimmt. */
+.adm-toggle {
+    width: 40px;
+    height: 24px;
+    flex: none;
+    border-radius: 50px;
+    background: var(--sand-pale);
+    padding: 3px;
+    transition: background .2s var(--ease);
+}
+
+.adm-toggle[aria-checked='true'] {
+    background: var(--sand);
+}
+
+.adm-toggle span {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--white);
+    transition: transform .2s var(--ease);
+}
+
+.adm-toggle[aria-checked='true'] span {
+    transform: translateX(16px);
+}
+
+/* ── Zusammenfassung ── */
+.adm-changes {
+    list-style: none;
+    display: grid;
+    gap: .7rem;
+}
+
+.adm-changes li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: .88rem;
+}
+
+.adm-changes b {
+    font-weight: 400;
+}
+
+.adm-changes s {
+    color: var(--soft);
+}
+
+.adm-changes strong {
+    font-weight: 500;
+    color: var(--warm);
+    font-variant-numeric: tabular-nums;
+}
+
+.adm-changes small {
+    color: var(--sand);
+}
+
+.adm-problems {
+    margin-top: 1.25rem;
+    padding: .9rem 1rem;
+    border-radius: 12px;
+    background: rgba(161, 93, 76, .08);
+    font-size: .82rem;
+    color: var(--warn);
+}
+
+.adm-problems ul {
+    list-style: none;
+    margin-top: .4rem;
+    display: grid;
+    gap: .25rem;
+}
+
+/* ── Speicherleiste ── */
+.adm-savebar {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: .8rem .8rem .8rem 1.4rem;
+    border-radius: 50px;
+    background: var(--warm);
+    color: var(--cream);
+    box-shadow: 0 12px 30px rgba(74, 63, 56, .22);
+}
+
+.adm-savebar strong {
+    font-weight: 500;
+    color: var(--sand-lt);
+}
+
+.adm-savebar > div {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}
+
+.adm-savebar .adm-submit {
+    width: auto;
+    margin-top: 0;
+    padding: .7rem 1.6rem;
+    background: var(--sand);
+    color: var(--warm);
+}
+
+.adm-savebar .adm-submit:hover {
+    background: var(--sand-lt);
+}
+
+.adm-savebar .adm-submit:disabled {
+    background: var(--warm-lt);
+    color: var(--soft);
+    cursor: not-allowed;
+}
+
+/* Zweifach qualifiziert, damit der Rahmen auch auf einem <button> steht:
+   `.adm button { border: none }` weiter oben schlaegt eine einfache
+   Klasse, und ein Knopf ohne Rahmen neben einem Link mit Rahmen sieht aus
+   wie ein Fehler. */
+.adm .adm-ghost {
+    display: inline-block;
+    padding: .7rem 1.2rem;
+    border-radius: 50px;
+    border: 1px solid var(--line);
+    font-size: .85rem;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .2s var(--ease), color .2s var(--ease);
+}
+
+.adm .adm-savebar .adm-ghost {
+    border-color: rgba(220, 196, 160, .35);
+}
+
+.adm .adm-ghost:hover {
+    border-color: var(--sand);
+    color: var(--sand);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Vorlagen
+   ═══════════════════════════════════════════════════════════ */
+.adm-tpl-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.adm-select {
+    display: grid;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--warm-lt);
+}
+
+.adm-select select {
+    font: inherit;
+    color: var(--warm);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .6rem .8rem;
+    min-width: 15rem;
+}
+
+.adm-seg {
+    display: flex;
+    gap: .25rem;
+    padding: .25rem;
+    border-radius: 50px;
+    background: var(--white);
+    border: 1px solid var(--line);
+}
+
+.adm-seg button {
+    padding: .5rem 1rem;
+    border-radius: 50px;
+    font-size: .84rem;
+    color: var(--taupe);
+    transition: background .2s var(--ease), color .2s var(--ease);
+}
+
+.adm-seg button[aria-pressed='true'] {
+    background: var(--warm);
+    color: var(--cream);
+}
+
+.adm-seg-small button {
+    padding: .5rem .85rem;
+    font-size: .78rem;
+}
+
+/* Kopfzeilen der Mail: bewusst wie in einem Mailprogramm gesetzt, damit
+   sofort klar ist, dass An und Betreff mit zur Vorlage gehoeren. */
+.adm-headers {
+    display: grid;
+    gap: .5rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--line);
+    font-size: .85rem;
+}
+
+.adm-headers > div {
+    display: flex;
+    gap: .75rem;
+}
+
+.adm-headers dt {
+    flex: none;
+    width: 4.5rem;
+    color: var(--soft);
+}
+
+.adm-headers dd {
+    color: var(--warm);
+    word-break: break-word;
+}
+
+.adm-frame {
+    margin: 0 auto;
+    width: 100%;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: max-width .3s var(--ease);
+}
+
+.adm-frame iframe {
+    display: block;
+    width: 100%;
+    height: 78vh;
+    min-height: 480px;
+    border: none;
+}
+
+.adm-frame-pdf {
+    max-width: none;
+}
+
+.adm-tpl-actions {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.adm-tpl-empty {
+    text-align: center;
+    padding: 2rem 0 1rem;
+}
+
+.adm-tpl-empty .adm-submit {
+    width: auto;
+    padding: .95rem 2.2rem;
+}
+
+.adm-source {
+    margin-top: 1.25rem;
+    font-size: .82rem;
+}
+
+.adm-source summary {
+    cursor: pointer;
+    color: var(--taupe);
+}
+
+.adm-source pre {
+    margin-top: .75rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    font-size: .74rem;
+    line-height: 1.7;
+    color: var(--warm-lt);
+    white-space: pre-wrap;
+
+    /* Die Nur-Text-Fassung enthaelt den Buchungslink, und der ist ein
+       einziges Wort von 100 Zeichen. pre-wrap bricht nur an Leerzeichen —
+       ohne die naechste Zeile schob die aufgeklappte Fassung die *ganze
+       Seite* auf 566px, am Telefon also in die Waagrechte.
+       overflow-x als zweite Sicherung: was sich trotzdem nicht brechen
+       laesst, scrollt in diesem Kasten und nicht im Dokument. */
+    overflow-wrap: anywhere;
+    overflow-x: auto;
+}
+
 /* ─── Schmale Fenster ──────────────────── */
 @media (max-width: 860px) {
     .adm-detail {
         grid-template-columns: 1fr;
+    }
+
+    /* Die Zeile wird zweizeilig: Name oben ueber die volle Breite, darunter
+       Schalter, Preis und Hinweis. Vier Spalten nebeneinander drueckten den
+       Behandlungsnamen sonst auf zwei Woerter pro Zeile. */
+    .adm-price-row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        row-gap: .5rem;
+    }
+
+    .adm-price-name {
+        grid-column: 2 / -1;
+    }
+
+    .adm-price-edit {
+        grid-column: 2;
+    }
+
+    .adm-price-flag {
+        grid-column: 3;
+    }
+
+    .adm-frame iframe {
+        height: 65vh;
     }
 }
 
@@ -880,7 +1577,7 @@
         font-size: .9rem;
     }
 
-    .adm-submit {
+    .adm .adm-submit {
         padding: 1.1rem;
         font-size: 1rem;
     }
@@ -893,6 +1590,279 @@
 
     .adm-timeline li {
         padding: 1rem 0;
+    }
+
+    /* ── Reiter ──
+       Drei Woerter passen nebeneinander, aber nicht mit der Einrueckung vom
+       Schreibtisch. Enger stellen statt scrollbar machen: eine Leiste, die
+       seitwaerts scrollt, versteckt den dritten Reiter. */
+    .adm-tabs {
+        margin-bottom: 1.25rem;
+    }
+
+    .adm-tabs button {
+        flex: 1;
+        padding: .6rem .3rem .85rem;
+        font-size: .88rem;
+    }
+
+    .adm-tabs button[aria-current]::after {
+        inset: auto .3rem -1px;
+    }
+
+    /* ── Preise ──
+       Der Preis bleibt neben dem Namen. Unter den Namen gesetzt wurde jede
+       Zeile doppelt so hoch, waehrend rechts daneben die halbe Breite frei
+       blieb — bei acht Behandlungen scrollt man dann ohne Not.
+       Es geht sich aus: 375px minus Seiten- und Kartenrand sind 287px, davon
+       48 fuer den Schalter, 96 fuer das Feld, der Rest fuer den Namen.
+       Nur der Hinweis („nicht im Shop", „Entfernen") faellt darunter — der
+       ist Nachtrag und muss nicht in die Kopfzeile. */
+    .adm-price-row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: .7rem;
+        row-gap: .35rem;
+        padding: .9rem 0;
+    }
+
+    .adm-price-name {
+        grid-column: 2;
+    }
+
+    .adm-price-edit {
+        grid-column: 3;
+        /* Der alte Preis stapelt sich ueber das Feld statt davor: nebenan
+           bliebe fuer den Namen zu wenig uebrig. */
+        flex-direction: column;
+        align-items: flex-end;
+        gap: .15rem;
+    }
+
+    /* Hinweis und Entfernen-Link laufen unter Name und Feld durch, nicht
+       neben ihnen — nebeneinander bliebe fuer keines von beiden Platz. */
+    .adm-price-flag {
+        grid-column: 2 / -1;
+        flex-direction: row;
+        align-items: center;
+        gap: .8rem;
+        text-align: left;
+        flex-wrap: wrap;
+    }
+
+    /* Schmaler als am Schreibtisch — sechs Zeichen plus Waehrungszeichen
+       sind alles, was hier je drinsteht. Das Feld im Formular „Neue
+       Behandlung" bleibt davon unberuehrt, es ist hoeher qualifiziert. */
+    .adm-money input {
+        width: 6rem;
+        padding-right: 1.9rem;
+    }
+
+    /* Als reiner Textlink zu klein zum Treffen. Wie .adm-back weiter oben
+       auf Fingerbreite gebracht, statt die Schrift zu vergroessern — die
+       Zeile soll ihre Rangordnung behalten. */
+    .adm-remove {
+        padding: .5rem 0;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        font-size: .75rem;
+    }
+
+    /* ── Schalter ──
+       40x24 trifft man mit dem Daumen nicht zuverlaessig. Sichtbar nur
+       leicht groesser — die Trefferflaeche waechst darueber hinaus per
+       Pseudoelement, damit die Zeile nicht auseinandergezogen wird. */
+    .adm-toggle {
+        position: relative;
+        width: 48px;
+        height: 28px;
+        padding: 4px;
+    }
+
+    .adm-toggle span {
+        width: 20px;
+        height: 20px;
+    }
+
+    .adm-toggle[aria-checked='true'] span {
+        transform: translateX(20px);
+    }
+
+    .adm-toggle::after {
+        content: '';
+        position: absolute;
+        inset: -8px -6px;
+    }
+
+    .adm-limit-row {
+        gap: .75rem;
+    }
+
+    .adm-limit-hint {
+        flex-basis: 100%;
+        padding-bottom: 0;
+    }
+
+    /* ── Katalog-Kopf ──
+       Ueberschrift und Zaehler nebeneinander gehen sich am Telefon in die
+       Quere: .adm-count bekommt aus der Werkzeugleiste width:100% mit, und
+       in einem space-between-Flex wird daraus ein Umbruch mitten in die
+       Ueberschrift. Hier deshalb ausdruecklich untereinander. */
+    .adm-catalog-head {
+        display: block;
+        margin-bottom: .3rem;
+    }
+
+    .adm-catalog-head h2 {
+        margin-bottom: .15rem;
+    }
+
+    .adm-catalog-head .adm-count {
+        display: block;
+        width: auto;
+    }
+
+    .adm-catalog .adm-sub {
+        margin-top: .6rem;
+    }
+
+    /* ── Neue Behandlung ──
+       Das Raster faellt durch auto-fit von selbst auf eine Spalte. Was
+       fehlt, sind Fingerbreiten fuer die beiden Knoepfe darunter. */
+    .adm-add {
+        padding: 1rem;
+    }
+
+    .adm-add-actions {
+        gap: .6rem;
+    }
+
+    .adm-add-actions .adm-ghost,
+    .adm-add-actions .adm-submit {
+        flex: 1;
+        min-height: 48px;
+        padding: .8rem 1rem;
+        text-align: center;
+    }
+
+    .adm-add-row .adm-ghost,
+    .adm-explain-links .adm-ghost {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .adm-price-row.is-removed {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: .75rem;
+    }
+
+    /* Die Regel weiter oben schiebt jeden Namen in Spalte 2 — in einem
+       einspaltigen Raster legte der Browser dafuer eine zweite Spalte an
+       und die Zeile stuende halb neben der Karte. */
+    .adm-price-row.is-removed .adm-price-name {
+        grid-column: 1;
+    }
+
+    .adm-price-row.is-removed .adm-ghost {
+        justify-self: start;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Die Leiste sitzt ueber dem Home-Balken, nicht darunter. */
+    .adm-savebar {
+        bottom: calc(.75rem + env(safe-area-inset-bottom));
+        padding: .7rem .7rem .7rem 1.1rem;
+        font-size: .85rem;
+    }
+
+    .adm-savebar .adm-submit,
+    .adm-savebar .adm-ghost {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: .7rem 1.2rem;
+        font-size: .85rem;
+        margin-top: 0;
+    }
+
+    /* Bricht die Leiste um, sollen die Knoepfe die Zeile fuellen statt
+       rechts zu kleben — "Speichern" ist hier die Hauptsache. */
+    .adm-savebar > div {
+        flex: 1;
+    }
+
+    .adm-savebar > div > * {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* ── Vorlagen ── */
+    .adm-tpl-controls {
+        gap: .75rem;
+    }
+
+    .adm-select,
+    .adm-select select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Drei Beschriftungen nebeneinander brechen bei 390px mitten im Wort
+       um („Geschenk-E-\nMail"). Untereinander gestellt liest sich dieselbe
+       Auswahl als Liste und ist nebenbei mit dem Daumen zu treffen. */
+    .adm-seg {
+        width: 100%;
+        flex-direction: column;
+        border-radius: 14px;
+    }
+
+    .adm-seg button {
+        border-radius: 10px;
+        padding: .75rem .9rem;
+        text-align: left;
+        font-size: .85rem;
+        min-height: 44px;
+    }
+
+    /* Desktop/Telefon steuert die Breite der Vorschau — die ist am Telefon
+       ohnehin durch die Karte begrenzt, der Schalter koennte also nichts
+       bewirken. Ein Knopf ohne Wirkung ist schlimmer als keiner. */
+    .adm-seg-small {
+        display: none;
+    }
+
+    .adm-headers dt {
+        width: 3.5rem;
+    }
+
+    .adm-frame iframe {
+        height: 60vh;
+    }
+
+    .adm-tpl-empty .adm-submit {
+        width: 100%;
+    }
+
+    .adm-tpl-actions {
+        flex-direction: column;
+    }
+
+    .adm-tpl-actions .adm-ghost {
+        text-align: center;
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Kurze Titel wie „E-Mail & PDF" lassen genug Platz, dass die
+       Anmeldezeile daneben rutscht und beides gedraengt wirkt. Am Telefon
+       gehoert der Kopf untereinander, unabhaengig von der Titellaenge. */
+    .adm-head {
+        flex-direction: column;
     }
 }
 
@@ -947,7 +1917,7 @@
         color: var(--warm);
     }
 
-    .adm-submit:hover {
+    .adm .adm-submit:hover {
         background: var(--warm);
     }
 
@@ -961,7 +1931,7 @@
         background: var(--white);
     }
 
-    .adm-submit:active {
+    .adm .adm-submit:active {
         background: var(--sand);
     }
 }

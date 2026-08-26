@@ -28,10 +28,39 @@ import {
   stateLabel,
   stateTone,
 } from './admin/format'
+import PricesTab from './admin/PricesTab'
+import TemplatesTab from './admin/TemplatesTab'
 
 // Erst hier importiert, nicht in main.jsx: die Seite haengt an einem
 // lazy()-Import, damit das Panel-CSS nicht im Bundle der Startseite landet.
 import './admin.css'
+
+// Drei Bereiche, weil drei verschiedene Anlässe: an der Kassa wird
+// eingelöst, am Schreibtisch werden Preise gepflegt, und die Vorlagen sieht
+// man sich einmal an, bevor sie rausgehen.
+const TABS = [
+  ['vouchers', 'Gutscheine'],
+  ['prices', 'Preise'],
+  ['templates', 'Vorlagen'],
+]
+
+const TAB_TITLES = {
+  vouchers: 'Gutschein-Übersicht',
+  prices: 'Preise & Behandlungen',
+  templates: 'E-Mail & PDF',
+}
+
+// Der Bereich steht im Fragment, damit ein Neuladen nicht zurueck auf die
+// Gutscheinliste wirft — beim Pflegen von Preisen laedt man oefter neu, als
+// einem lieb ist. Fragment und nicht Pfad: die Seite wird statisch
+// ausgeliefert und kennt keine Unterrouten.
+const TAB_HASH = { vouchers: '', prices: '#preise', templates: '#vorlagen' }
+
+function tabFromHash() {
+  const entry = Object.entries(TAB_HASH)
+    .find(([, hash]) => hash && hash === window.location.hash)
+  return entry ? entry[0] : 'vouchers'
+}
 
 const FILTERS = [
   ['all', 'Alle'],
@@ -88,6 +117,7 @@ export default function AdminPage() {
   // wuerde Ableitungen unruhig machen, die von Ablaufdaten abhaengen.
   const now = useMemo(() => new Date().toISOString(), [])
 
+  const [tab, setTab] = useState(tabFromHash)
   const [ledger, setLedger] = useState(seedRedemptions)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
@@ -128,9 +158,32 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
+  // Ein Wechsel des Bereichs schliesst das offene Detail. Sonst stuende
+  // beim Zurueckkommen ein Gutschein offen, den niemand mehr erwartet.
+  const changeTab = useCallback((next) => {
+    setTab(next)
+    setSelectedId(null)
+    setFlash(null)
+    // replaceState statt location.hash: ein Sprung zwischen den Reitern soll
+    // keinen Eintrag im Verlauf hinterlassen, den man einzeln zurueckgehen muss.
+    window.history.replaceState(null, '', TAB_HASH[next] || window.location.pathname)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [])
+
+  // Fragment von aussen geaendert — getippt, aus einem Lesezeichen, oder per
+  // Zurueck-Knopf. changeTab() selbst loest das nicht aus: replaceState
+  // feuert kein hashchange.
+  useEffect(() => {
+    const onHashChange = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
   // Tastatur: "/" springt in die Suche, Escape schliesst die Detailansicht.
   // An der Kassa wird mit einer Hand getippt, da zaehlt jeder Griff zur Maus.
   useEffect(() => {
+    if (tab !== 'vouchers') return undefined
+
     function onKey(event) {
       if (event.key === 'Escape' && selectedId) closeDetail()
       if (event.key === '/' && !selectedId && document.activeElement?.tagName !== 'INPUT') {
@@ -140,7 +193,7 @@ export default function AdminPage() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedId, closeDetail])
+  }, [tab, selectedId, closeDetail])
 
   /** Abbuchen. Spiegelt redeemVoucher() aus admin/api.js — inklusive Idempotenzschluessel. */
   function redeem(row, amountCents, note) {
@@ -189,12 +242,12 @@ export default function AdminPage() {
 
   return (
     <div className="adm">
-      <MockBanner />
+      <MockBanner tab={tab} />
 
       <div className="adm-wrap">
         <header className="adm-head">
           <div>
-            <h1>{selected ? 'Gutschein' : 'Gutschein-Übersicht'}</h1>
+            <h1>{selected ? 'Gutschein' : TAB_TITLES[tab]}</h1>
             {selected && (
               <button type="button" className="adm-back" onClick={closeDetail}>
                 ← Zurück zur Übersicht
@@ -206,7 +259,23 @@ export default function AdminPage() {
           </p>
         </header>
 
-        {selected ? (
+        <nav className="adm-tabs" aria-label="Bereiche">
+          {TABS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-current={tab === key ? 'page' : undefined}
+              onClick={() => changeTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {tab === 'prices' ? <PricesTab /> : null}
+        {tab === 'templates' ? <TemplatesTab /> : null}
+
+        {tab === 'vouchers' && (selected ? (
           <VoucherDetail
             row={selected}
             flash={flash}
@@ -227,19 +296,26 @@ export default function AdminPage() {
             />
             <VoucherTable rows={visible} onSelect={openDetail} />
           </>
-        )}
+        ))}
       </div>
     </div>
   )
 }
 
-function MockBanner() {
+// Der Hinweis muss stimmen, sonst richtet er Schaden an. Gebuchte Betraege
+// verschwinden beim Neuladen — gespeicherte Preise nicht, die liegen im
+// localStorage und wirken im Shop. Ein Banner, das beides gleich beschreibt,
+// waere an einer der beiden Stellen eine Falschaussage.
+function MockBanner({ tab }) {
   return (
     <div className="adm-mock" role="status">
       <strong>Entwurf</strong>
       <span>
-        Alle Zahlen auf dieser Seite sind erfunden. Keine Anmeldung, keine
-        Datenbank — Änderungen verschwinden beim Neuladen.
+        {tab === 'prices'
+          ? 'Preise wirken sofort im Gutschein-Shop und bleiben in diesem '
+            + 'Browser gespeichert. Was Stripe abbucht, ändern sie noch nicht.'
+          : 'Alle Zahlen auf dieser Seite sind erfunden. Keine Anmeldung, keine '
+            + 'Datenbank — Änderungen verschwinden beim Neuladen.'}
       </span>
     </div>
   )
