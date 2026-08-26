@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { VOUCHER_MAX_MESSAGE_LENGTH } from '../data'
+import { API_BASE } from '../config'
 import { shopTreatments, useCatalog } from '../voucherCatalog'
 
 const MAX_MESSAGE_LENGTH = VOUCHER_MAX_MESSAGE_LENGTH
@@ -22,6 +23,24 @@ function formatCurrency(value) {
 
 function getTreatment(treatments, treatmentId) {
   return treatments.find(({ id }) => id === treatmentId) ?? treatments[0] ?? null
+}
+
+// Die Gruende kommen englisch und knapp aus dem Worker. Fuer jemanden, der
+// gerade kaufen will, taugt das nicht — ein unuebersetzter Code wirkt wie
+// ein Absturz. Was hier fehlt, faellt auf einen allgemeinen Satz zurueck.
+const CHECKOUT_ERRORS = {
+  amount_too_low: 'Der Betrag liegt unter dem Mindestwert.',
+  amount_too_high: 'Der Betrag liegt über dem Höchstwert.',
+  invalid_amount: 'Bitte einen gültigen Betrag eingeben.',
+  unknown_treatment: 'Diese Behandlung ist gerade nicht verfügbar. Bitte wähle eine andere.',
+  recipient_required: 'Bitte trage den Namen der beschenkten Person ein.',
+  delivery_email_invalid: 'Bitte trage eine gültige E-Mail-Adresse ein.',
+  message_too_long: 'Die Nachricht ist zu lang.',
+}
+
+function checkoutError(reason) {
+  return CHECKOUT_ERRORS[reason]
+    ?? 'Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es noch einmal.'
 }
 
 // Variante und Dauer sind bei selbst angelegten Behandlungen optional. Fest
@@ -306,10 +325,8 @@ export default function VoucherShop() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState(false)
-  const [done, setDone] = useState(false)
   const errorRef = useRef(null)
   const headingRef = useRef(null)
-  const timerRef = useRef(null)
   const stepRef = useRef(0)
 
   // Nimmt die Inhaberin *alle* Behandlungen aus dem Shop, gaebe es unter
@@ -326,8 +343,6 @@ export default function VoucherShop() {
   const effectiveAmount = kind === 'treatment' && selectedTreatment
     ? selectedTreatment.price
     : amountSelection.amount
-
-  useEffect(() => () => window.clearTimeout(timerRef.current), [])
 
   // Beim Schrittwechsel auf die Ueberschrift fokussieren, damit Screenreader
   // den neuen Abschnitt ansagen. Nicht beim ersten Aufbau — sonst springt die
@@ -371,36 +386,53 @@ export default function VoucherShop() {
     setStep((current) => Math.max(0, current - 1))
   }
 
-  const submit = () => {
+  /**
+   * Weiter zu Stripe.
+   *
+   * Geschickt wird eine Absicht, kein Preis: Betrag und Behandlung
+   * bestimmt der Server aus seiner eigenen Tabelle. Was hier an Zahlen
+   * mitginge, lieste er ohnehin nur als Wunsch.
+   *
+   * Kein setProcessing(false) im Erfolgsfall — der Browser verlaesst die
+   * Seite. Den Knopf wieder freizugeben hiesse, ihn fuer einen Sekunden-
+   * bruchteil erneut klickbar zu machen, waehrend die Weiterleitung laeuft.
+   */
+  const submit = async () => {
     if (processing) return
     setProcessing(true)
-    timerRef.current = window.setTimeout(() => {
-      setProcessing(false)
-      setDone(true)
-    }, 900)
-  }
+    setError('')
 
-  if (done) {
-    return (
-      <section className="voucher-shop" id="vouchers">
-        <div className="vshop-done">
-          <span className="vshop-done-icon"><Icon name="check" /></span>
-          <h2>Dein Gutschein ist bereit.</h2>
-          <p>
-            Im produktiven Shop öffnet sich jetzt Stripe Checkout. Nach erfolgreicher
-            Zahlung werden Gutschein-Code und PDF automatisch erzeugt und versendet.
-          </p>
-          <div className="vshop-receipt">
-            <span>{kind === 'treatment' ? treatmentName(selectedTreatment) : 'Wertgutschein'}</span>
-            <strong>{formatCurrency(effectiveAmount)}</strong>
-            <small>FEM–GIFT–PREVIEW</small>
-          </div>
-          <button type="button" className="vshop-submit" onClick={() => { setDone(false); setStep(0) }}>
-            Zurück zum Gutschein
-          </button>
-        </div>
-      </section>
-    )
+    try {
+      const response = await fetch(`${API_BASE}/api/checkout`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          kind,
+          ...(kind === 'treatment'
+            ? { treatmentId: selectedTreatment?.id }
+            : { amount: amountSelection.amount }),
+          recipient,
+          sender,
+          message,
+          delivery,
+          deliveryEmail: delivery === 'email' ? email : '',
+        }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.url) {
+        setProcessing(false)
+        setError(checkoutError(data.reason))
+        window.requestAnimationFrame(() => errorRef.current?.focus({ preventScroll: true }))
+        return
+      }
+
+      window.location.assign(data.url)
+    } catch {
+      setProcessing(false)
+      setError('Die Verbindung ist abgerissen. Bitte versuche es noch einmal.')
+      window.requestAnimationFrame(() => errorRef.current?.focus({ preventScroll: true }))
+    }
   }
 
   return (
@@ -549,7 +581,10 @@ export default function VoucherShop() {
                 <strong>{formatCurrency(effectiveAmount)}</strong>
               </div>
               <p className="vshop-trust"><Icon name="lock" /> Sichere Zahlung über Stripe</p>
-              <p className="vshop-demo">Frontend-Vorschau — es wird keine echte Zahlung ausgelöst.</p>
+              <p className="vshop-demo">
+                <Icon name="lock" /> Sichere Bezahlung über Stripe. Weiter geht es
+                auf deren Seite.
+              </p>
             </div>
           )}
 
