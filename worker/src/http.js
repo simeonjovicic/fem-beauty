@@ -35,8 +35,19 @@ export function corsHeaders(origin) {
   if (!origin) return {}
   return {
     'access-control-allow-origin': origin,
-    'access-control-allow-methods': 'POST, GET, OPTIONS',
+    // Vollstaendige Liste noetig: PATCH und DELETE nutzt das Preise-Tab,
+    // und eine fehlende Methode scheitert schon am Vorabflug.
+    'access-control-allow-methods': 'GET, POST, PATCH, DELETE, OPTIONS',
     'access-control-allow-headers': 'content-type',
+    // Ohne diese Kopfzeile verwirft der Browser jede Antwort auf einen
+    // Aufruf mit credentials: 'include' — und zwar stillschweigend: fetch
+    // wirft einen Netzwerkfehler, obwohl der Server mit 200 geantwortet
+    // hat. Hinter Cloudflare Access kommt die Anmeldung als Cookie, das
+    // Panel muss es also mitschicken.
+    //
+    // Erlaubt ist das nur mit einem konkreten Ursprung, nie mit '*' —
+    // deshalb die Allowlist in allowedOrigin().
+    'access-control-allow-credentials': 'true',
     'access-control-max-age': '86400',
     vary: 'Origin',
   }
