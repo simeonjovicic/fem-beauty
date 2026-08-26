@@ -7,11 +7,14 @@
 
   "d1_databases": [
     {
+      // Der Bindungsname ist frei gewählt und heißt im Code env.DB.
+      // Wrangler schlägt beim Anlegen den Datenbanknamen vor; das ist nur
+      // ein Vorschlag und hätte hier eine Umbenennung überall erzwungen.
       "binding": "DB",
       "database_name": "fem-gutscheine",
-      // Platzhalter. Lokal genügt er; für Cloudflare erst nach
-      // `wrangler d1 create fem-gutscheine` durch die echte ID ersetzen.
-      "database_id": "local-dev-placeholder"
+      // Echte Datenbank in der Region EEUR. Für `--local` ist der Wert
+      // ohne Belang, dort liegt eine eigene SQLite-Datei.
+      "database_id": "106c17f4-25f9-4420-837c-6bdc5386e02f"
     }
   ],
 
