@@ -1584,339 +1584,24 @@ h2 em {
     background: #f2eee6
 }
 
-.voucher-toggle {
-    position: absolute;
-    top: 1rem;
-    left: 50%;
-    z-index: 5;
-    display: inline-flex;
-    gap: .25rem;
-    padding: .25rem;
-    border: 1px solid rgba(55, 43, 35, .16);
-    border-radius: 999px;
-    background: rgba(255, 252, 246, .84);
-    box-shadow: 0 12px 32px rgba(31, 24, 19, .12);
-    transform: translateX(-50%);
-    backdrop-filter: blur(12px)
-}
-
-.voucher-toggle button {
-    appearance: none;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: rgba(45, 35, 28, .62);
-    cursor: pointer;
-    font-family: 'Outfit', sans-serif;
-    font-size: .66rem;
-    font-weight: 500;
-    letter-spacing: .14em;
-    line-height: 1;
-    padding: .62rem .9rem;
-    text-transform: uppercase;
-    transition: background .25s var(--ease), color .25s var(--ease)
-}
-
-.voucher-toggle button.active {
-    background: #2b211a;
-    color: #fff8ef
-}
-
-.voucher-teaser {
-    position: relative;
-    background: #3f362f;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    min-height: 600px
-}
-
 /* Hintergrundbild statt nachgebauter Textur: Raster, Lichtkegel und der
    Pflanzenschatten links stecken darin. Mit Verlaeufen war besonders der
    Schatten nicht glaubwuerdig herzustellen.
    cover + links ausgerichtet, damit der Schatten auch auf schmalen Schirmen
    an seiner Stelle bleibt statt weggeschnitten zu werden. */
-.voucher-teaser::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('/voucher-bg-v2.webp');
-    background-size: cover;
-    background-position: left center;
-    background-repeat: no-repeat;
-    pointer-events: none
-}
-
 /* Bahn wie im Commit-Stand: 1120px breit, 360px-Spalte fuer die Karten.
    Die volle Sektion bleibt randlos, nur der Inhalt ist gefasst. */
-.voucher-teaser-inner {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 3.5rem;
-    display: grid;
-    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
-    gap: 5rem;
-    align-items: center
-}
-
 /* ── Kartenpaar (Geometrie unveraendert aus 061fc1f) ──
    Gegenlaeufig gekippt: hintere nach links, vordere nach rechts. Das faechert
    den Stapel auf, statt ihn nur zu versetzen — der Grund, warum die Rueckkarte
    dort klar lesbar ist und in meiner Zwischenfassung verschwand. */
-.vt-stack {
-    position: relative;
-    aspect-ratio: 1 / .92
-}
-
-.vt-card {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    aspect-ratio: 1.62 / 1;
-    border-radius: 14px;
-    padding: 1.35rem 1.5rem;
-    overflow: hidden
-}
-
-.vt-card-back {
-    top: 0;
-    /* Einen Schritt zurueck vom hellen Grau — der Sprung zur schwarzen Karte
-       war mit 5,08 zu hart. Dreistufiger Verlauf statt zweier Endpunkte gibt
-       der Flaeche eine Woelbung statt einer geraden Neigung. */
-    background: linear-gradient(150deg, #8a7b6b 0%, #6f6154 55%, #5c5046 100%);
-    border: 1px solid rgba(255, 246, 234, .26);
-    transform: rotate(-7deg) translateX(-6%);
-    /* Kicker und Siegel in der oberen Zeile: unten rechts lag das Siegel
-       vollstaendig unter der Vorderkarte. */
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-content: start;
-    /* Geschichtet statt einfach: enger Kontaktschatten plus weiter
-       Umgebungsschatten laesst die Karte liegen statt schweben. */
-    box-shadow:
-        inset 0 1px 0 rgba(255, 252, 246, .16),
-        inset 0 -18px 34px rgba(38, 28, 20, .22),
-        0 2px 6px rgba(24, 17, 12, .32),
-        0 16px 36px rgba(24, 17, 12, .3)
-}
-
 /* Weicher Lichtstreifen quer ueber die Karte — laesst die Flaeche wie
    mattes Material wirken statt wie eingefaerbtes Rechteck. Absolut
    positioniert, damit das Pseudoelement keine Rasterzeile belegt. */
-.vt-card-back::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(116deg, transparent 22%, rgba(255, 252, 246, .1) 40%, transparent 56%);
-    pointer-events: none
-}
-
-.vt-card-seal {
-    justify-self: end;
-    width: 38px;
-    height: 38px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, .42);
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: .95rem;
-    color: rgba(255, 255, 255, .9)
-}
-
-.vt-card-front {
-    bottom: 0;
-    /* Nicht mehr fast Schwarz: ein tiefes, warmes Anthrazit traegt Licht und
-       wirkt wie ein echter Kartenkoerper — reines Schwarz saeuft ab. */
-    background:
-        radial-gradient(78% 88% at 10% 6%, rgba(220, 196, 160, .13), transparent 46%),
-        linear-gradient(155deg, #2e2721 0%, #1d1815 52%, #15110f 100%);
-    background-color: #1e1a16;
-    /* Umriss traegt hier den Kontrast, nicht die Flaeche. */
-    border: 1px solid rgba(255, 246, 234, .14);
-    box-shadow:
-        /* Lichtkante oben, Abdunklung zu den Raendern: gibt der Karte Tiefe
-           statt einer gleichmaessig gefuellten Flaeche. */
-        inset 0 1px 0 rgba(255, 246, 234, .09),
-        inset 0 0 52px rgba(0, 0, 0, .45),
-        0 3px 8px rgba(24, 16, 11, .45),
-        0 20px 44px rgba(24, 16, 11, .45),
-        0 46px 80px rgba(24, 16, 11, .3);
-    transform: rotate(3.5deg) translateX(5%);
-    display: grid;
-    grid-template-rows: auto 1fr auto
-}
-
-.vt-card-front::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(118deg, transparent 24%, rgba(255, 246, 234, .06) 41%, transparent 57%);
-    pointer-events: none
-}
-
-.vt-card-front::after {
-    content: '';
-    position: absolute;
-    inset: .6rem;
-    border: 1px solid rgba(216, 190, 150, .38);
-    border-radius: 10px;
-    pointer-events: none
-}
-
-.vt-card-kicker {
-    font-family: 'Outfit', sans-serif;
-    font-size: .58rem;
-    letter-spacing: .24em;
-    text-transform: uppercase;
-    color: rgba(222, 200, 168, .9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .55)
-}
-
-.vt-card-back .vt-card-kicker {
-    color: rgba(255, 255, 255, .86)
-}
-
-.vt-card-mark {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 2.4rem;
-    line-height: 1;
-    color: #fff;
-    align-self: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .45)
-}
-
-.vt-card-foot {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: .58rem;
-    letter-spacing: .24em;
-    text-transform: uppercase;
-    color: rgba(226, 205, 173, .95)
-}
-
 /* ── Text ── */
-.vt-content {
-    position: relative;
-    z-index: 1;
-    padding: 5.6rem 0;
-    max-width: none
-}
-
-.vt-kicker {
-    display: block;
-    margin-bottom: 1.6rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: .78rem;
-    font-weight: 500;
-    letter-spacing: .32em;
-    text-transform: uppercase;
-    color: var(--sand-lt)
-}
-
-.vt-content h2 {
-    margin-bottom: 1.4rem;
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 3.6vw, 3.3rem);
-    font-weight: 400;
-    line-height: 1.2;
-    color: #fff
-}
-
-.vt-content h2 em {
-    font-style: italic;
-    color: var(--sand-lt)
-}
-
-.vt-rule {
-    width: 78px;
-    height: 1px;
-    margin-bottom: 1.9rem;
-    background: rgba(220, 196, 160, .55)
-}
-
-.vt-content p {
-    margin-bottom: 1.9rem;
-    font-size: 1.02rem;
-    line-height: 1.95;
-    color: rgba(255, 255, 255, .8)
-}
-
 /* ── Merkmale ── */
-.vt-features {
-    list-style: none;
-    margin: 0 0 2.2rem;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .8rem 1.9rem
-}
-
-.vt-features li {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    font-size: .95rem;
-    color: rgba(255, 255, 255, .82)
-}
-
 /* Trennstrich zwischen den Merkmalen, nicht davor oder dahinter. */
-.vt-features li + li {
-    padding-left: 1.9rem;
-    border-left: 1px solid rgba(220, 196, 160, .28)
-}
-
-.vt-features svg {
-    font-size: 1.15rem;
-    color: var(--sand-lt)
-}
-
 /* ── Button ── */
-.vt-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: .9rem;
-    padding: 1.05rem 2.4rem;
-    border-radius: 50px;
-    background: linear-gradient(135deg, #e0bb84, #c9995e);
-    /* Weiss auf dem Goldton erreicht nur 2,56 — deutlich unter dem
-       Mindestwert 4,5. Dunkle Schrift haelt die Optik und kommt auf 5,7. */
-    color: #2e2723;
-    font-family: 'Outfit', sans-serif;
-    font-size: .88rem;
-    font-weight: 500;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: filter .3s var(--ease), transform .3s var(--ease-out), box-shadow .3s
-}
-
-.vt-cta:hover,
-.vt-cta:focus-visible {
-    filter: brightness(1.07);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(201, 153, 94, .3);
-    outline: none
-}
-
-.vt-cta i {
-    font-style: normal;
-    transition: transform .3s var(--ease-out)
-}
-
-.vt-cta:hover i {
-    transform: translateX(4px)
-}
-
 .voucher-teaser-alt {
     position: relative;
     height: 600px;
@@ -2093,12 +1778,7 @@ h2 em {
 }
 
 @media(max-width:1100px) {
-    .voucher-teaser-inner {
-        grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
-        gap: 3.4rem;
-        padding: 0 2.2rem
     }
-}
 
 @media(max-width:860px) {
     /* Auf kleinen Screens bekommt das Foto eine eigene, randlose Bildzone am
@@ -2123,81 +1803,13 @@ h2 em {
     }
 
     /* Gestapelt: nebeneinander bliebe fuer Karten und Text zu wenig Breite. */
-    .voucher-teaser {
-        min-height: 0
-    }
-
-    .voucher-teaser-inner {
-        grid-template-columns: 1fr;
-        gap: 2.2rem;
-        padding: 3.2rem 1.5rem 3.6rem
-    }
-
-    .vt-stack {
-        width: min(78%, 300px);
-        margin-inline: auto
-    }
-
-    .vt-content {
-        padding: 0
-    }
-
-    .vt-content h2,
-    .vt-content p {
-        margin-bottom: 1.3rem
-    }
-
-    .vt-rule {
-        margin-bottom: 1.5rem
-    }
-
-    /* Drei Spalten nebeneinander statt untereinander. Icon ueber den Text
+                            /* Drei Spalten nebeneinander statt untereinander. Icon ueber den Text
        gesetzt: nebeneinander bliebe fuer "Perfekt als Geschenk" bei rund
        110px Spaltenbreite zu wenig Platz. */
-    .vt-features {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        /* start statt center: die aeusseren Texte laufen zweizeilig, mittig
-           ausgerichtet saessen die Icons dann auf drei verschiedenen Hoehen. */
-        align-items: start;
-        gap: 0;
-        margin-bottom: 1.8rem
-    }
-
-    .vt-features li {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: .4rem;
-        padding-inline: .35rem;
-        font-size: .76rem;
-        line-height: 1.3
-    }
-
-    .vt-features li + li {
-        padding-left: .35rem;
-        border-left: 1px solid rgba(220, 196, 160, .28)
-    }
-
-    .vt-features svg {
-        font-size: 1.05rem
-    }
-
-    /* Volle Breite und zentriert: unter den drei mittig gesetzten Merkmalen
+                    /* Volle Breite und zentriert: unter den drei mittig gesetzten Merkmalen
        wirkte der linksbuendige Knopf in Textbreite verloren, und als
        wichtigstes Ziel der Sektion darf er die ganze Breite nutzen. */
-    .vt-cta {
-        display: flex;
-        width: 100%;
-        justify-content: center;
-        padding-inline: 1.2rem
-    }
-
-    .voucher-toggle {
-        top: .75rem
-    }
-
-    .voucher-teaser-alt-content {
+            .voucher-teaser-alt-content {
         width: 100%;
         padding: 4.75rem 1.5rem calc(var(--vt2-img-h) + 1.25rem)
     }

@@ -510,139 +510,41 @@ function VtIcon({ name }) {
   )
 }
 
-const VT_FEATURES = [
-  ['gift', 'Perfekt als Geschenk'],
-  ['clock', 'Flexibel einlösbar'],
-  ['heart', 'Rundum wohltuend'],
-]
 
 function VoucherTeaser() {
-  const [variant, setVariant] = useState('current')
-  const previewRef = useRef(null)
-
-  // Beim Umschalten werden die Sektionen neu gemountet. useRevealAnimations
-  // sammelt die .rv-Knoten nur einmal beim ersten Render ein, die neuen
-  // Elemente blieben also auf opacity 0 — der Text war nach dem Zurueckschalten
-  // weg. Darum hier die eigenen .rv-Knoten nach jedem Variantenwechsel selbst
-  // beobachten.
-  useEffect(() => {
-    const root = previewRef.current
-    if (!root) return undefined
-
-    const targets = root.querySelectorAll('.rv:not(.on)')
-    if (!targets.length) return undefined
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          entry.target.classList.add('on')
-          observer.unobserve(entry.target)
-        })
-      },
-      { threshold: 0.06, rootMargin: '0px 0px -30px 0px' },
-    )
-
-    targets.forEach((element) => observer.observe(element))
-    return () => observer.disconnect()
-  }, [variant])
-
   return (
-    <div className="voucher-preview" id="vouchers" ref={previewRef}>
-      <div className="voucher-toggle" aria-label="Gutschein Sektion Variante">
-        <button
-          type="button"
-          className={variant === 'current' ? 'active' : undefined}
-          onClick={() => setVariant('current')}
-        >
-          Aktuell
-        </button>
-        <button
-          type="button"
-          className={variant === 'new' ? 'active' : undefined}
-          onClick={() => setVariant('new')}
-        >
-          Neu
-        </button>
+    <section className="voucher-teaser-alt" id="vouchers">
+      <div className="voucher-teaser-alt-content">
+        <span className="vt2-kicker">FEM Gutschein</span>
+        <h2>Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
+        <div className="vt2-rule" />
+        <p>
+          Schenke Zeit für Wohlbefinden – als Wertgutschein oder für eine Wunschbehandlung.
+        </p>
+
+        <ul className="vt2-features">
+          <li>
+            <span><VtIcon name="heart" /></span>
+            <strong>Für alles bei FEM</strong>
+            <small>Behandlung oder Produkt.</small>
+          </li>
+          <li>
+            <span><VtIcon name="clock" /></span>
+            <strong>3 Jahre gültig</strong>
+            <small>Termin frei wählbar.</small>
+          </li>
+          <li>
+            <span><VtIcon name="gift" /></span>
+            <strong>Schön verpackt</strong>
+            <small>Auf Wunsch als Geschenk.</small>
+          </li>
+        </ul>
+
+        <a className="vt2-cta" href="/gutscheine.html">
+          Gutschein kaufen <i aria-hidden="true">→</i>
+        </a>
       </div>
-
-      {variant === 'current' ? (
-        <section className="voucher-teaser">
-          <div className="voucher-teaser-inner">
-            {/* Zwei gepraegte Karten, in CSS gebaut. Kein Import aus VoucherShop:
-                der Konfigurator liegt auf /gutscheine.html und soll nicht ins
-                Bundle der Startseite zurueck. */}
-            <div className="vt-stack" aria-hidden="true">
-              <div className="vt-card vt-card-back">
-                <span className="vt-card-kicker">Zeit für dich.</span>
-                <span className="vt-card-seal">f</span>
-              </div>
-              <div className="vt-card vt-card-front">
-                <span className="vt-card-kicker">Gutschein</span>
-                <span className="vt-card-mark">fem</span>
-                <span className="vt-card-foot">
-                  <span>Head Spa</span>
-                  <span>No. 0001</span>
-                </span>
-              </div>
-            </div>
-
-            <div className="vt-content">
-              <span className="vt-kicker rv">Ihr Gutschein</span>
-              <h2 className="rv d1">Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
-              <div className="vt-rule rv d1" />
-              <p className="rv d2">
-                Eine wohltuende Auszeit, schenken oder selbst genießen.<br />
-                Head Spa — pure Entspannung für Kopfhaut, Haar und Sinne.
-              </p>
-
-              <ul className="vt-features rv d2">
-                {VT_FEATURES.map(([icon, label]) => (
-                  <li key={label}><VtIcon name={icon} />{label}</li>
-                ))}
-              </ul>
-
-              <a className="vt-cta rv d3" href="/gutscheine.html">
-                Gutschein kaufen <i aria-hidden="true">→</i>
-              </a>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section className="voucher-teaser-alt">
-          <div className="voucher-teaser-alt-content">
-            <span className="vt2-kicker">FEM Gutschein</span>
-            <h2>Zeit für dich.<br /><em>Zum Verschenken.</em></h2>
-            <div className="vt2-rule" />
-            <p>
-              Schenke Zeit für Wohlbefinden – als Wertgutschein oder für eine Wunschbehandlung.
-            </p>
-
-            <ul className="vt2-features">
-              <li>
-                <span><VtIcon name="heart" /></span>
-                <strong>Für alles bei FEM</strong>
-                <small>Behandlung oder Produkt.</small>
-              </li>
-              <li>
-                <span><VtIcon name="clock" /></span>
-                <strong>3 Jahre gültig</strong>
-                <small>Termin frei wählbar.</small>
-              </li>
-              <li>
-                <span><VtIcon name="gift" /></span>
-                <strong>Schön verpackt</strong>
-                <small>Auf Wunsch als Geschenk.</small>
-              </li>
-            </ul>
-
-            <a className="vt2-cta" href="/gutscheine.html">
-              Gutschein kaufen <i aria-hidden="true">→</i>
-            </a>
-          </div>
-        </section>
-      )}
-    </div>
+    </section>
   )
 }
 
