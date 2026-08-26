@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { MAX_AMOUNT_CENTS, MIN_AMOUNT_CENTS, validateOrder } from '../src/catalog.js'
+import {
+  DEFAULT_MAX_AMOUNT_CENTS,
+  DEFAULT_MIN_AMOUNT_CENTS,
+  validateOrder,
+} from '../src/catalog.js'
 
 // Behandlungen kommen jetzt aus der Datenbank. Die Pruefung selbst bleibt
 // eine reine Funktion und bekommt sie uebergeben — deshalb reichen hier
@@ -93,13 +97,13 @@ test('der Behandlungsname wird als Schnappschuss uebernommen', () => {
 // ── Betragsgrenzen ───────────────────────────────────────────────
 
 test('Grenzen sind einschließend', () => {
-  assert.equal(value({ amount: MIN_AMOUNT_CENTS / 100 }).ok, true)
-  assert.equal(value({ amount: MAX_AMOUNT_CENTS / 100 }).ok, true)
+  assert.equal(value({ amount: DEFAULT_MIN_AMOUNT_CENTS / 100 }).ok, true)
+  assert.equal(value({ amount: DEFAULT_MAX_AMOUNT_CENTS / 100 }).ok, true)
 })
 
 test('knapp daneben ist abgelehnt', () => {
-  assert.equal(value({ amount: MIN_AMOUNT_CENTS / 100 - 0.01 }).reason, 'amount_too_low')
-  assert.equal(value({ amount: MAX_AMOUNT_CENTS / 100 + 0.01 }).reason, 'amount_too_high')
+  assert.equal(value({ amount: DEFAULT_MIN_AMOUNT_CENTS / 100 - 0.01 }).reason, 'amount_too_low')
+  assert.equal(value({ amount: DEFAULT_MAX_AMOUNT_CENTS / 100 + 0.01 }).reason, 'amount_too_high')
 })
 
 test('Unfug als Betrag fliegt raus', () => {
@@ -153,4 +157,25 @@ test('kaputte Rümpfe stürzen nicht ab', () => {
 test('der Steuersatz wird als Schnappschuss mitgegeben', () => {
   assert.equal(value().order.vatRateBp, 2000)
   assert.equal(value().order.currency, 'eur')
+})
+
+// ── Grenzen aus der Datenbank ────────────────────────────────────
+
+test('die Grenzen kommen aus den Einstellungen, nicht aus dem Code', () => {
+  const limits = { minCents: 5000, maxCents: 20000 }
+  const order = (amount) =>
+    validateOrder({ kind: 'value', amount, ...base }, treatments, limits)
+
+  assert.equal(order(49).reason, 'amount_too_low')
+  assert.equal(order(50).ok, true)
+  assert.equal(order(200).ok, true)
+  assert.equal(order(201).reason, 'amount_too_high')
+})
+
+test('ohne Grenzen faellt es auf die Werte aus dem Code zurueck', () => {
+  // Etwa auf einer frisch angelegten Datenbank vor dem Saatlauf: dann
+  // darf nicht plotzlich jeder Betrag durchgehen.
+  const order = (amount) => validateOrder({ kind: 'value', amount, ...base }, treatments, {})
+  assert.equal(order(DEFAULT_MIN_AMOUNT_CENTS / 100 - 1).reason, 'amount_too_low')
+  assert.equal(order(DEFAULT_MAX_AMOUNT_CENTS / 100 + 1).reason, 'amount_too_high')
 })

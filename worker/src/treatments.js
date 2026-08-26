@@ -7,15 +7,16 @@
 // unberührt. `vouchers` hält Betrag und Namen als Schnappschuss und
 // verweist nicht per Fremdschlüssel hierher.
 
-import { listTreatments, treatmentLabel } from './catalog.js'
+import { listTreatments, loadLimits, treatmentLabel } from './catalog.js'
 import { error, json } from './http.js'
 
 const MAX_PRICE_CENTS = 100000 // 1.000 € — eine Behandlung darüber ist ein Tippfehler.
 
 /** Öffentliche Sicht für den Shop: nur was sichtbar ist, ohne Verwaltungsfelder. */
 export async function getPublicTreatments(env) {
-  const rows = await listTreatments(env.DB, 'shop')
+  const [rows, limits] = await Promise.all([listTreatments(env.DB, 'shop'), loadLimits(env.DB)])
   return json({
+    limits,
     treatments: rows.map((row) => ({
       id: row.id,
       category: row.category,
@@ -34,7 +35,43 @@ export async function getPublicTreatments(env) {
 
 /** Panel-Sicht: alle Zeilen roh, auch die ausgeblendeten. */
 export async function getAdminTreatments(env) {
-  return json({ treatments: await listTreatments(env.DB, 'all') })
+  const [treatments, limits] = await Promise.all([listTreatments(env.DB, 'all'), loadLimits(env.DB)])
+  return json({ treatments, limits })
+}
+
+/**
+ * Betragsgrenzen aendern.
+ *
+ * Die Obergrenze aus loadLimits() greift weiterhin: was hier gespeichert
+ * wird, ist ein Wunsch, keine Erlaubnis.
+ */
+export async function updateLimits(request, env) {
+  let body
+  try {
+    body = await request.json()
+  } catch {
+    return error('invalid_json')
+  }
+
+  const min = Number(body.minCents)
+  const max = Number(body.maxCents)
+  if (!Number.isSafeInteger(min) || min <= 0) return error('min_invalid', 400, { field: 'minCents' })
+  if (!Number.isSafeInteger(max) || max <= min) return error('max_invalid', 400, { field: 'maxCents' })
+  if (max > MAX_PRICE_CENTS) return error('max_too_high', 400, { field: 'maxCents' })
+
+  const now = new Date().toISOString()
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO settings (key, value, updated_at) VALUES ('voucher_min_cents', ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    ).bind(String(min), now),
+    env.DB.prepare(
+      `INSERT INTO settings (key, value, updated_at) VALUES ('voucher_max_cents', ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    ).bind(String(max), now),
+  ])
+
+  return json({ ok: true, limits: await loadLimits(env.DB) })
 }
 
 function validateInput(body, { partial = false } = {}) {

@@ -48,6 +48,21 @@ CREATE TABLE IF NOT EXISTS treatments (
 CREATE INDEX IF NOT EXISTS idx_treatments_shop
   ON treatments (shop_visible, sort_order);
 
+-- Einstellungen, die zu keiner einzelnen Behandlung gehören: derzeit die
+-- Betragsgrenzen des Wertgutscheins. Sie stehen hier und nicht im Code,
+-- weil das Panel sie bearbeitbar macht — läge die verbindliche Grenze
+-- weiterhin in data.js, zeigte der Shop eine andere als die, gegen die
+-- der Server prüft.
+--
+-- Werte als Text mit Typangabe im Namen: eine Tabelle mit zwei Zeilen
+-- rechtfertigt keine Spalte je Einstellung, und was eine Ganzzahl ist,
+-- steht im Schlüssel (`_cents`).
+CREATE TABLE IF NOT EXISTS settings (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
 -- ─────────────────────────────────────────────────────────────────
 -- Gutscheine
 -- ─────────────────────────────────────────────────────────────────

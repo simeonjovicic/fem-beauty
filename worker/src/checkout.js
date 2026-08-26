@@ -4,7 +4,7 @@
 // bestimmt validateOrder serverseitig; was im Request an Zahlen steht,
 // wird höchstens als Wunsch gelesen und gegen die Grenzen geprüft.
 
-import { CURRENCY, lineItemName, listTreatments, validateOrder } from './catalog.js'
+import { CURRENCY, lineItemName, listTreatments, loadLimits, validateOrder } from './catalog.js'
 import { error, json } from './http.js'
 
 /**
@@ -42,9 +42,12 @@ export async function handleCheckout(request, env, stripe) {
   // Nur die im Shop sichtbaren Behandlungen. Eine ausgeblendete zu
   // kaufen darf auch dann nicht gehen, wenn jemand ihre Kennung noch aus
   // einem alten Seitenaufbau hat.
-  const treatments = await listTreatments(env.DB, 'shop')
+  const [treatments, limits] = await Promise.all([
+    listTreatments(env.DB, 'shop'),
+    loadLimits(env.DB),
+  ])
 
-  const validation = validateOrder(body, treatments)
+  const validation = validateOrder(body, treatments, limits)
   if (!validation.ok) return error(validation.reason, 400, { field: validation.field })
 
   const { order } = validation

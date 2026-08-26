@@ -22,12 +22,8 @@ import { useMemo, useState } from 'react'
 
 import {
   categoriesOf,
-  defaultCatalog,
-  hasOverrides,
-  makeTreatmentId,
-  resetCatalog,
   saveCatalog,
-  useCatalog,
+  useAdminCatalog,
 } from '../voucherCatalog'
 import { euro } from './format'
 
@@ -156,15 +152,47 @@ function problemsOf(draft, catalog) {
   return problems
 }
 
+/**
+ * Laedt den Katalog und uebergibt ihn.
+ *
+ * Der `key` sorgt dafuer, dass der Editor seinen Entwurf neu aus den Daten
+ * aufbaut, sobald sie sich geaendert haben — nach dem Laden und nach jedem
+ * Speichern. Das ist der Weg, Zustand an Daten zu binden, ohne ihn in
+ * einem Effekt nachtraeglich zu ueberschreiben.
+ */
 export default function PricesTab() {
-  // Der gespeicherte Stand kommt aus dem Katalog-Store, nicht aus einem
-  // useState hier. Damit sieht der Shop dieselben Preise wie das Panel —
-  // und zwar sofort, auch im anderen Tab.
-  const catalog = useCatalog()
+  const catalog = useAdminCatalog()
 
+  if (catalog.loading) return <p className="adm-empty">Preise werden geladen …</p>
+
+  // Ein Ladefehler darf nicht als leerer Katalog erscheinen: „keine
+  // Behandlungen" und „Server nicht erreichbar" saehen sonst gleich aus.
+  if (catalog.error) {
+    return (
+      <div className="adm-mock" role="alert">
+        <strong>Nicht geladen</strong>
+        <span>
+          {catalog.error}{' '}
+          <button type="button" className="adm-undo" onClick={catalog.reload}>
+            Erneut versuchen
+          </button>
+        </span>
+      </div>
+    )
+  }
+
+  const version = catalog.treatments
+    .map((treatment) => `${treatment.id}:${treatment.priceCents}:${treatment.shopVisible}`)
+    .join('|')
+
+  return <PricesEditor key={`${version}|${catalog.minCents}|${catalog.maxCents}`} catalog={catalog} />
+}
+
+function PricesEditor({ catalog }) {
   const [draft, setDraft] = useState(() => initialDraft(catalog))
   const [flash, setFlash] = useState(null)
   const [adding, setAdding] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   // Alles Folgende wird aus draft und catalog abgeleitet, nicht nebenher
   // gepflegt. Ein zweiter useState für „hat Änderungen" wäre eine zweite
@@ -184,7 +212,6 @@ export default function PricesTab() {
     return [...byCategory]
   }, [rows])
 
-  const takenIds = useMemo(() => new Set(rows.map((row) => row.id)), [rows])
   const categories = useMemo(() => categoriesOf(catalog), [catalog])
 
   const setPrice = (id, value) => {
@@ -238,8 +265,8 @@ export default function PricesTab() {
     setFlash(null)
   }
 
-  const save = () => {
-    if (problems.length > 0) return
+  const save = async () => {
+    if (problems.length > 0 || saving) return
 
     const next = {
       treatments: rows.map((treatment) => ({
@@ -250,28 +277,22 @@ export default function PricesTab() {
       minCents: diff.min,
       maxCents: diff.max,
     }
-    const count = diff.count
-
-    saveCatalog(next)
-    // Eingaben aus den gerundeten Werten neu aufbauen, damit „105,00"
-    // nach dem Speichern wieder als „105" dasteht — und damit added und
-    // removed geleert werden, die jetzt im Katalog stehen.
-    setDraft(initialDraft({ ...catalog, ...next }))
-    setFlash({
-      ok: true,
-      message: `${count} ${count === 1 ? 'Änderung' : 'Änderungen'} übernommen. `
-        + 'Der Gutschein-Shop rechnet ab sofort mit den neuen Preisen.',
-    })
-  }
-
-  // Nach resetCatalog() liefert useCatalog() erst beim nächsten Rendern den
-  // Ausgangsstand — der Entwurf wird deshalb direkt aus defaultCatalog
-  // aufgebaut und nicht aus dem noch alten `catalog`.
-  const restore = () => {
-    resetCatalog()
-    setDraft(initialDraft(defaultCatalog))
-    setAdding(false)
-    setFlash({ ok: true, message: 'Zurück auf die Preise aus dem Ausgangsstand.' })
+    setSaving(true)
+    try {
+      const count = await saveCatalog(next, catalog)
+      // Kein setDraft hier: das Neuladen aendert den `key` der Komponente,
+      // und damit baut sich der Entwurf ohnehin aus den frischen Daten auf.
+      await catalog.reload()
+      setFlash({
+        ok: true,
+        message: `${count} ${count === 1 ? 'Änderung' : 'Änderungen'} übernommen. `
+          + 'Der Gutschein-Shop rechnet ab sofort mit den neuen Preisen.',
+      })
+    } catch (err) {
+      setFlash({ ok: false, message: err.message || 'Speichern fehlgeschlagen.' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   const shopCount = rows.filter((treatment) => draft.visible[treatment.id]).length
@@ -302,19 +323,6 @@ export default function PricesTab() {
           </span>
         </p>
 
-        {/* Nur zeigen, wenn es etwas zurückzusetzen gibt. Ein Knopf, der
-            nichts tut, laesst einen jedes Mal ueberlegen, ob er etwas tut. */}
-        {hasOverrides() ? (
-          <p className="adm-explain-links">
-            <button type="button" className="adm-ghost" onClick={restore}>
-              Auf Ausgangspreise zurücksetzen
-            </button>
-            <span>
-              Die Preise sind im Entwurf in diesem Browser gespeichert, nicht
-              auf dem Server.
-            </span>
-          </p>
-        ) : null}
       </section>
 
       <section className="adm-card">
@@ -397,7 +405,6 @@ export default function PricesTab() {
         {adding ? (
           <AddTreatmentForm
             categories={categories}
-            takenIds={takenIds}
             onAdd={addTreatment}
             onCancel={() => setAdding(false)}
           />
@@ -469,7 +476,7 @@ function MoneyInput({ value, onChange, id }) {
  * geklickt wurde, ist das hier keine Änderung am Katalog, und die
  * Speicherleiste soll deswegen nicht aufwachen.
  */
-function AddTreatmentForm({ categories, takenIds, onAdd, onCancel }) {
+function AddTreatmentForm({ categories, onAdd, onCancel }) {
   const [category, setCategory] = useState(categories[0] ?? '')
   const [title, setTitle] = useState('')
   const [variant, setVariant] = useState('')
@@ -488,7 +495,6 @@ function AddTreatmentForm({ categories, takenIds, onAdd, onCancel }) {
     if (cents > MAX_PRICE_CENTS) return setError(`Höchstens ${euro(MAX_PRICE_CENTS)}.`)
 
     return onAdd({
-      id: makeTreatmentId(title.trim(), variant.trim(), takenIds),
       category: category.trim(),
       title: title.trim(),
       variant: variant.trim(),

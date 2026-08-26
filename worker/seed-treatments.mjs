@@ -8,7 +8,12 @@
 //   wrangler d1 execute fem-gutscheine --local  --file /tmp/treatments.sql
 //   wrangler d1 execute fem-gutscheine --remote --file /tmp/treatments.sql
 
-import { headSpaTreatments, voucherTreatments } from '../src/data.js'
+import {
+  VOUCHER_MAX_AMOUNT,
+  VOUCHER_MIN_AMOUNT,
+  headSpaTreatments,
+  voucherTreatments,
+} from '../src/data.js'
 
 const now = new Date().toISOString()
 const quote = (value) => (value == null ? 'NULL' : `'${String(value).replace(/'/g, "''")}'`)
@@ -35,4 +40,13 @@ const rows = all.map((treatment, index) => {
           ${inShop.has(treatment.id) ? 1 : 0}, ${index * 10}, ${quote(now)}, ${quote(now)});`
 })
 
-console.log(rows.join('\n'))
+// Betragsgrenzen aus data.js als Ausgangsstand. Danach ist das Panel die
+// Quelle — auch hier OR IGNORE, damit ein zweiter Lauf nichts zurücksetzt.
+const settings = [
+  ['voucher_min_cents', VOUCHER_MIN_AMOUNT * 100],
+  ['voucher_max_cents', VOUCHER_MAX_AMOUNT * 100],
+].map(([key, value]) =>
+  `INSERT OR IGNORE INTO settings (key, value, updated_at)
+  VALUES (${quote(key)}, ${quote(String(value))}, ${quote(now)});`)
+
+console.log([...rows, ...settings].join('\n'))

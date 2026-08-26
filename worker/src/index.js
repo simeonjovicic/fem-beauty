@@ -16,6 +16,7 @@ import {
   getAdminTreatments,
   getPublicTreatments,
   hideTreatment,
+  updateLimits,
   updateTreatment,
 } from './treatments.js'
 import { handleWebhook } from './webhook.js'
@@ -59,6 +60,10 @@ async function handleAdmin(request, env, url) {
     if (request.method === 'GET') return getAdminTreatments(env)
     if (request.method === 'POST') return createTreatment(request, env)
     return error('method_not_allowed', 405)
+  }
+
+  if (path === '/api/admin/limits' && request.method === 'PATCH') {
+    return updateLimits(request, env)
   }
 
   const treatment = path.match(/^\/api\/admin\/treatments\/([^/]+)$/)

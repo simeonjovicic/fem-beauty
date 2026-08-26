@@ -20,10 +20,34 @@ import {
   VOUCHER_MIN_AMOUNT,
 } from '../../src/data.js'
 
-export const MIN_AMOUNT_CENTS = VOUCHER_MIN_AMOUNT * 100
-export const MAX_AMOUNT_CENTS = VOUCHER_MAX_AMOUNT * 100
+// Ausgangsstand, falls die Einstellungen fehlen — etwa auf einer frisch
+// angelegten Datenbank vor dem Saatlauf. Die verbindlichen Werte stehen
+// in der Tabelle `settings`, weil das Panel sie bearbeitbar macht.
+export const DEFAULT_MIN_AMOUNT_CENTS = VOUCHER_MIN_AMOUNT * 100
+export const DEFAULT_MAX_AMOUNT_CENTS = VOUCHER_MAX_AMOUNT * 100
 export const MAX_MESSAGE_LENGTH = VOUCHER_MAX_MESSAGE_LENGTH
 export const CURRENCY = 'eur'
+
+// Ein Wertgutschein darüber ist ein Tippfehler, keine Bestellung —
+// unabhängig davon, was in den Einstellungen steht.
+const HARD_MAX_CENTS = 100000
+
+/** Betragsgrenzen aus der Datenbank, mit dem Code als Rückfallebene. */
+export async function loadLimits(db) {
+  const { results } = await db
+    .prepare("SELECT key, value FROM settings WHERE key IN ('voucher_min_cents','voucher_max_cents')")
+    .all()
+
+  const map = Object.fromEntries((results ?? []).map((row) => [row.key, Number(row.value)]))
+  const min = Number.isSafeInteger(map.voucher_min_cents) && map.voucher_min_cents > 0
+    ? map.voucher_min_cents
+    : DEFAULT_MIN_AMOUNT_CENTS
+  const max = Number.isSafeInteger(map.voucher_max_cents) && map.voucher_max_cents > min
+    ? Math.min(map.voucher_max_cents, HARD_MAX_CENTS)
+    : DEFAULT_MAX_AMOUNT_CENTS
+
+  return { minCents: min, maxCents: max }
+}
 
 // Kosmetikleistungen in Österreich: 20 %. Wird pro Gutschein als
 // Schnappschuss gespeichert, nicht zur Laufzeit nachgeschlagen.
@@ -57,9 +81,12 @@ export function treatmentLabel(treatment) {
  *
  * @param {object} input       was der Client geschickt hat
  * @param {object[]} treatments  die im Shop wählbaren Behandlungen
+ * @param {{minCents:number,maxCents:number}} limits  aus loadLimits()
  * @returns {{ ok: true, order: object } | { ok: false, reason: string, field?: string }}
  */
-export function validateOrder(input, treatments = []) {
+export function validateOrder(input, treatments = [], limits = {}) {
+  const minCents = limits.minCents ?? DEFAULT_MIN_AMOUNT_CENTS
+  const maxCents = limits.maxCents ?? DEFAULT_MAX_AMOUNT_CENTS
   const fail = (reason, field) => ({ ok: false, reason, field })
 
   if (!input || typeof input !== 'object') return fail('invalid_body')
@@ -83,8 +110,8 @@ export function validateOrder(input, treatments = []) {
     if (!Number.isFinite(euros)) return fail('invalid_amount', 'amount')
     amountCents = Math.round(euros * 100)
     if (!Number.isSafeInteger(amountCents)) return fail('invalid_amount', 'amount')
-    if (amountCents < MIN_AMOUNT_CENTS) return fail('amount_too_low', 'amount')
-    if (amountCents > MAX_AMOUNT_CENTS) return fail('amount_too_high', 'amount')
+    if (amountCents < minCents) return fail('amount_too_low', 'amount')
+    if (amountCents > maxCents) return fail('amount_too_high', 'amount')
   }
 
   const recipient = trimmed(input.recipient)

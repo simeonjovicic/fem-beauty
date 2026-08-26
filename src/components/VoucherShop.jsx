@@ -275,8 +275,10 @@ const STEPS = [
 // zweite Spalte, die um Aufmerksamkeit konkurriert.
 export default function VoucherShop() {
   // Preise und Auswahl kommen aus dem Katalog, nicht mehr fest aus data.js.
-  // Aendert die Inhaberin im Panel etwas, steht es hier sofort — auch ohne
-  // Neuladen, wenn der Shop in einem zweiten Tab offen ist.
+  // Preise kommen aus derselben Tabelle, gegen die der Server beim Checkout
+  // prueft — angezeigt wird also, was auch abgebucht wird. Geladen wird
+  // einmal beim Aufbau der Seite; eine Preisaenderung im Panel erreicht
+  // einen bereits offenen Shop-Tab erst beim naechsten Neuladen.
   const catalog = useCatalog()
 
   const treatments = useMemo(
