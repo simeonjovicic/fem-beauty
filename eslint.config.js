@@ -9,6 +9,16 @@ export default [
   js.configs.recommended,
   reactHooks.configs.flat['recommended-latest'],
   reactRefresh.configs.vite,
+  // Skripte, die in Node laufen statt im Browser oder im Worker:
+  // Saatdaten erzeugen, Tests ausführen.
+  {
+    files: ['**/*.mjs', 'worker/test/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: globals.node,
+      parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+    },
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

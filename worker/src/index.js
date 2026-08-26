@@ -11,6 +11,13 @@ import { authenticate } from './admin/auth.js'
 import { handleCheckout } from './checkout.js'
 import { allowedOrigin, corsHeaders, error, json, withCors } from './http.js'
 import { getBySession, getPdf } from './public.js'
+import {
+  createTreatment,
+  getAdminTreatments,
+  getPublicTreatments,
+  hideTreatment,
+  updateTreatment,
+} from './treatments.js'
 import { handleWebhook } from './webhook.js'
 
 function createStripe(env) {
@@ -46,6 +53,20 @@ async function handleAdmin(request, env, url) {
 
   if (path === '/api/admin/redemptions' && request.method === 'GET') {
     return listRedemptions(request, env)
+  }
+
+  if (path === '/api/admin/treatments') {
+    if (request.method === 'GET') return getAdminTreatments(env)
+    if (request.method === 'POST') return createTreatment(request, env)
+    return error('method_not_allowed', 405)
+  }
+
+  const treatment = path.match(/^\/api\/admin\/treatments\/([^/]+)$/)
+  if (treatment) {
+    const id = decodeURIComponent(treatment[1])
+    if (request.method === 'PATCH') return updateTreatment(request, env, id)
+    if (request.method === 'DELETE') return hideTreatment(env, id)
+    return error('method_not_allowed', 405)
   }
 
   const detail = path.match(/^\/api\/admin\/vouchers\/([^/]+)$/)
@@ -134,6 +155,17 @@ export default {
       } catch (err) {
         console.error('PDF fehlgeschlagen —', err.stack ?? err.message)
         return error('pdf_failed', 500)
+      }
+    }
+
+    // Preise fuer den Shop. Oeffentlich, weil der Konfigurator sie
+    // anzeigen muss — geaendert werden koennen sie nur unter /api/admin.
+    if (url.pathname === '/api/treatments' && request.method === 'GET') {
+      try {
+        return withCors(await getPublicTreatments(env), origin)
+      } catch (err) {
+        console.error('treatments fehlgeschlagen —', err.stack ?? err.message)
+        return withCors(error('treatments_failed', 500), origin)
       }
     }
 

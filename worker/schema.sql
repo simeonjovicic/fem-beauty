@@ -14,6 +14,41 @@
 PRAGMA foreign_keys = ON;
 
 -- ─────────────────────────────────────────────────────────────────
+-- Behandlungen
+-- ─────────────────────────────────────────────────────────────────
+-- Der Preiskatalog. Vorher lagen die Preise in src/data.js, eine
+-- Preisänderung war also ein Commit; im Panel bearbeitet wurden sie im
+-- localStorage des Browsers, den der Server nie zu sehen bekam. Damit
+-- konnte der Shop einen Preis anzeigen, den Stripe nicht abbucht.
+--
+-- Wichtig für das Verständnis der Gutschein-Tabelle: eine Preisänderung
+-- wirkt niemals rückwirkend. `vouchers` hält Betrag und Behandlungsnamen
+-- als Schnappschuss des Kaufzeitpunkts fest und verweist bewusst nicht
+-- per Fremdschlüssel hierher — was verkauft wurde, bleibt, was es war,
+-- auch wenn die Behandlung später umbenannt oder gelöscht wird.
+CREATE TABLE IF NOT EXISTS treatments (
+  id           TEXT    PRIMARY KEY,
+  category     TEXT    NOT NULL,
+  title        TEXT    NOT NULL,
+  variant      TEXT,
+  duration     TEXT,
+
+  price_cents  INTEGER NOT NULL CHECK (price_cents > 0),
+
+  -- Ob die Behandlung im Gutschein-Shop zur Auswahl steht. Ausblenden
+  -- statt löschen: eine gelöschte Zeile nähme dem Panel die Möglichkeit,
+  -- sie wieder einzuschalten.
+  shop_visible INTEGER NOT NULL DEFAULT 1 CHECK (shop_visible IN (0, 1)),
+  sort_order   INTEGER NOT NULL DEFAULT 0,
+
+  created_at   TEXT    NOT NULL,
+  updated_at   TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_treatments_shop
+  ON treatments (shop_visible, sort_order);
+
+-- ─────────────────────────────────────────────────────────────────
 -- Gutscheine
 -- ─────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS vouchers (

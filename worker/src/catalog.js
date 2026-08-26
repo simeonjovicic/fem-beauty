@@ -1,18 +1,23 @@
 // Verbindliche Preis- und Gültigkeitsprüfung.
 //
-// Importiert bewusst aus src/data.js — dieselbe Datei, aus der das Frontend
-// die Anzeige speist. Eine Quelle statt zweier, die auseinanderdriften.
+// Die Preise kommen aus der Tabelle `treatments`, nicht mehr aus
+// src/data.js. Vorher war eine Preisänderung ein Commit, und was im Panel
+// bearbeitet wurde, lag im localStorage des Browsers — der Server sah es
+// nie. Damit konnte der Shop einen Preis anzeigen, den Stripe nicht
+// abbucht.
 //
-// Dass diese Datei auch an den Browser ausgeliefert wird, ist unkritisch:
-// der Worker liest zur Laufzeit seine eigene gebündelte Kopie. Wer im
-// Browser Preise manipuliert, ändert nur, was er *sendet* — und genau das
-// glaubt der Server ihm nie.
+// Betragsgrenzen und Steuersatz bleiben im Code: sie gehören nicht zu
+// einer einzelnen Behandlung, und ihre Änderung ist eine Entscheidung,
+// die einen Commit verdient.
+//
+// validateOrder bekommt die Behandlungen übergeben, statt sie selbst zu
+// laden. So bleibt die Prüfung eine reine Funktion — testbar ohne
+// Datenbank, und der Aufrufer macht genau eine Abfrage.
 
 import {
   VOUCHER_MAX_AMOUNT,
   VOUCHER_MAX_MESSAGE_LENGTH,
   VOUCHER_MIN_AMOUNT,
-  voucherTreatments,
 } from '../../src/data.js'
 
 export const MIN_AMOUNT_CENTS = VOUCHER_MIN_AMOUNT * 100
@@ -24,25 +29,37 @@ export const CURRENCY = 'eur'
 // Schnappschuss gespeichert, nicht zur Laufzeit nachgeschlagen.
 export const VAT_RATE_BP = 2000
 
-export function findTreatment(treatmentId) {
-  return voucherTreatments.find((treatment) => treatment.id === treatmentId) ?? null
+/**
+ * Behandlungen aus der Datenbank.
+ *
+ * @param {'shop'|'all'} scope  'shop' liefert nur, was im Konfigurator
+ *   zur Auswahl steht; 'all' zusätzlich die ausgeblendeten, damit das
+ *   Panel sie wieder einschalten kann.
+ */
+export function listTreatments(db, scope = 'shop') {
+  const where = scope === 'all' ? '' : 'WHERE shop_visible = 1'
+  return db
+    .prepare(`SELECT * FROM treatments ${where} ORDER BY sort_order ASC, title ASC`)
+    .all()
+    .then((result) => result.results ?? [])
 }
 
-/** Behandlungspreis in Cent. Der Client sendet nie einen Preis, nur eine ID. */
-export function treatmentPriceCents(treatment) {
-  return Math.round(treatment.price * 100)
+export function findTreatment(treatments, treatmentId) {
+  return treatments.find((treatment) => treatment.id === treatmentId) ?? null
 }
 
 export function treatmentLabel(treatment) {
-  return `${treatment.title} · ${treatment.variant}`
+  return treatment.variant ? `${treatment.title} · ${treatment.variant}` : treatment.title
 }
 
 /**
  * Prüft die Kaufanfrage und bestimmt den Betrag serverseitig.
  *
+ * @param {object} input       was der Client geschickt hat
+ * @param {object[]} treatments  die im Shop wählbaren Behandlungen
  * @returns {{ ok: true, order: object } | { ok: false, reason: string, field?: string }}
  */
-export function validateOrder(input) {
+export function validateOrder(input, treatments = []) {
   const fail = (reason, field) => ({ ok: false, reason, field })
 
   if (!input || typeof input !== 'object') return fail('invalid_body')
@@ -54,9 +71,12 @@ export function validateOrder(input) {
   let treatment = null
 
   if (kind === 'treatment') {
-    treatment = findTreatment(input.treatmentId)
+    treatment = findTreatment(treatments, input.treatmentId)
     if (!treatment) return fail('unknown_treatment', 'treatmentId')
-    amountCents = treatmentPriceCents(treatment)
+    amountCents = treatment.price_cents
+    if (!Number.isSafeInteger(amountCents) || amountCents <= 0) {
+      return fail('invalid_treatment_price', 'treatmentId')
+    }
   } else {
     // Euro-Zahl vom Client, aber nur als Wunsch — Grenzen entscheidet der Server.
     const euros = Number(input.amount)
@@ -95,6 +115,8 @@ export function validateOrder(input) {
     order: {
       kind,
       treatmentId: treatment?.id ?? null,
+      // Schnappschuss: der Gutschein soll den Namen tragen, der beim Kauf
+      // galt — auch wenn die Behandlung später umbenannt wird.
       treatmentLabel: treatment ? treatmentLabel(treatment) : null,
       amountCents,
       currency: CURRENCY,
