@@ -4,7 +4,6 @@ import { error, json } from '../http.js'
 import {
   buildRedemption,
   buildReversal,
-  stateFromBalance,
   validateRedemption,
   validateReversal,
 } from '../ledger.js'
@@ -12,29 +11,23 @@ import { parseCode } from '../codes.js'
 
 const PAGE_SIZE = 50
 
-function listRow(row, now) {
-  return {
-    id: row.id,
-    code: row.code,
-    kind: row.kind,
-    treatmentLabel: row.treatment_label,
-    recipient: row.recipient_name,
-    sender: row.sender_name,
-    buyerEmail: row.buyer_email,
-    originalCents: row.original_amount_cents,
-    balanceCents: row.balance_cents,
-    redeemedCents: row.redeemed_cents,
-    debitCount: row.debit_count,
-    state: stateFromBalance(row, row.balance_cents, now),
-    issuedAt: row.issued_at,
-    lastRedeemedAt: row.last_redeemed_at,
-    expiresAt: row.expires_at,
-  }
-}
+// Das Panel bekommt die Zeilen so, wie sie in der Datenbank stehen, und
+// rechnet Saldo und Zustand selbst — mit denselben Funktionen aus
+// ledger.js, die auch der Worker benutzt.
+//
+// Eine Umwandlung in camelCase stand hier vorher und war ein Fehler: sie
+// erzeugte eine zweite Form derselben Daten, und die Ledger-Funktionen
+// erwarten die erste. Wer rechnen will, muss dann erst zurückwandeln.
+//
+// Anders als bei der Kundenansicht ist Sparsamkeit hier kein Argument:
+// das Panel steht hinter Access, und wer es sieht, darf alles sehen.
+// Mitgeliefert werden nur die aggregierten Werte aus der View, weil sie
+// sonst alle Buchungen aller Gutscheine nachladen müssten.
+const LIST_COLUMNS = `v.*, b.balance_cents, b.redeemed_cents,
+                      b.debit_count, b.reversal_count, b.last_redeemed_at`
 
 export async function listVouchers(request, env) {
   const url = new URL(request.url)
-  const now = new Date().toISOString()
   const limit = Math.min(Number(url.searchParams.get('limit')) || PAGE_SIZE, 200)
   const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0)
   const search = (url.searchParams.get('q') ?? '').trim()
@@ -59,7 +52,7 @@ export async function listVouchers(request, env) {
   const clause = where.length ? `WHERE ${where.join(' AND ')}` : ''
 
   const { results } = await env.DB.prepare(
-    `SELECT v.*, b.balance_cents, b.redeemed_cents, b.debit_count, b.last_redeemed_at
+    `SELECT ${LIST_COLUMNS}
        FROM vouchers v
        JOIN voucher_balances b ON b.id = v.id
        ${clause}
@@ -67,7 +60,26 @@ export async function listVouchers(request, env) {
       LIMIT ? OFFSET ?`,
   ).bind(...params, limit, offset).all()
 
-  return json({ vouchers: (results ?? []).map((row) => listRow(row, now)), limit, offset })
+  return json({ vouchers: results ?? [], limit, offset })
+}
+
+/**
+ * Alle Buchungen.
+ *
+ * Das Panel rechnet Kennzahlen und Verlauf selbst aus den Rohdaten,
+ * statt für jede Ansicht einen eigenen Endpunkt zu verlangen. Bei einem
+ * Salon reden wir über einige hundert Zeilen im Jahr — die Obergrenze
+ * steht trotzdem drin, damit die Antwort nie unbegrenzt wächst.
+ */
+export async function listRedemptions(request, env) {
+  const url = new URL(request.url)
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 2000, 5000)
+
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM redemptions ORDER BY redeemed_at DESC LIMIT ?',
+  ).bind(limit).all()
+
+  return json({ redemptions: results ?? [] })
 }
 
 export async function getStats(env) {
@@ -107,30 +119,10 @@ export async function getVoucher(env, { code, token }) {
     'SELECT * FROM redemptions WHERE voucher_id = ? ORDER BY redeemed_at ASC',
   ).bind(voucher.id).all()
 
-  const redemptions = results ?? []
-  const now = new Date().toISOString()
-  const balance = voucher.original_amount_cents
-    - redemptions.reduce((sum, entry) => sum + entry.amount_cents, 0)
-
-  return json({
-    voucher: {
-      ...listRow({ ...voucher, balance_cents: balance }, now),
-      message: voucher.message,
-      delivery: voucher.delivery,
-      deliveryEmail: voucher.delivery_email,
-      stripeSessionId: voucher.stripe_session_id,
-      voidedAt: voucher.voided_at,
-      voidReason: voucher.void_reason,
-    },
-    redemptions: redemptions.map((entry) => ({
-      id: entry.id,
-      amountCents: entry.amount_cents,
-      redeemedAt: entry.redeemed_at,
-      staffId: entry.staff_id,
-      note: entry.note,
-      reversesId: entry.reverses_id,
-    })),
-  })
+  // Beides roh. Den Saldo rechnet das Panel aus den Buchungen selbst —
+  // hier eine zweite Zahl mitzuschicken hiesse, zwei Wege zu haben, auf
+  // denen derselbe Wert entsteht.
+  return json({ voucher, redemptions: results ?? [] })
 }
 
 /**

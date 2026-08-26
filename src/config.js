@@ -8,3 +8,9 @@
 // In der Entwicklung läuft Vite auf :8000 und der Worker auf :8787.
 // Im Betrieb bedient derselbe Ursprung beides, dann bleibt der Pfad relativ.
 export const API_BASE = import.meta.env.DEV ? 'http://localhost:8787' : ''
+
+// Stripe-Gebühren für EWR-Karten, nur zur Anzeige im Panel. Der tatsächlich
+// abgezogene Betrag steht in Stripes Abrechnung; hier geht es allein um eine
+// Hausnummer neben dem Umsatz.
+export const STRIPE_PERCENT = 0.015
+export const STRIPE_FIXED_CENTS = 25

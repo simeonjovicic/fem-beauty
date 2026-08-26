@@ -13,12 +13,14 @@ import {
 import { parseCode } from '../worker/src/codes.js'
 
 import {
-  STAFF,
-  STRIPE_FIXED_CENTS,
-  STRIPE_PERCENT,
-  redemptions as seedRedemptions,
-  vouchers as seedVouchers,
-} from './admin/mockData'
+  ApiError,
+  fetchMe,
+  fetchRedemptions,
+  fetchVouchers,
+  redeemVoucher,
+  reverseRedemption,
+} from './admin/api'
+import { STRIPE_FIXED_CENTS, STRIPE_PERCENT } from './config'
 import {
   date,
   dateTime,
@@ -118,7 +120,11 @@ export default function AdminPage() {
   const now = useMemo(() => new Date().toISOString(), [])
 
   const [tab, setTab] = useState(tabFromHash)
-  const [ledger, setLedger] = useState(seedRedemptions)
+  const [vouchers, setVouchers] = useState([])
+  const [ledger, setLedger] = useState([])
+  const [me, setMe] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
   const [selectedId, setSelectedId] = useState(null)
@@ -126,13 +132,54 @@ export default function AdminPage() {
 
   const searchRef = useRef(null)
 
-  const rows = useMemo(() => seedVouchers.map((voucher) => {
+  // Gutscheine und Buchungen kommen roh und vollstaendig; abgeleitet wird
+  // hier. Fuer einen Salon sind das einige hundert Zeilen — dafuer je Ansicht
+  // einen eigenen Endpunkt zu bauen, waere Aufwand ohne Gegenwert.
+  const reload = useCallback(async () => {
+    try {
+      const [voucherPage, ledgerPage] = await Promise.all([
+        fetchVouchers({ limit: 200 }),
+        fetchRedemptions(),
+      ])
+      const loaded = voucherPage.vouchers ?? []
+      setVouchers(loaded)
+      setLedger(ledgerPage.redemptions ?? [])
+      setLoadError(null)
+
+      // Aus dem QR-Code kommend: ?token=… oeffnet den Gutschein direkt.
+      // Bewusst hier und nicht in einem eigenen Effekt — dort waere es ein
+      // setState im Effektkoerper, also eine zweite Renderrunde nach jedem
+      // Laden. Der Token wird einmal beim Ankommen aufgeloest.
+      const token = new URLSearchParams(window.location.search).get('token')
+      if (token) {
+        const hit = loaded.find((voucher) => voucher.token === token)
+        if (hit) setSelectedId(hit.id)
+      }
+    } catch (err) {
+      setLoadError(err instanceof ApiError ? err.message : 'Daten konnten nicht geladen werden.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Laden beim Ankommen.
+  useEffect(() => {
+    fetchMe().then(setMe).catch(() => setMe(null))
+    // Die Regel warnt vor setState *synchron* im Effektkoerper. Hier laufen
+    // alle Zustandsaenderungen erst nach einem await, also in genau dem
+    // Rueckruf, den die Regel selbst als richtigen Ort beschreibt — durch
+    // die async-Funktion hindurch kann sie das nur nicht sehen.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    reload()
+  }, [reload])
+
+  const rows = useMemo(() => vouchers.map((voucher) => {
     const entries = ledger
       .filter((entry) => entry.voucher_id === voucher.id)
       .sort((a, b) => a.redeemed_at.localeCompare(b.redeemed_at))
     const balance = balanceCents(voucher, entries)
     return { voucher, entries, balance, state: stateFromBalance(voucher, balance, now) }
-  }), [ledger, now])
+  }), [vouchers, ledger, now])
 
   const visible = useMemo(
     () => rows
@@ -195,54 +242,59 @@ export default function AdminPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [tab, selectedId, closeDetail])
 
-  /** Abbuchen. Spiegelt redeemVoucher() aus admin/api.js — inklusive Idempotenzschluessel. */
-  function redeem(row, amountCents, note) {
+  /**
+   * Abbuchen.
+   *
+   * Die Pruefung hier ist Komfort — sie erspart einen Netzaufruf fuer einen
+   * Fehler, der schon lokal erkennbar ist, und liefert sofort einen Satz auf
+   * Deutsch. Entschieden wird trotzdem am Server: dessen INSERT traegt seine
+   * eigene Bedingung, damit zwei Geraete nicht denselben Restwert zweimal
+   * abbuchen koennen.
+   */
+  async function redeem(row, amountCents, note) {
     const check = validateRedemption({
       voucher: row.voucher, redemptions: row.entries, amountCents, now: new Date().toISOString(),
     })
     if (!check.ok) return { ok: false, message: reasonText(check.reason) }
 
-    setLedger((prev) => [...prev, {
-      id: crypto.randomUUID(),
-      voucher_id: row.voucher.id,
-      amount_cents: amountCents,
-      redeemed_at: new Date().toISOString(),
-      staff_id: STAFF.email,
-      note: note || null,
-      idempotency_key: crypto.randomUUID(),
-      reverses_id: null,
-    }])
-
-    return {
-      ok: true,
-      message: `${euro(amountCents)} abgebucht — ${euro(check.remainingAfter)} bleiben offen.`,
+    try {
+      const result = await redeemVoucher(row.voucher.id, {
+        amountCents,
+        note: note || null,
+        // Einer pro Versuch, nicht pro Klick: schickt der Browser dieselbe
+        // Buchung erneut, weist die Datenbank sie ab statt doppelt abzuziehen.
+        idempotencyKey: crypto.randomUUID(),
+      })
+      await reload()
+      return result.duplicate
+        ? { ok: true, message: 'Diese Buchung lag bereits vor — nichts doppelt abgezogen.' }
+        : { ok: true, message: `${euro(amountCents)} abgebucht — ${euro(result.balanceCents)} bleiben offen.` }
+    } catch (err) {
+      await reload()
+      return { ok: false, message: err instanceof ApiError ? err.message : 'Abbuchen fehlgeschlagen.' }
     }
   }
 
   /** Gegenbuchung. Korrigiert, ohne die Historie zu verlieren. */
-  function reverse(row, targetId) {
+  async function reverse(row, targetId) {
     const check = validateReversal({
       voucher: row.voucher, redemptions: row.entries, targetRedemptionId: targetId,
     })
     if (!check.ok) return { ok: false, message: reasonText(check.reason) }
 
-    setLedger((prev) => [...prev, {
-      id: crypto.randomUUID(),
-      voucher_id: row.voucher.id,
-      amount_cents: check.amountCents,
-      redeemed_at: new Date().toISOString(),
-      staff_id: STAFF.email,
-      note: 'Storno',
-      idempotency_key: crypto.randomUUID(),
-      reverses_id: targetId,
-    }])
-
-    return { ok: true, message: `Buchung über ${euro(-check.amountCents)} storniert.` }
+    try {
+      await reverseRedemption(targetId, { note: 'Storno', idempotencyKey: crypto.randomUUID() })
+      await reload()
+      return { ok: true, message: `Buchung über ${euro(-check.amountCents)} storniert.` }
+    } catch (err) {
+      await reload()
+      return { ok: false, message: err instanceof ApiError ? err.message : 'Storno fehlgeschlagen.' }
+    }
   }
 
   return (
     <div className="adm">
-      <MockBanner tab={tab} />
+      <MockBanner tab={tab} dev={me?.dev} />
 
       <div className="adm-wrap">
         <header className="adm-head">
@@ -254,8 +306,12 @@ export default function AdminPage() {
               </button>
             )}
           </div>
+          {/* Die Kennung aus dem Access-Token — und genau die landet auch als
+              staff_id an jeder Buchung. */}
           <p className="adm-who">
-            Angemeldet als <strong>{STAFF.name}</strong> <span>({STAFF.role})</span>
+            {me
+              ? <>Angemeldet als <strong>{me.email}</strong></>
+              : <span>Nicht angemeldet</span>}
           </p>
         </header>
 
@@ -275,7 +331,24 @@ export default function AdminPage() {
         {tab === 'prices' ? <PricesTab /> : null}
         {tab === 'templates' ? <TemplatesTab /> : null}
 
-        {tab === 'vouchers' && (selected ? (
+        {/* Ein Ladefehler darf nicht als leere Liste erscheinen — „keine
+            Gutscheine" und „Server nicht erreichbar" sehen sonst gleich aus,
+            und an der Kassa wird das Erste geglaubt. */}
+        {tab === 'vouchers' && loadError && (
+          <div className="adm-mock" role="alert">
+            <strong>Nicht geladen</strong>
+            <span>
+              {loadError}{' '}
+              <button type="button" className="adm-undo" onClick={reload}>Erneut versuchen</button>
+            </span>
+          </div>
+        )}
+
+        {tab === 'vouchers' && !loadError && loading && (
+          <p className="adm-empty">Gutscheine werden geladen …</p>
+        )}
+
+        {tab === 'vouchers' && !loadError && !loading && (selected ? (
           <VoucherDetail
             row={selected}
             flash={flash}
@@ -306,16 +379,34 @@ export default function AdminPage() {
 // verschwinden beim Neuladen — gespeicherte Preise nicht, die liegen im
 // localStorage und wirken im Shop. Ein Banner, das beides gleich beschreibt,
 // waere an einer der beiden Stellen eine Falschaussage.
-function MockBanner({ tab }) {
+/**
+ * Warnbalken. Zeigt nur noch an, was tatsaechlich noch nicht echt ist.
+ *
+ * Gutscheine und Buchungen kommen inzwischen aus der Datenbank — was hier
+ * frueher stand ("alle Zahlen erfunden") waere jetzt falsch und damit
+ * schlimmer als kein Hinweis. Uebrig bleiben zwei echte Vorbehalte.
+ */
+function MockBanner({ tab, dev }) {
+  if (tab === 'prices') {
+    return (
+      <div className="adm-mock" role="status">
+        <strong>Entwurf</strong>
+        <span>
+          Preise wirken sofort im Gutschein-Shop und bleiben in diesem Browser
+          gespeichert. Was Stripe abbucht, ändern sie noch nicht.
+        </span>
+      </div>
+    )
+  }
+
+  if (!dev) return null
+
   return (
     <div className="adm-mock" role="status">
-      <strong>Entwurf</strong>
+      <strong>Ohne Zugangsschutz</strong>
       <span>
-        {tab === 'prices'
-          ? 'Preise wirken sofort im Gutschein-Shop und bleiben in diesem '
-            + 'Browser gespeichert. Was Stripe abbucht, ändern sie noch nicht.'
-          : 'Alle Zahlen auf dieser Seite sind erfunden. Keine Anmeldung, keine '
-            + 'Datenbank — Änderungen verschwinden beim Neuladen.'}
+        Dieses Panel läuft im Entwicklungsmodus — jeder mit der Adresse käme
+        hier herein. Vor dem Livegang muss ADMIN_AUTH_MODE auf „access" stehen.
       </span>
     </div>
   )
@@ -551,7 +642,7 @@ function VoucherDetail({ row, flash, setFlash, onRedeem, onReverse }) {
                     <button
                       type="button"
                       className="adm-undo"
-                      onClick={() => setFlash(onReverse(row, entry.id))}
+                      onClick={async () => setFlash(await onReverse(row, entry.id))}
                     >
                       Stornieren
                     </button>
@@ -601,19 +692,30 @@ function RedeemCard({ row, redeemable, flash, setFlash, onRedeem }) {
     return [...new Set(candidates)].sort((a, b) => a - b).slice(0, 3)
   }, [balance])
 
-  function submit(event) {
+  const [busy, setBusy] = useState(false)
+
+  async function submit(event) {
     event.preventDefault()
+    if (busy) return
     const parsed = Number.parseFloat(String(amount).replace(',', '.'))
     if (!Number.isFinite(parsed)) {
       setFlash({ ok: false, message: 'Bitte einen Betrag eingeben.' })
       return
     }
-    // Erst in Cent, dann rechnen. Aus 0.1 + 0.2 wird sonst 0.30000000000000004.
-    const result = onRedeem(row, Math.round(parsed * 100), note)
-    setFlash(result)
-    if (result.ok) {
-      setAmount('')
-      setNote('')
+    // Gesperrt, solange die Buchung laeuft. Der Idempotenzschluessel faengt
+    // einen Doppelklick zwar ab, aber gar nicht erst zweimal zu senden ist
+    // ehrlicher — und die Rueckmeldung bleibt eindeutig.
+    setBusy(true)
+    try {
+      // Erst in Cent, dann rechnen. Aus 0.1 + 0.2 wird sonst 0.30000000000000004.
+      const result = await onRedeem(row, Math.round(parsed * 100), note)
+      setFlash(result)
+      if (result.ok) {
+        setAmount('')
+        setNote('')
+      }
+    } finally {
+      setBusy(false)
     }
   }
 

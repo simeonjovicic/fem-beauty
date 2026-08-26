@@ -1,6 +1,12 @@
 import Stripe from 'stripe'
-import panelHtml from './admin/panel.html'
-import { getStats, getVoucher, listVouchers, redeemVoucher, reverseRedemption } from './admin/api.js'
+import {
+  getStats,
+  getVoucher,
+  listRedemptions,
+  listVouchers,
+  redeemVoucher,
+  reverseRedemption,
+} from './admin/api.js'
 import { authenticate } from './admin/auth.js'
 import { handleCheckout } from './checkout.js'
 import { allowedOrigin, corsHeaders, error, json, withCors } from './http.js'
@@ -15,14 +21,6 @@ function createStripe(env) {
   })
 }
 
-const HTML_HEADERS = {
-  'content-type': 'text/html; charset=utf-8',
-  // Das Panel zeigt Kundendaten — nichts davon gehört in einen Index.
-  'x-robots-tag': 'noindex, nofollow',
-  'referrer-policy': 'same-origin',
-  'x-content-type-options': 'nosniff',
-}
-
 async function handleAdmin(request, env, url) {
   const identity = await authenticate(request, env)
   if (!identity.ok) {
@@ -31,8 +29,11 @@ async function handleAdmin(request, env, url) {
 
   const path = url.pathname
 
-  if (path === '/admin' || path === '/admin/') {
-    return new Response(panelHtml, { headers: HTML_HEADERS })
+  // Wer bin ich? Kommt aus dem von Access verifizierten Token, nicht aus
+  // einer Konstante im Frontend — sonst stünde im Panel ein Name, der mit
+  // dem, was bei einer Buchung als staff_id landet, nichts zu tun hat.
+  if (path === '/api/admin/me' && request.method === 'GET') {
+    return json({ email: identity.email, dev: Boolean(identity.dev) })
   }
 
   if (path === '/api/admin/stats' && request.method === 'GET') {
@@ -41,6 +42,10 @@ async function handleAdmin(request, env, url) {
 
   if (path === '/api/admin/vouchers' && request.method === 'GET') {
     return listVouchers(request, env)
+  }
+
+  if (path === '/api/admin/redemptions' && request.method === 'GET') {
+    return listRedemptions(request, env)
   }
 
   const detail = path.match(/^\/api\/admin\/vouchers\/([^/]+)$/)
@@ -90,13 +95,19 @@ export default {
       return Response.redirect(`${url.origin}/admin?token=${encodeURIComponent(qr[1])}`, 302)
     }
 
-    if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')
-        || url.pathname.startsWith('/api/admin/')) {
+    // Nur noch die API. Die Panel-Oberflaeche liefert die React-App als
+    // statische Seite aus; geschuetzt wird sie durch dieselbe
+    // Access-Anwendung, die auch diese Endpunkte abdeckt.
+    if (url.pathname.startsWith('/api/admin/')) {
+      // Mit CORS: im Betrieb liegen Panel und API gleichursprünglich, aber
+      // in der Entwicklung sitzt das Panel auf :8000 und der Worker auf
+      // :8787. Ohne diese Kopfzeilen weist der Browser jeden Aufruf ab.
+      // Die Allowlist entscheidet weiterhin, wer fragen darf.
       try {
-        return await handleAdmin(request, env, url)
+        return withCors(await handleAdmin(request, env, url), origin)
       } catch (err) {
         console.error('admin fehlgeschlagen —', err.stack ?? err.message)
-        return error('admin_failed', 500)
+        return withCors(error('admin_failed', 500), origin)
       }
     }
 
