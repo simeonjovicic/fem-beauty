@@ -23,9 +23,14 @@
     }
   ],
 
-  // Das Panel wird als Textmodul eingebunden, nicht gebaut.
-  // fallthrough, damit Wranglers Standardregeln (.txt, .sql) erhalten bleiben.
-  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  // Schriften und Logo landen als Binärdaten im Bündel: das PDF wird zur
+  // Laufzeit erzeugt, es kann also nichts nachladen. Eng begrenzt auf die
+  // beiden Ordner, damit nicht versehentlich andere Dateien mitwandern.
+  // fallthrough, damit Wranglers Standardregeln erhalten bleiben.
+  "rules": [
+    { "type": "Data", "globs": ["**/*.ttf", "**/*.png"], "fallthrough": true },
+    { "type": "Text", "globs": ["**/*.html"], "fallthrough": true }
+  ],
 
   "vars": {
     // Ursprünge, die /api/checkout aus dem Browser aufrufen dürfen.

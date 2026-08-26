@@ -5,25 +5,35 @@
 // 1. Workers haben kein Canvas. Übliche QR-Bibliotheken zeichnen auf eines.
 //    Deshalb erzeugt qrcode-generator hier nur die Modulmatrix, und die
 //    wird als Rechtecke ins PDF gezeichnet — bleibt dabei vektoriell und
-//    druckt in jeder Auflösung scharf.
+//    druckt in jeder Auflösung scharf. Gegengeprüft mit einem Decoder:
+//    lesbar von 72 bis 300 dpi.
 //
-// 2. Die eingebauten PDF-Standardschriften können nur WinAnsi. Ein Emoji
+// 2. Schriften und Logo müssen mitgebündelt werden. Das PDF entsteht zur
+//    Laufzeit im Worker, es kann also nichts nachladen. Playfair Display
+//    und Outfit liegen als TTF in worker/fonts, die Wortmarke als PNG in
+//    worker/assets; wrangler.jsonc bindet beide als Binärdaten ein.
+//
+//    Vorher standen hier Times und Helvetica, die eingebauten
+//    PDF-Standardschriften. Sie brauchten keine Datei, sahen aber nach
+//    Textverarbeitung aus statt nach der Marke.
+//
+// 3. Nicht jedes Zeichen hat eine Entsprechung in der Schrift. Ein Emoji
 //    in der Grußnachricht — bei einem Geschenkgutschein alles andere als
-//    unwahrscheinlich — würde die Erzeugung sonst mit einer Ausnahme
-//    abbrechen. Deshalb geht jeder Text durch winAnsi().
-//
-//    WinAnsi kann allerdings mehr, als man annimmt: Umlaute, ß, deutsche
-//    Anführungszeichen und Gedankenstrich sind enthalten. Nur was
-//    wirklich fehlt, wird ersetzt — alles andere bliebe sonst ohne Not
-//    Fernschreiber-Typografie.
-//
-// 3. Ohne eingebettete Schriftdatei bleiben Times und Helvetica. Die
-//    Sperrung der Kleinversalien, die auf der Website die Ruhe erzeugt,
-//    kennt drawText nicht — deshalb drawTracked(), das Zeichen für
-//    Zeichen setzt. Nur für kurze Labels, nicht für Fließtext.
+//    unwahrscheinlich — würde als Leerkasten erscheinen. Deshalb geht
+//    jeder Text durch sanitize(). Umlaute, ß, deutsche Anführungszeichen
+//    und Gedankenstrich bleiben dabei erhalten; nur was die Schrift nicht
+//    kennt, fällt weg.
 
 import qrcode from 'qrcode-generator'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
+import { PDFDocument, rgb } from 'pdf-lib'
+
+import playfairRegular from '../fonts/Playfair-Regular.ttf'
+import playfairMedium from '../fonts/Playfair-Medium.ttf'
+import playfairItalic from '../fonts/Playfair-Italic.ttf'
+import outfitRegular from '../fonts/Outfit-Regular.ttf'
+import outfitMedium from '../fonts/Outfit-Medium.ttf'
+import logoPng from '../assets/logo.png'
 
 // Dieselben Werte wie :root in style.css. Das PDF erfindet keine Farben.
 const WARM = rgb(0.290, 0.247, 0.220)   // #4a3f38
@@ -38,12 +48,6 @@ const MUTED = rgb(0.588, 0.541, 0.502)  // #968a80
 
 const A4 = [595.28, 841.89]
 
-// Das Vier-Punkt-Funkeln aus dem Icon-Satz der Website, als SVG-Pfad im
-// 24er-Raster. drawSvgPath rechnet in SVG-Koordinaten (y nach unten) —
-// der übergebene Punkt ist also die *obere* linke Ecke, nicht die untere.
-const SPARKLE = 'M12 2.8c.7 4.2 2.9 6.4 7.2 7.2-4.3.8-6.5 3-7.2 7.2'
-  + '-.7-4.2-2.9-6.4-7.2-7.2 4.3-.8 6.5-3 7.2-7.2Z'
-
 const NBSP = String.fromCharCode(0xa0)
 const REPLACEMENTS = [
   [/‹/g, '‘'],
@@ -55,25 +59,29 @@ const REPLACEMENTS = [
   [new RegExp(NBSP, 'g'), ' '],
 ]
 
-// ASCII, Latin-1 und die WinAnsi-Sonderzeichen. Alles andere fliegt raus.
+// ASCII, Latin-1 und die gebraeuchlichen typografischen Zeichen. Playfair
+// und Outfit koennen mehr, aber diese Auswahl deckt Deutsch vollstaendig ab
+// und laesst zuverlaessig alles weg, wofuer eine Textschrift keine Zeichen
+// hat — Emoji vor allem.
+//
 // Als Escapes geschrieben: die Klasse enthaelt sonst ein literales
 // geschuetztes Leerzeichen, das im Editor unsichtbar ist.
-const WIN_ANSI = new RegExp(
+const ERLAUBT = new RegExp(
   '[^\\u0020-\\u007E\\u00A0-\\u00FF'
   + '\\u20AC\\u201A\\u0192\\u201E\\u2026\\u2020\\u2021\\u02C6\\u2030\\u0160\\u2039\\u0152\\u017D'
   + '\\u2018\\u2019\\u201C\\u201D\\u2022\\u2013\\u2014\\u02DC\\u2122\\u0161\\u203A\\u0153\\u017E\\u0178]',
   'g',
 )
 
-/** Macht beliebigen Nutzertext für die Standardschriften ungefährlich. */
-export function winAnsi(value) {
+/** Entfernt, was die eingebetteten Schriften nicht darstellen können. */
+export function sanitize(value) {
   let text = String(value ?? '')
   for (const [pattern, replacement] of REPLACEMENTS) text = text.replace(pattern, replacement)
-  return text.replace(WIN_ANSI, '').replace(/\s+/g, ' ').trim()
+  return text.replace(ERLAUBT, '').replace(/\s+/g, ' ').trim()
 }
 
 const euro = new Intl.NumberFormat('de-AT', { style: 'currency', currency: 'EUR' })
-const money = (cents) => winAnsi(euro.format(cents / 100))
+const money = (cents) => sanitize(euro.format(cents / 100))
 
 /** Bricht Text auf eine Breite um — pdf-lib bringt keinen Umbruch mit. */
 function wrap(text, font, size, maxWidth) {
@@ -180,10 +188,16 @@ export async function buildVoucherPdf(voucher, qrUrl) {
   doc.setSubject('Gutschein')
   doc.setCreator('fembeauty.at')
 
-  const serif = await doc.embedFont(StandardFonts.TimesRoman)
-  const serifItalic = await doc.embedFont(StandardFonts.TimesRomanItalic)
-  const sans = await doc.embedFont(StandardFonts.Helvetica)
-  const sansBold = await doc.embedFont(StandardFonts.HelveticaBold)
+  doc.registerFontkit(fontkit)
+
+  // subset: true bettet nur die tatsächlich benutzten Zeichen ein. Ohne
+  // das trüge jedes PDF rund 450 kB Schriftdaten mit sich herum.
+  const embed = (bytes) => doc.embedFont(bytes, { subset: true })
+  const [serif, serifMedium, serifItalic, sans, sansMedium] = await Promise.all([
+    embed(playfairRegular), embed(playfairMedium), embed(playfairItalic),
+    embed(outfitRegular), embed(outfitMedium),
+  ])
+  const logo = await doc.embedPng(logoPng)
 
   const [W, H] = A4
   const page = doc.addPage(A4)
@@ -195,18 +209,20 @@ export async function buildVoucherPdf(voucher, qrUrl) {
   const isTreatment = voucher.kind === 'treatment'
 
   // ── Kopf ───────────────────────────────────────────────
-  // Wortmarke links, Gattung rechts. Beides auf einer Grundlinie, damit
-  // der Blick oben nicht zweimal ansetzen muss.
+  // Hier gesetzt, nicht als Bild: das Logo ist sandfarben und stuende auf
+  // dem hellen Papier fast unsichtbar. Die Website macht es in der
+  // Navigation genauso — Schriftzug auf Hell, Bildmarke auf Dunkel.
   page.drawText('Fem', {
-    x: margin, y: H - 74, size: 27, font: serifItalic, color: WARM,
+    x: margin, y: H - 74, size: 28, font: serifItalic, color: WARM,
   })
 
   const kicker = 'BEAUTY & SPA'
   drawTracked(page, kicker, {
-    x: margin + 62, y: H - 68, size: 7.5, font: sans, color: SAND, tracking: 2,
+    x: margin + serifItalic.widthOfTextAtSize('Fem', 28) + 12,
+    y: H - 68, size: 7.5, font: sans, color: SAND, tracking: 2,
   })
 
-  const gattung = winAnsi(isTreatment ? 'BEHANDLUNGSGUTSCHEIN' : 'WERTGUTSCHEIN')
+  const gattung = sanitize(isTreatment ? 'BEHANDLUNGSGUTSCHEIN' : 'WERTGUTSCHEIN')
   drawTracked(page, gattung, {
     x: right - trackedWidth(gattung, sans, 8, 2),
     y: H - 68, size: 8, font: sans, color: MUTED, tracking: 2,
@@ -227,22 +243,16 @@ export async function buildVoucherPdf(voucher, qrUrl) {
     borderColor: SAND, borderWidth: 0.5, borderOpacity: 0.45, opacity: 0,
   })
 
-  // Wasserzeichen: groß genug, um Fläche zu geben, blass genug, um den
-  // Text nicht zu stören. Beide bleiben oberhalb von cardY + 66 — darunter
-  // steht rechts der Absendername, und ein Funkeln hinter einem Namen
-  // sieht nicht nach Absicht aus, sondern nach Unfall.
-  page.drawSvgPath(SPARKLE, {
-    x: right - pad - 90, y: cardY + 150, scale: 3.3, color: SAND, opacity: 0.09,
-  })
-  page.drawSvgPath(SPARKLE, {
-    x: right - pad - 130, y: cardY + 104, scale: 1.4, color: SAND, opacity: 0.13,
+  // Dieselbe Marke auf der Karte. Der Sandton des Logos steht auf dem
+  // dunklen Grund von selbst — eine weisse Fassung braucht es nicht.
+  const cardLogoW = 104
+  const cardLogoH = cardLogoW * (logo.height / logo.width)
+  page.drawImage(logo, {
+    x: margin + pad, y: cardY + cardH - 30 - cardLogoH,
+    width: cardLogoW, height: cardLogoH,
   })
 
-  page.drawText('Fem', {
-    x: margin + pad, y: cardY + cardH - 54, size: 24, font: serifItalic, color: WHITE,
-  })
-
-  const edition = winAnsi(isTreatment ? 'TREATMENT EDITION' : 'GIFT EDITION')
+  const edition = sanitize(isTreatment ? 'TREATMENT EDITION' : 'GIFT EDITION')
   drawTracked(page, edition, {
     x: right - pad - trackedWidth(edition, sans, 7, 2),
     y: cardY + cardH - 47, size: 7, font: sans, color: SAND_LT, tracking: 2,
@@ -253,9 +263,14 @@ export async function buildVoucherPdf(voucher, qrUrl) {
     color: SAND_LT, opacity: 0.3,
   })
 
-  const label = winAnsi(isTreatment ? 'BEHANDLUNG' : 'GUTSCHEIN ÜBER')
+  // Alles Folgende haengt an dieser Grundlinie. Vorher stand das Label auf
+  // cardY + 158 und der zweizeilige Titel begann auf 146 — bei 25pt Schrift
+  // ragten dessen Oberlaengen in das Label hinein.
+  const labelY = cardY + cardH - 104
+
+  const label = sanitize(isTreatment ? 'BEHANDLUNG' : 'GUTSCHEIN ÜBER')
   drawTracked(page, label, {
-    x: margin + pad, y: cardY + 158, size: 7, font: sans, color: SAND_LT, tracking: 2,
+    x: margin + pad, y: labelY, size: 7, font: sans, color: SAND_LT, tracking: 2,
   })
 
   if (isTreatment) {
@@ -264,9 +279,11 @@ export async function buildVoucherPdf(voucher, qrUrl) {
     //
     // Der Betrag sitzt fest auf cardY + 92, nicht relativ zur Zeilenzahl:
     // ein zweizeiliger Titel schöbe ihn sonst in die Linie darunter.
-    const title = winAnsi(voucher.treatment_label || 'Behandlung')
+    const title = sanitize(voucher.treatment_label || 'Behandlung')
     const lines = wrap(title, serif, 25, inner - pad * 2 - 100).slice(0, 2)
-    const top = lines.length === 2 ? cardY + 146 : cardY + 128
+    // Eine Zeile sitzt tiefer als die erste von zweien, damit der Block in
+    // beiden Faellen ungefaehr gleich weit unter dem Label endet.
+    const top = lines.length === 2 ? labelY - 34 : labelY - 44
 
     lines.forEach((line, index) => {
       page.drawText(line, {
@@ -274,24 +291,24 @@ export async function buildVoucherPdf(voucher, qrUrl) {
       })
     })
     page.drawText(money(voucher.original_amount_cents), {
-      x: margin + pad, y: cardY + 92, size: 13, font: sans, color: SAND_LT,
+      x: margin + pad, y: cardY + 86, size: 13, font: sans, color: SAND_LT,
     })
   } else {
     drawAmount(page, voucher.original_amount_cents, {
-      x: margin + pad, y: cardY + 100, size: 50, font: serif, color: WHITE,
+      x: margin + pad, y: cardY + 96, size: 50, font: serifMedium, color: WHITE,
     })
   }
 
   rule(page, {
-    x: margin + pad, y: cardY + 74, width: 44, color: SAND, thickness: 1,
+    x: margin + pad, y: cardY + 66, width: 44, color: SAND, thickness: 1,
   })
 
-  const recipient = winAnsi(voucher.recipient_name)
+  const recipient = sanitize(voucher.recipient_name)
   page.drawText(recipient ? `Für ${recipient}` : 'Für einen besonderen Menschen', {
-    x: margin + pad, y: cardY + 44, size: 14, font: serifItalic, color: SAND_PALE,
+    x: margin + pad, y: cardY + 38, size: 14, font: serifItalic, color: SAND_PALE,
   })
 
-  const sender = winAnsi(voucher.sender_name)
+  const sender = sanitize(voucher.sender_name)
   if (sender) {
     const from = `Von ${sender}`
     page.drawText(from, {
@@ -304,7 +321,7 @@ export async function buildVoucherPdf(voucher, qrUrl) {
   // Mit Randbalken statt Anführungszeichen-Ornament: der Balken markiert
   // das Zitat auch dann, wenn die Nachricht selbst schon Zeichen mitbringt.
   let y = cardY - 46
-  const message = winAnsi(voucher.message)
+  const message = sanitize(voucher.message)
   if (message) {
     const quoted = /^[„“"']/.test(message) ? message : `„${message}“`
     const lines = wrap(quoted, serifItalic, 14, inner - 22).slice(0, 3)
@@ -331,16 +348,16 @@ export async function buildVoucherPdf(voucher, qrUrl) {
     x: margin + 28, y: boxY + boxH - 34, size: 7, font: sans, color: MUTED, tracking: 2,
   })
   drawTracked(page, voucher.code, {
-    x: margin + 28, y: boxY + boxH - 66, size: 20, font: sansBold, color: WARM, tracking: 1.2,
+    x: margin + 28, y: boxY + boxH - 66, size: 20, font: sansMedium, color: WARM, tracking: 1.2,
   })
-  page.drawText(winAnsi('Im Studio vorzeigen oder bei der Buchung nennen.'), {
+  page.drawText(sanitize('Im Studio vorzeigen oder bei der Buchung nennen.'), {
     x: margin + 28, y: boxY + 26, size: 9, font: sans, color: MUTED,
   })
 
   const qrSize = 86
   const qrX = right - 26 - qrSize
   drawQr(page, { url: qrUrl, x: qrX, y: boxY + (boxH - qrSize) / 2, size: qrSize })
-  const scanHint = winAnsi('Guthaben prüfen')
+  const scanHint = sanitize('Guthaben prüfen')
   page.drawText(scanHint, {
     x: qrX + (qrSize - sans.widthOfTextAtSize(scanHint, 6.5)) / 2,
     y: boxY + (boxH - qrSize) / 2 - 11, size: 6.5, font: sans, color: MUTED,
@@ -360,10 +377,10 @@ export async function buildVoucherPdf(voucher, qrUrl) {
   steps.forEach(([num, title, hint], index) => {
     const x = margin + colW * index
     page.drawText(num, { x, y: stepsY, size: 13, font: serif, color: SAND })
-    page.drawText(winAnsi(title), {
-      x: x + 22, y: stepsY, size: 9.5, font: sansBold, color: WARM,
+    page.drawText(sanitize(title), {
+      x: x + 22, y: stepsY, size: 9.5, font: sansMedium, color: WARM,
     })
-    wrap(winAnsi(hint), sans, 8.5, colW - 34).slice(0, 2).forEach((line, row) => {
+    wrap(sanitize(hint), sans, 8.5, colW - 34).slice(0, 2).forEach((line, row) => {
       page.drawText(line, {
         x: x + 22, y: stepsY - 14 - row * 11, size: 8.5, font: sans, color: MUTED,
       })
@@ -376,13 +393,13 @@ export async function buildVoucherPdf(voucher, qrUrl) {
   const footTop = margin + 74
   rule(page, { x: margin, y: footTop, width: inner, color: SAND, opacity: 0.28 })
 
-  page.drawText(winAnsi('FEM Beauty Wien'), {
-    x: margin, y: footTop - 22, size: 10, font: sansBold, color: WARM,
+  page.drawText(sanitize('FEM Beauty Wien'), {
+    x: margin, y: footTop - 22, size: 10, font: sansMedium, color: WARM,
   })
-  page.drawText(winAnsi('Ramperstorffergasse 51 · 1050 Wien'), {
+  page.drawText(sanitize('Ramperstorffergasse 51 · 1050 Wien'), {
     x: margin, y: footTop - 36, size: 8.5, font: sans, color: MUTED,
   })
-  page.drawText(winAnsi('+43 660 8866068 · beauty@fembeauty.at · fembeauty.at'), {
+  page.drawText(sanitize('+43 660 8866068 · beauty@fembeauty.at · fembeauty.at'), {
     x: margin, y: footTop - 49, size: 8.5, font: sans, color: MUTED,
   })
 
@@ -394,7 +411,7 @@ export async function buildVoucherPdf(voucher, qrUrl) {
     'Keine Barauszahlung. Nicht mit anderen Aktionen kombinierbar.',
   ]
   legal.forEach((line, index) => {
-    const text = winAnsi(line)
+    const text = sanitize(line)
     page.drawText(text, {
       x: right - sans.widthOfTextAtSize(text, 8),
       y: footTop - 22 - index * 12, size: 8, font: sans, color: MUTED,
