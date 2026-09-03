@@ -43,7 +43,16 @@
     // Variable statt "kein Header = offen": ein Konfigurationsfehler soll
     // sperren, nicht öffnen.
     "ADMIN_AUTH_MODE": "dev",
-    "ADMIN_DEV_EMAIL": "jenny@fembeauty.at"
+    "ADMIN_DEV_EMAIL": "jenny@fembeauty.at",
+
+    // Absender der Gutscheinmails. Die Domain muss bei Resend verifiziert
+    // sein, sonst weist die API die Sendung ab.
+    //
+    // Eigene Adresse statt beauty@: Antworten auf eine automatische Mail
+    // sollen trotzdem im gelesenen Postfach landen — dafuer MAIL_REPLY_TO.
+    "MAIL_FROM": "FEM Beauty Wien <gutschein@fembeauty.at>",
+    "MAIL_REPLY_TO": "beauty@fembeauty.at",
+    "BOOKING_URL": "https://trea.tw/uc3hWqqxxVC9uu2Yj"
 
     // Im Betrieb stattdessen setzen:
     //   "ADMIN_AUTH_MODE": "access",
