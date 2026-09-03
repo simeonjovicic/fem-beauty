@@ -60,8 +60,17 @@ export async function getPdf(request, env, token) {
   const voucher = await findVoucherByToken(env.DB, token)
   if (!voucher) return error('not_found', 404)
 
-  const qrUrl = `${new URL(request.url).origin}/v/${voucher.token}`
-  const bytes = await buildVoucherPdf(voucher, qrUrl)
+  const url = new URL(request.url)
+  // Das QR-Ziel haengt an PUBLIC_SITE_URL, nicht an der aufgerufenen
+  // Adresse. Sonst traegt ein PDF, das ueber die workers.dev-Adresse oder
+  // eine Vorschau-URL erzeugt wurde, dauerhaft die falsche Domain — und
+  // ein gedruckter Gutschein laesst sich nicht nachtraeglich korrigieren.
+  const base = (env.PUBLIC_SITE_URL || url.origin).replace(/\/+$/, '')
+  const qrUrl = `${base}/v/${voucher.token}`
+  // ?variante=simple zum Vergleichen waehrend der Gestaltung. Faellt weg,
+  // sobald entschieden ist, welche Fassung bleibt.
+  const variant = url.searchParams.get('variante') === 'simple' ? 'simple' : 'card'
+  const bytes = await buildVoucherPdf(voucher, qrUrl, { variant })
 
   return new Response(bytes, {
     headers: {
