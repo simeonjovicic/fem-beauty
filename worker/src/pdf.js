@@ -40,11 +40,23 @@ const WARM = rgb(0.290, 0.247, 0.220)   // #4a3f38
 const WARM_LT = rgb(0.420, 0.373, 0.333) // #6b5f55
 const SAND = rgb(0.788, 0.600, 0.369)   // #c9995e
 const SAND_LT = rgb(0.863, 0.769, 0.627) // #dcc4a0
-const SAND_PALE = rgb(0.929, 0.878, 0.816) // #ede0d0
 const CREAM = rgb(0.961, 0.941, 0.918)  // #f5f0ea
 const PAPER = rgb(0.992, 0.984, 0.973)  // #fdfbf8
 const WHITE = rgb(1, 1, 1)
 const MUTED = rgb(0.588, 0.541, 0.502)  // #968a80
+
+// Grund der Karte. Aufgehelltes --warm, kein anderer Braunton — sonst
+// passte der Sandton der Wortmarke darauf nicht mehr, die ja direkt
+// darauf sitzt.
+const CARD = rgb(0.490, 0.435, 0.392)  // #7d6f64
+
+// Beschriftung auf der Karte. Auf dem helleren Grund traegt der Sandton
+// nicht mehr: --sand-lt kommt dort auf 2,9:1, und das bei 7-Punkt-Labels.
+// Ein blasseres Sand half nicht — selbst #f7f0e6 blieb unter 4,5:1, die
+// Karte ist dafuer schlicht zu hell. Gebrochenes Weiss loest es (7,4:1)
+// und nimmt der Karte nichts: den Sandcharakter tragen Wortmarke, Linie
+// und der Akzentstrich.
+const CARD_LABEL = rgb(0.965, 0.949, 0.929)  // #f6f2ed
 
 const A4 = [595.28, 841.89]
 
@@ -181,7 +193,7 @@ function drawQr(page, { url, x, y, size, dark = WARM }) {
  * @param {string} qrUrl    Ziel des QR-Codes (führt ins Panel, löst nichts ein)
  * @returns {Promise<Uint8Array>}
  */
-export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {}) {
+export async function buildVoucherPdf(voucher, qrUrl) {
   const doc = await PDFDocument.create()
   doc.setTitle(`FEM Gutschein ${voucher.code}`)
   doc.setAuthor('FEM Beauty Wien')
@@ -207,14 +219,6 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
   const inner = W - margin * 2
   const right = W - margin
   const isTreatment = voucher.kind === 'treatment'
-
-  if (variant === 'simple') {
-    drawSimple(page, {
-      voucher, qrUrl, isTreatment, W, H, margin, inner,
-      serif, serifMedium, serifItalic, sans, sansMedium, logo,
-    })
-    return doc.save()
-  }
 
   // ── Kopf ───────────────────────────────────────────────
   // Hier gesetzt, nicht als Bild: das Logo ist sandfarben und stuende auf
@@ -245,7 +249,7 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
   const cardY = H - 116 - cardH
   const pad = 36
 
-  page.drawRectangle({ x: margin, y: cardY, width: inner, height: cardH, color: WARM })
+  page.drawRectangle({ x: margin, y: cardY, width: inner, height: cardH, color: CARD })
   page.drawRectangle({
     x: margin + 12, y: cardY + 12, width: inner - 24, height: cardH - 24,
     borderColor: SAND, borderWidth: 0.5, borderOpacity: 0.45, opacity: 0,
@@ -263,12 +267,12 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
   const edition = sanitize(isTreatment ? 'TREATMENT EDITION' : 'GIFT EDITION')
   drawTracked(page, edition, {
     x: right - pad - trackedWidth(edition, sans, 7, 2),
-    y: cardY + cardH - 47, size: 7, font: sans, color: SAND_LT, tracking: 2,
+    y: cardY + cardH - 47, size: 7, font: sans, color: CARD_LABEL, tracking: 2,
   })
 
   rule(page, {
     x: margin + pad, y: cardY + cardH - 74, width: inner - pad * 2,
-    color: SAND_LT, opacity: 0.3,
+    color: CARD_LABEL, opacity: 0.35,
   })
 
   // Alles Folgende haengt an dieser Grundlinie. Vorher stand das Label auf
@@ -278,7 +282,7 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
 
   const label = sanitize(isTreatment ? 'BEHANDLUNG' : 'GUTSCHEIN ÜBER')
   drawTracked(page, label, {
-    x: margin + pad, y: labelY, size: 7, font: sans, color: SAND_LT, tracking: 2,
+    x: margin + pad, y: labelY, size: 7, font: sans, color: CARD_LABEL, tracking: 2,
   })
 
   if (isTreatment) {
@@ -299,7 +303,7 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
       })
     })
     page.drawText(money(voucher.original_amount_cents), {
-      x: margin + pad, y: cardY + 86, size: 13, font: sans, color: SAND_LT,
+      x: margin + pad, y: cardY + 86, size: 13, font: sans, color: CARD_LABEL,
     })
   } else {
     drawAmount(page, voucher.original_amount_cents, {
@@ -313,7 +317,7 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
 
   const recipient = sanitize(voucher.recipient_name)
   page.drawText(recipient ? `Für ${recipient}` : 'Für einen besonderen Menschen', {
-    x: margin + pad, y: cardY + 38, size: 14, font: serifItalic, color: SAND_PALE,
+    x: margin + pad, y: cardY + 38, size: 14, font: serifItalic, color: CARD_LABEL,
   })
 
   const sender = sanitize(voucher.sender_name)
@@ -321,7 +325,7 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
     const from = `Von ${sender}`
     page.drawText(from, {
       x: right - pad - sans.widthOfTextAtSize(from, 9.5),
-      y: cardY + 47, size: 9.5, font: sans, color: SAND_LT,
+      y: cardY + 47, size: 9.5, font: sans, color: CARD_LABEL,
     })
   }
 
@@ -430,127 +434,3 @@ export async function buildVoucherPdf(voucher, qrUrl, { variant = 'card' } = {})
 }
 
 
-/**
- * Schlichte Fassung.
- *
- * Ohne dunkle Karte, ohne Rahmen, ohne Anleitung — nur Marke, Betrag,
- * Widmung und Code. Der Gedanke: ein Gutschein muss nicht erklären, wie
- * ein Gutschein funktioniert; das weiss jede Beschenkte. Was übrig
- * bleibt, ist die Zahl und für wen sie gedacht ist.
- *
- * Derselbe Papierton wie die Kartenfassung und wie --bg der Website. Reines
- * Weiss stand hier zuerst, sah neben der anderen Fassung aber wie ein
- * anderes Produkt aus — und der Gutschein wird oft genug am Schirm
- * angesehen, wo der warme Ton den Unterschied macht.
- */
-function drawSimple(page, ctx) {
-  const {
-    voucher, qrUrl, isTreatment, W, H, margin, inner,
-    serif, serifMedium, serifItalic, sans, sansMedium, logo,
-  } = ctx
-
-  page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: PAPER })
-
-  // Die Bildmarke mittig oben. Auf hellem Grund ist sie zart — das ist
-  // hier gewollt, sie soll nicht mit dem Betrag konkurrieren.
-  const logoW = 108
-  const logoH = logoW * (logo.height / logo.width)
-  page.drawImage(logo, {
-    x: (W - logoW) / 2, y: H - 96 - logoH, width: logoW, height: logoH,
-  })
-
-  const centre = (text, { y, size, font, color, tracking }) => {
-    const width = tracking
-      ? trackedWidth(text, font, size, tracking)
-      : font.widthOfTextAtSize(text, size)
-    const x = (W - width) / 2
-    if (tracking) drawTracked(page, text, { x, y, size, font, color, tracking })
-    else page.drawText(text, { x, y, size, font, color })
-  }
-
-  const gattung = sanitize(isTreatment ? 'BEHANDLUNGSGUTSCHEIN' : 'GUTSCHEIN')
-  centre(gattung, { y: H - 236, size: 8, font: sans, color: MUTED, tracking: 2.4 })
-
-  // ── Der Betrag beziehungsweise die Behandlung ──────────
-  if (isTreatment) {
-    const title = sanitize(voucher.treatment_label || 'Behandlung')
-    const lines = wrap(title, serif, 30, inner - 60).slice(0, 2)
-    lines.forEach((line, index) => {
-      centre(line, { y: H - 290 - index * 36, size: 30, font: serif, color: WARM })
-    })
-    centre(money(voucher.original_amount_cents), {
-      y: H - 300 - lines.length * 36, size: 13, font: sans, color: MUTED,
-    })
-  } else {
-    // Zentriert setzen heisst hier: die Breite selbst rechnen, weil
-    // drawAmount das Zeichen kleiner setzt als die Zahl.
-    const text = money(voucher.original_amount_cents)
-    const gap = text.indexOf(' ')
-    const symbol = gap < 0 ? '' : text.slice(0, gap)
-    const number = gap < 0 ? text : text.slice(gap + 1)
-    const size = 58
-    const symbolSize = size * 0.56
-    const total = serifMedium.widthOfTextAtSize(symbol, symbolSize)
-      + size * 0.14 + serifMedium.widthOfTextAtSize(number, size)
-    drawAmount(page, voucher.original_amount_cents, {
-      x: (W - total) / 2, y: H - 320, size, font: serifMedium, color: WARM,
-    })
-  }
-
-  rule(page, { x: (W - 40) / 2, y: H - 366, width: 40, color: SAND, thickness: 1 })
-
-  const recipient = sanitize(voucher.recipient_name)
-  centre(recipient ? `Für ${recipient}` : 'Für einen besonderen Menschen', {
-    y: H - 400, size: 15, font: serifItalic, color: WARM_LT,
-  })
-
-  const sender = sanitize(voucher.sender_name)
-  if (sender) {
-    centre(sanitize(`von ${sender}`), { y: H - 420, size: 10, font: sans, color: MUTED })
-  }
-
-  const message = sanitize(voucher.message)
-  if (message) {
-    const quoted = /^[„“"']/.test(message) ? message : `„${message}“`
-    wrap(quoted, serifItalic, 12, inner - 120).slice(0, 3).forEach((line, index) => {
-      centre(line, { y: H - 458 - index * 18, size: 12, font: serifItalic, color: MUTED })
-    })
-  }
-
-  // ── Code und QR ────────────────────────────────────────
-  // Nebeneinander mittig statt in einem Kasten: der Kasten war das, was
-  // die Seite nach Formular aussehen liess.
-  const qrSize = 88
-  const codeSize = 19
-  const codeWidth = sansMedium.widthOfTextAtSize(voucher.code, codeSize)
-  const blockW = qrSize + 28 + codeWidth
-  const blockX = (W - blockW) / 2
-  const blockY = margin + 190
-
-  drawQr(page, { url: qrUrl, x: blockX, y: blockY, size: qrSize })
-
-  drawTracked(page, sanitize('GUTSCHEINCODE'), {
-    x: blockX + qrSize + 28, y: blockY + 58, size: 7, font: sans, color: MUTED, tracking: 2,
-  })
-  page.drawText(voucher.code, {
-    x: blockX + qrSize + 28, y: blockY + 30, size: codeSize, font: sansMedium, color: WARM,
-  })
-  page.drawText(sanitize('Im Studio vorzeigen oder nennen.'), {
-    x: blockX + qrSize + 28, y: blockY + 12, size: 8.5, font: sans, color: MUTED,
-  })
-
-  // ── Fusszeile ──────────────────────────────────────────
-  // Eine Zeile statt eines Blocks. Adresse und Bedingungen gehoeren aufs
-  // Papier, aber sie sind nicht das Geschenk.
-  const footY = margin + 40
-  rule(page, { x: (W - 40) / 2, y: footY + 26, width: 40, color: SAND_LT, opacity: 0.6 })
-
-  centre(sanitize('FEM Beauty Wien · Ramperstorffergasse 51 · 1050 Wien · fembeauty.at'), {
-    y: footY, size: 8.5, font: sans, color: MUTED,
-  })
-  centre(sanitize(voucher.expires_at
-    ? `Einlösbar bis ${new Date(voucher.expires_at).toLocaleDateString('de-AT')} · Teileinlösung möglich · keine Barauszahlung`
-    : 'Ohne Ablaufdatum · Teileinlösung möglich · keine Barauszahlung'), {
-    y: footY - 13, size: 7.5, font: sans, color: MUTED,
-  })
-}

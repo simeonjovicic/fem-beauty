@@ -67,10 +67,7 @@ export async function getPdf(request, env, token) {
   // ein gedruckter Gutschein laesst sich nicht nachtraeglich korrigieren.
   const base = (env.PUBLIC_SITE_URL || url.origin).replace(/\/+$/, '')
   const qrUrl = `${base}/v/${voucher.token}`
-  // ?variante=simple zum Vergleichen waehrend der Gestaltung. Faellt weg,
-  // sobald entschieden ist, welche Fassung bleibt.
-  const variant = url.searchParams.get('variante') === 'simple' ? 'simple' : 'card'
-  const bytes = await buildVoucherPdf(voucher, qrUrl, { variant })
+  const bytes = await buildVoucherPdf(voucher, qrUrl)
 
   return new Response(bytes, {
     headers: {

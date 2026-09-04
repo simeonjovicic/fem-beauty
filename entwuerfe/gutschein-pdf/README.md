@@ -1,40 +1,34 @@
-# Gutschein-PDF — zwei Fassungen zur Auswahl
+# Gutschein-PDF — aktueller Stand
 
-Vier Dateien, zwei Layouts × zwei Gutscheinarten. Zum Ansehen und
-Weiterschicken, nicht zum Einlösen.
+Zwei Dateien, je eine pro Gutscheinart. Zum Ansehen und Weiterschicken,
+nicht zum Einlösen.
 
-| Fassung | Kennzeichen |
-| --- | --- |
-| **A — Karte** | Dunkle Karte als Blickfang, drei Schritte erklären das Einlösen, Code und QR in einem eigenen Feld |
-| **B — schlicht** | Keine Karte, alles zentriert, keine Anleitung, Code neben dem QR |
+Schriften wie auf der Website (Playfair Display und Outfit, eingebettet),
+die echte Wortmarke, Papierton `#fdfbf8`. Der Kartengrund ist `#7d6f64` —
+aufgehelltes `--warm`, kein anderer Braunton: der Sandton der Wortmarke
+sitzt direkt darauf und würde auf einem anderen Ton nicht mehr passen.
 
-Beide nutzen dieselben Schriften wie die Website (Playfair Display und
-Outfit, eingebettet) und dieselbe Wortmarke. Beide stehen auf demselben
-Papierton `#fdfbf8`.
+Auf dem helleren Grund trägt `--sand-lt` die kleinen Labels nicht mehr
+(2,9:1 bei 7 Punkt). Sie stehen deshalb in gebrochenem Weiß `#f6f2ed` —
+4,4:1. Den Sandcharakter tragen weiterhin Wortmarke, Trennlinie und der
+Akzentstrich.
 
-## Wozu das hier liegt
-
-Die Entscheidung, welche Fassung bleibt, steht noch aus. Sobald sie
-gefallen ist, kann dieser Ordner weg — die Dateien lassen sich jederzeit
-neu erzeugen:
+## Neu erzeugen
 
 ```
-# Fassung A
 /api/voucher/<token>/pdf
-
-# Fassung B
-/api/voucher/<token>/pdf?variante=simple
 ```
 
-Der Parameter `?variante=simple` existiert nur für diese Auswahl und
-fällt mit der Entscheidung ebenfalls weg.
+Das QR-Ziel kommt aus `PUBLIC_SITE_URL`, nicht aus der aufgerufenen
+Adresse — sonst trüge ein PDF aus der lokalen Entwicklung dauerhaft
+`localhost`, und ein gedruckter Gutschein lässt sich nicht nachträglich
+korrigieren.
 
 ## Zu den QR-Codes
 
 Sie zeigen auf `https://fembeauty.at/v/…` und sind mit einem Decoder
-geprüft (lesbar von 72 bis 300 dpi). Das Ziel gibt es aber noch nicht —
-der Worker ist nicht deployed. Die Codes sind also echt aufgebaut, führen
-derzeit jedoch ins Leere.
+geprüft, lesbar ab 72 dpi. Das Ziel existiert aber noch nicht — der Worker
+ist nicht deployed.
 
 Die Gutscheindaten stammen aus lokalen Testkäufen. **Keine echten
 Kundendaten**, und die Codes gehören zu keinem gültigen Gutschein.
