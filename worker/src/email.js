@@ -30,6 +30,13 @@ const BRAND = {
   sandPale: '#ede0d0',
   warm: '#4a3f38',
   warmLt: '#6b5f55',
+  // Grund der Gutscheinkarte — derselbe Wert wie CARD in pdf.js. Mail und
+  // PDF liegen nebeneinander im Postfach; zwei Brauntoene sahen dort nach
+  // zwei verschiedenen Gutscheinen aus.
+  card: '#7d6f64',
+  // Beschriftung auf der Karte. Sand traegt auf dem helleren Grund nicht
+  // mehr (2,9:1); gebrochenes Weiss kommt auf 4,4:1.
+  cardLabel: '#f6f2ed',
   taupe: '#968a80',
   line: '#eadfd2',
 }
@@ -88,7 +95,7 @@ function voucherCard(voucher) {
     ? `<div style="margin:0;font-family:${SERIF};font-size:26px;line-height:1.25;color:${BRAND.white};">
          ${esc(voucher.treatment_label || 'Behandlung')}
        </div>
-       <div style="margin:10px 0 0;font-family:${SANS};font-size:13px;color:${BRAND.sandLt};">
+       <div style="margin:10px 0 0;font-family:${SANS};font-size:13px;color:${BRAND.cardLabel};">
          Gutscheinwert ${money(voucher.original_amount_cents)}
        </div>`
     : `<div style="margin:0;font-family:${SERIF};font-size:46px;line-height:1;color:${BRAND.white};">
@@ -96,7 +103,7 @@ function voucherCard(voucher) {
        </div>`
 
   const sender = voucher.sender_name
-    ? `<td align="right" style="font-family:${SANS};font-size:12px;color:${BRAND.sandLt};">
+    ? `<td align="right" style="font-family:${SANS};font-size:12px;color:${BRAND.cardLabel};">
          Von ${esc(voucher.sender_name)}
        </td>`
     : '<td></td>'
@@ -105,14 +112,14 @@ function voucherCard(voucher) {
   <tr>
     <td style="padding:0 24px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background-color:${BRAND.warm};border-radius:2px;">
+             style="background-color:${BRAND.card};border-radius:2px;">
         <tr>
           <td style="padding:30px 30px 34px;">
 
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="font-family:${SERIF};font-style:italic;font-size:24px;color:${BRAND.white};">Fem</td>
-                <td align="right" style="font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.sandLt};">
+                <td align="right" style="font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.cardLabel};">
                   ${edition}
                 </td>
               </tr>
@@ -122,10 +129,10 @@ function voucherCard(voucher) {
                  als dicker 3D-Balken und ignoriert die Farbe. -->
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr><td height="1" style="height:1px;line-height:1px;font-size:0;
-                  background-color:${BRAND.warmLt};padding:0;">&nbsp;</td></tr>
+                  background-color:${BRAND.cardLabel};padding:0;">&nbsp;</td></tr>
             </table>
 
-            <div style="padding:26px 0 0;font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.sandLt};">
+            <div style="padding:26px 0 0;font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.cardLabel};">
               ${isTreatment ? 'BEHANDLUNGSGUTSCHEIN' : 'WERTGUTSCHEIN'}
             </div>
             <div style="padding:12px 0 22px;">${headline}</div>
@@ -389,7 +396,10 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
     voucher.kind === 'treatment' ? ['Behandlung', esc(voucher.treatment_label)] : null,
     ['Für', voucher.recipient_name ? esc(voucher.recipient_name) : 'Dich selbst'],
     ['Gekauft am', longDate(voucher.issued_at)],
-    ['Zustellung', voucher.delivery === 'email'
+    // Bei einem Kauf fuer sich selbst geht keine zweite Mail raus — die
+    // Dublettenpruefung in emailPlan unterdrueckt sie. "Per E-Mail an …"
+    // behauptete hier einen Versand, den es nicht gab.
+    ['Zustellung', voucher.delivery === 'email' && !selfPurchase
       ? `Per E-Mail an ${esc(voucher.delivery_email)}`
       : 'Als PDF in dieser E-Mail'],
     ['Code', spacedCode(voucher.code)],
@@ -437,7 +447,7 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
           Danke für deinen Einkauf.
         </div>
         <div style="padding-top:12px;font-family:${SANS};font-size:14px;line-height:1.65;color:${BRAND.warmLt};">
-          ${voucher.delivery === 'email'
+          ${voucher.delivery === 'email' && !selfPurchase
             ? `Der Gutschein ist an <strong style="color:${BRAND.warm};">${esc(voucher.delivery_email)}</strong> unterwegs. Eine Kopie liegt dieser E-Mail als PDF bei.`
             : 'Der Gutschein liegt dieser E-Mail als PDF bei — zum Ausdrucken oder Weiterleiten.'}
         </div>
@@ -460,7 +470,7 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
       preheader: `${money(voucher.original_amount_cents)} · ${voucher.code} · PDF im Anhang.`,
       body,
     }),
-    text: receiptText(voucher, { net, vat, rate }),
+    text: receiptText(voucher, { net, vat, rate, selfPurchase }),
   }
 }
 
@@ -508,7 +518,7 @@ function giftText(voucher, bookingUrl) {
   ].join('\n')
 }
 
-function receiptText(voucher, { net, vat, rate }) {
+function receiptText(voucher, { net, vat, rate, selfPurchase }) {
   return [
     'Danke für deinen Einkauf.',
     '',
@@ -519,11 +529,14 @@ function receiptText(voucher, { net, vat, rate }) {
     `enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %), netto ${money(net)}`,
     `Code: ${voucher.code}`,
     `Gekauft am: ${longDate(voucher.issued_at)}`,
-    voucher.delivery === 'email'
+    voucher.delivery === 'email' && !selfPurchase
       ? `Zustellung: per E-Mail an ${voucher.delivery_email}`
       : 'Zustellung: als PDF in dieser E-Mail',
     '',
-    'Der Gutschein liegt dieser E-Mail als PDF bei.',
+    voucher.delivery === 'email' && !selfPurchase
+      ? `Der Gutschein ist an ${voucher.delivery_email} unterwegs. `
+        + 'Eine Kopie liegt dieser E-Mail als PDF bei.'
+      : 'Der Gutschein liegt dieser E-Mail als PDF bei.',
     'Diese E-Mail ist deine Kaufbestätigung.',
     ...contactLines,
   ].join('\n')
