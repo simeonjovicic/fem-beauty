@@ -49,18 +49,22 @@
     // VOR DEM DEPLOY auf "access" stellen und die beiden Werte darunter
     // ausfuellen. Ohne sie sperrt der Worker jeden Zugriff — richtig so,
     // aber dann ist das Panel auch fuer euch zu.
-    "ADMIN_AUTH_MODE": "dev",
-    "ADMIN_DEV_EMAIL": "jenny@fembeauty.at",
-
-    // Aus Zero Trust: Applications → eure App → Configure →
-    // Additional settings → Application Audience (AUD) Tag.
+    // Voreinstellung ist der sichere Zustand. Wer versehentlich deployt,
+    // deployt ein geschlossenes Panel — nicht ein offenes.
     //
-    // Mehrere kommagetrennt: /admin und /api/admin teilen keinen Pfad,
-    // es braucht also womoeglich zwei Anwendungen — und dann traegt das
-    // Token je nachdem die eine oder die andere Kennung.
-    "ACCESS_AUD": "",
-    // <euer-team>.cloudflareaccess.com — ohne https:// davor.
-    "ACCESS_TEAM_DOMAIN": "",
+    // Lokal steht ADMIN_AUTH_MODE=dev in .dev.vars und ueberschreibt das;
+    // .dev.vars ist gitignoriert und wird nie deployed.
+    "ADMIN_AUTH_MODE": "access",
+
+    // ACCESS_AUD und ACCESS_TEAM_DOMAIN stehen bewusst NICHT hier: das
+    // Repo ist oeffentlich. Beide sind zwar keine Geheimnisse — die
+    // Kennung steht in jedem Access-Token, die Team-Domain in jeder
+    // Weiterleitung zur Anmeldung —, aber sie beschreiben die
+    // Zugangsschicht, und die muss nicht im Klartext nachlesbar sein.
+    //
+    // Lokal in .dev.vars, in der Cloud per:
+    //   wrangler secret put ACCESS_AUD
+    //   wrangler secret put ACCESS_TEAM_DOMAIN
 
     // Absender der Gutscheinmails. Die Domain muss bei Resend verifiziert
     // sein, sonst weist die API die Sendung ab.
