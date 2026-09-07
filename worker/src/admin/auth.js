@@ -61,8 +61,22 @@ async function verifyAccessJwt(token, env) {
 
   // Ohne aud-Prüfung würde ein gültiges Token einer *anderen* Access-Anwendung
   // desselben Teams hier ebenfalls durchkommen.
+  //
+  // Mehrere Kennungen sind erlaubt, kommagetrennt: die Panel-Seite unter
+  // /admin und die API unter /api/admin teilen keinen gemeinsamen Pfad, es
+  // braucht also womöglich zwei Access-Anwendungen — und dann trägt das
+  // Token je nachdem die eine oder die andere Kennung. Beide sind unsere,
+  // mit derselben Richtlinie.
+  const erlaubt = String(env.ACCESS_AUD ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  if (!erlaubt.length) return { ok: false, reason: 'not_configured' }
+
   const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
-  if (!audiences.includes(env.ACCESS_AUD)) return { ok: false, reason: 'wrong_audience' }
+  if (!audiences.some((entry) => erlaubt.includes(entry))) {
+    return { ok: false, reason: 'wrong_audience' }
+  }
 
   const keys = await loadKeys(env.ACCESS_TEAM_DOMAIN)
   const jwk = keys.find((key) => key.kid === header.kid)

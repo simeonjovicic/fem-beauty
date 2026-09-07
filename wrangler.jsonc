@@ -38,12 +38,29 @@
     "ALLOWED_ORIGINS": "http://localhost:8000,http://127.0.0.1:8000",
     "PUBLIC_SITE_URL": "http://localhost:8000",
 
-    // NUR für die lokale Entwicklung. In der Cloud muss das auf "access"
-    // stehen, sonst ist das Panel offen im Netz. Bewusst eine eigene
-    // Variable statt "kein Header = offen": ein Konfigurationsfehler soll
-    // sperren, nicht öffnen.
+    // Zugang zum Panel.
+    //
+    // "dev"    — jeder mit der Adresse kommt herein. NUR lokal.
+    // "access" — Cloudflare Access davor, das Token wird geprueft.
+    //
+    // Bewusst eine eigene Variable statt "kein Header = offen": eine
+    // fehlende Einstellung soll sperren, nicht oeffnen.
+    //
+    // VOR DEM DEPLOY auf "access" stellen und die beiden Werte darunter
+    // ausfuellen. Ohne sie sperrt der Worker jeden Zugriff — richtig so,
+    // aber dann ist das Panel auch fuer euch zu.
     "ADMIN_AUTH_MODE": "dev",
     "ADMIN_DEV_EMAIL": "jenny@fembeauty.at",
+
+    // Aus Zero Trust: Applications → eure App → Configure →
+    // Additional settings → Application Audience (AUD) Tag.
+    //
+    // Mehrere kommagetrennt: /admin und /api/admin teilen keinen Pfad,
+    // es braucht also womoeglich zwei Anwendungen — und dann traegt das
+    // Token je nachdem die eine oder die andere Kennung.
+    "ACCESS_AUD": "",
+    // <euer-team>.cloudflareaccess.com — ohne https:// davor.
+    "ACCESS_TEAM_DOMAIN": "",
 
     // Absender der Gutscheinmails. Die Domain muss bei Resend verifiziert
     // sein, sonst weist die API die Sendung ab.
@@ -53,11 +70,6 @@
     "MAIL_FROM": "FEM Beauty Wien <gutschein@fembeauty.at>",
     "MAIL_REPLY_TO": "beauty@fembeauty.at",
     "BOOKING_URL": "https://trea.tw/uc3hWqqxxVC9uu2Yj"
-
-    // Im Betrieb stattdessen setzen:
-    //   "ADMIN_AUTH_MODE": "access",
-    //   "ACCESS_TEAM_DOMAIN": "<team>.cloudflareaccess.com",
-    //   "ACCESS_AUD": "<Application Audience Tag aus Zero Trust>"
   }
 
   // Secrets stehen NICHT hier, sondern lokal in .dev.vars und
