@@ -5,6 +5,20 @@
   // stripe-node erwartet Node-Bausteine (Buffer, crypto, events).
   "compatibility_flags": ["nodejs_compat"],
 
+  // Nur diese Pfade. Alles andere auf fembeauty.at bedient weiterhin der
+  // bestehende Worker fem-beauty — bei Cloudflare gewinnt die
+  // spezifischere Route, die laufende Seite bleibt also unberuehrt.
+  //
+  // www eigens aufgefuehrt: die Adresse antwortet eigenstaendig mit 200
+  // und leitet nicht auf die Hauptdomain um. Ohne diese Routen schluege
+  // ein Kauf dort fehl.
+  "routes": [
+    { "pattern": "fembeauty.at/api/*", "zone_name": "fembeauty.at" },
+    { "pattern": "fembeauty.at/v/*", "zone_name": "fembeauty.at" },
+    { "pattern": "www.fembeauty.at/api/*", "zone_name": "fembeauty.at" },
+    { "pattern": "www.fembeauty.at/v/*", "zone_name": "fembeauty.at" }
+  ],
+
   "d1_databases": [
     {
       // Der Bindungsname ist frei gewählt und heißt im Code env.DB.
@@ -35,8 +49,14 @@
   "vars": {
     // Ursprünge, die /api/checkout aus dem Browser aufrufen dürfen.
     // Im Betrieb laufen Seite und Worker gleichursprünglich, dann leer.
-    "ALLOWED_ORIGINS": "http://localhost:8000,http://127.0.0.1:8000",
-    "PUBLIC_SITE_URL": "http://localhost:8000",
+    // Produktionswerte. Lokal ueberschreibt .dev.vars beide — ein
+    // deployter Worker mit localhost-Adressen waere kaputt, und der
+    // Fehler faellt erst auf, wenn eine Kundin schon bezahlt hat.
+    //
+    // ALLOWED_ORIGINS leer: im Betrieb liegen Seite und API auf
+    // demselben Ursprung, CORS wird dort nicht gebraucht.
+    "ALLOWED_ORIGINS": "",
+    "PUBLIC_SITE_URL": "https://fembeauty.at",
 
     // Zugang zum Panel.
     //
