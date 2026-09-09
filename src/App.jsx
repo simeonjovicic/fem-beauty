@@ -6,12 +6,14 @@ import HomePage from './HomePage'
 // ihn die meisten Besucher nie oeffnen. Per lazy() bekommt jede Unterseite
 // einen eigenen Chunk, der erst beim Aufruf geladen wird.
 const ImpressumPage = lazy(() => import('./ImpressumPage'))
+const DatenschutzPage = lazy(() => import('./DatenschutzPage'))
 const GutscheinePage = lazy(() => import('./GutscheinePage'))
 const DankePage = lazy(() => import('./DankePage'))
 const AdminPage = lazy(() => import('./AdminPage'))
 
 const PAGES = {
   impressum: ImpressumPage,
+  datenschutz: DatenschutzPage,
   gutscheine: GutscheinePage,
   danke: DankePage,
   admin: AdminPage,

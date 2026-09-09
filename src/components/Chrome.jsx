@@ -177,6 +177,7 @@ export function Footer() {
 
         <div className="ft-right">
           <a href="/impressum.html" className="ft-link">Impressum</a>
+          <a href="/datenschutz.html" className="ft-link">Datenschutz</a>
           <span className="ft-mob-copy">© 2025 FEM Beauty Wien.</span>
           <div className="ft-hango-wrap">
             Made by <a href="https://hango.at" target="_blank" rel="noopener noreferrer" className="ft-hango-highlight">Hango.at</a>

@@ -528,9 +528,14 @@ function VoucherTeaser() {
             <strong>Für alles bei FEM</strong>
             <small>Behandlung oder Produkt.</small>
           </li>
+          {/* Kein Ablaufdatum, weil das System auch keines vergibt:
+              expires_at bleibt NULL. In Oesterreich gilt fuer Gutscheine
+              die allgemeine Verjaehrungsfrist, und kurze Befristungen in
+              AGB sind wiederholt gekippt worden. "3 Jahre gueltig" stand
+              hier vorher und versprach weniger, als das System haelt. */}
           <li>
             <span><VtIcon name="clock" /></span>
-            <strong>3 Jahre gültig</strong>
+            <strong>Ohne Ablaufdatum</strong>
             <small>Termin frei wählbar.</small>
           </li>
           <li>
