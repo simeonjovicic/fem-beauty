@@ -115,10 +115,18 @@ export default function DatenschutzPage() {
 
           <h2>Karte</h2>
           <p>
-            Auf der Startseite ist eine Karte von Google Maps (Google Ireland
-            Limited) eingebunden. Beim Laden der Seite wird Ihre IP-Adresse an
-            Google übertragen, und Google kann Cookies setzen. Rechtsgrundlage ist
-            Art. 6 Abs. 1 lit. f DSGVO. Einzelheiten unter{' '}
+            Auf der Startseite kann eine Karte von Google Maps (Google Ireland
+            Limited) angezeigt werden. Sie wird <strong>nicht automatisch
+            geladen</strong>: Solange Sie nicht auf „Karte laden" klicken, wird
+            keine Verbindung zu Google hergestellt und es werden keine Daten
+            übertragen.
+          </p>
+          <p>
+            Erst mit dem Klick wird Ihre IP-Adresse an Google übermittelt, und
+            Google kann Cookies setzen. Rechtsgrundlage ist dann Ihre Einwilligung
+            nach Art. 6 Abs. 1 lit. a DSGVO. Die Einwilligung gilt nur für den
+            aktuellen Seitenaufruf; beim nächsten Besuch entscheiden Sie erneut.
+            Einzelheiten unter{' '}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
               policies.google.com/privacy
             </a>.

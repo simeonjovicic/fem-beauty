@@ -880,6 +880,69 @@ function Lightbox({ image, onClose }) {
   )
 }
 
+/**
+ * Karte, die erst auf Klick laedt.
+ *
+ * Der iframe uebertraegt beim Laden die IP-Adresse an Google und setzt
+ * Cookies — ohne Zutun der Besucherin, allein weil sie die Startseite
+ * geoeffnet hat. Das erst nach einer bewussten Entscheidung zu tun ist der
+ * saubere Weg, und der Platzhalter zeigt ohnehin schon alles, was die
+ * meisten brauchen: Adresse und einen Weg zur Route.
+ *
+ * Der Zustand lebt nur in dieser Sitzung. Ihn zu merken hiesse, eine
+ * Einwilligung zu speichern — dafuer braeuchte es wieder einen Hinweis.
+ */
+function ContactMap() {
+  const [geladen, setGeladen] = useState(false)
+
+  if (geladen) {
+    return (
+      <div className="contact-map">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2659.2!2d16.3558!3d48.1857!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476da836d80ebf75%3A0x3e5a9d2f7b6c1234!2sRamperstorffergasse+51%2C+1050+Wien!5e0!3m2!1sde!2sat!4v1710000000000"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="FEM Beauty Wien — Ramperstorffergasse 51, 1050 Wien"
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="contact-map contact-map-placeholder">
+      <div className="cmap-inner">
+        <span className="cmap-pin" aria-hidden="true"><LocationIcon /></span>
+        <strong>Ramperstorffergasse 51</strong>
+        <span className="cmap-sub">1050 Wien · U4 Pilgramgasse</span>
+
+        <button type="button" className="cmap-load" onClick={() => setGeladen(true)}>
+          Karte laden
+        </button>
+
+        <p className="cmap-note">
+          Beim Laden stellt Google eine Verbindung zu deinem Gerät her. Mehr dazu
+          im <a href="/datenschutz.html">Datenschutz</a>.
+        </p>
+
+        {/* Fuer alle, die die Karte gar nicht brauchen — oder sie nicht laden
+            wollen. Oeffnet in einer neuen Registerkarte, ohne diese Seite. */}
+        <a
+          className="cmap-route"
+          href="https://www.google.com/maps/dir/?api=1&destination=Ramperstorffergasse+51,+1050+Wien"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Route öffnen <i aria-hidden="true">↗</i>
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function Contact() {
   return (
     <section className="contact" id="contact">
@@ -897,18 +960,7 @@ function Contact() {
         </div>
         <BookingLink className="btn-p" style={{ marginTop: '2.5rem' }}>Jetzt über Treatwell buchen →</BookingLink>
       </div>
-      <div className="contact-map">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2659.2!2d16.3558!3d48.1857!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476da836d80ebf75%3A0x3e5a9d2f7b6c1234!2sRamperstorffergasse+51%2C+1050+Wien!5e0!3m2!1sde!2sat!4v1710000000000"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title="FEM Beauty Wien"
-        />
-      </div>
+      <ContactMap />
     </section>
   )
 }
