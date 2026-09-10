@@ -97,6 +97,32 @@ async function handleAdmin(request, env, url) {
   return error('not_found', 404)
 }
 
+/**
+ * Bildet endungslose Adressen auf ihre .html-Datei ab: "/" auf
+ * index.html, "/admin" auf admin.html.
+ *
+ * Cloudflare kann das selbst, aber nur um den Preis einer Umleitung in
+ * die Gegenrichtung: /danke.html wuerde auf /danke wandern — ausgerechnet
+ * die Seite, auf der Kaeuferinnen mit ihrer Sitzungskennung landen. Und
+ * die Seiten nennen sich in ihren canonical-Angaben selbst mit .html.
+ * Deshalb liegt html_handling auf "none" und dieser Fall hier.
+ *
+ * Nur GET und HEAD: ein POST auf einen unbekannten Pfad ist ein Fehler,
+ * keine Seitenanfrage.
+ *
+ * @returns {Promise<Response|null>} null, wenn es keine solche Seite gibt
+ */
+async function seiteAusAssets(request, env, url) {
+  if (!env.ASSETS) return null
+  if (request.method !== 'GET' && request.method !== 'HEAD') return null
+  // Etwas mit Punkt im letzten Abschnitt ist eine Datei, keine Seite.
+  if (/\.[^/]+$/.test(url.pathname)) return null
+
+  const pfad = url.pathname === '/' ? '/index.html' : `${url.pathname.replace(/\/$/, '')}.html`
+  const antwort = await env.ASSETS.fetch(new URL(pfad, url.origin))
+  return antwort.status === 200 ? antwort : null
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
@@ -186,6 +212,14 @@ export default {
 
     if (url.pathname === '/api/health') {
       return withCors(json({ ok: true, time: new Date().toISOString() }), origin)
+    }
+
+    // Keine API-Route getroffen. Bevor wir 404 sagen: vielleicht ist es
+    // eine Seite ohne Endung. /api/* bleibt ausgenommen — ein Tippfehler
+    // dort soll ein API-Fehler bleiben und keine Seite ausliefern.
+    if (!url.pathname.startsWith('/api/')) {
+      const seite = await seiteAusAssets(request, env, url)
+      if (seite) return seite
     }
 
     return withCors(error('not_found', 404), origin)

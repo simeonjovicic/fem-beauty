@@ -19,6 +19,27 @@
     { "pattern": "www.fembeauty.at/v/*", "zone_name": "fembeauty.at" }
   ],
 
+  // Die gebauten Seiten. Erst hier wird wahr, was vite.config.js schon
+  // behauptete: ein Worker liefert Seite und API zusammen aus.
+  //
+  // html_handling "none" ist eine bewusste Wahl gegen die Vorgabe. Die
+  // Vorgabe leitet /danke.html auf /danke um — ausgerechnet die Seite, auf
+  // der Kaeuferinnen nach der Zahlung landen, mit der Sitzungskennung im
+  // Anhang. Und die Seiten nennen sich in ihren canonical-Angaben selbst
+  // mit .html. Ein Umschreiben der Adressen waere also ein Widerspruch zu
+  // dem, was im Kopf jeder Seite steht.
+  //
+  // Nicht gefundene Pfade fallen an den Worker-Code durch, der seine
+  // eigene Antwort gibt.
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "none",
+    "not_found_handling": "none",
+    // Der Worker braucht selbst Zugriff, um "/" und "/admin" auf ihre
+    // .html-Dateien abzubilden — siehe seiteAusAssets() in index.js.
+    "binding": "ASSETS"
+  },
+
   "d1_databases": [
     {
       // Der Bindungsname ist frei gewählt und heißt im Code env.DB.
