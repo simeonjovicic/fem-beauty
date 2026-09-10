@@ -1,0 +1,318 @@
+/* Responsive layout for the three-step voucher shop. */
+.voucher-shop .vshop {
+  max-width: 1120px;
+}
+
+.voucher-shop .vshop-steps {
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.voucher-shop .vshop-steps li {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: .8rem;
+  padding-top: 1rem;
+}
+
+.voucher-shop .vshop-panel {
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+  border-radius: 8px;
+}
+
+.voucher-shop .vshop-heading {
+  margin-bottom: 2rem;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+.vshop-selection {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.vshop-selection-value-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.voucher-shop .vshop-field-group + .vshop-field-group {
+  margin-top: 0;
+}
+
+.voucher-shop .vshop-label,
+.voucher-shop .voucher-amount-picker legend,
+.voucher-shop .voucher-treatment-picker legend,
+.voucher-shop .voucher-delivery-options legend {
+  margin-bottom: 1rem;
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+
+.voucher-shop .voucher-kind-switch {
+  grid-template-columns: minmax(0, 1fr);
+  gap: .85rem;
+  margin-bottom: 0;
+}
+
+.voucher-shop .voucher-kind-switch > button {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 86px;
+  padding: 1rem;
+  gap: .8rem;
+}
+
+.voucher-shop .voucher-kind-copy strong {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.voucher-shop .voucher-kind-copy {
+  text-align: left;
+}
+
+.voucher-shop .voucher-kind-switch > button .voucher-kind-copy small,
+.voucher-shop .voucher-kind-switch > button:not(:disabled) .voucher-kind-copy small {
+  display: block;
+  white-space: normal;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+.voucher-shop .voucher-amount-options {
+  gap: .75rem;
+}
+
+.voucher-shop .voucher-amount-options button {
+  height: 86px;
+  gap: .35rem;
+}
+
+.voucher-shop .voucher-custom-value {
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.voucher-shop .voucher-custom-input {
+  flex: 0 0 132px;
+}
+
+.voucher-shop .voucher-amount-hint {
+  margin-top: .85rem;
+  line-height: 1.6;
+}
+
+.voucher-shop .voucher-form-grid {
+  gap: 1.5rem;
+}
+
+.voucher-shop .voucher-field {
+  gap: .7rem;
+}
+
+.voucher-shop .voucher-field input {
+  height: 56px;
+}
+
+.voucher-shop .voucher-field textarea {
+  min-height: 140px;
+}
+
+.voucher-shop .voucher-message-field,
+.voucher-shop .voucher-delivery-options,
+.voucher-shop .voucher-email-field {
+  margin-top: 1.75rem;
+}
+
+.voucher-shop .voucher-delivery-options {
+  gap: 1rem;
+}
+
+.voucher-shop .voucher-delivery-options > button {
+  align-items: center;
+  min-height: 90px;
+  padding: 1.15rem;
+}
+
+.voucher-shop .vshop-nav {
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.voucher-shop .vshop-nav-end {
+  flex: 1;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.voucher-shop .vshop-nav.has-back .vshop-nav-end {
+  flex: 0 1 auto;
+  gap: 2rem;
+}
+
+.voucher-shop .vshop-submit {
+  min-width: 190px;
+  min-height: 56px;
+  padding: 1rem 1.5rem;
+  white-space: normal;
+}
+
+.voucher-shop .vshop-row {
+  padding-block: 1rem;
+}
+
+.voucher-shop .vshop-row > :last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .vshop-selection {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .voucher-shop .voucher-kind-switch {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .voucher-shop:has(.vshop) {
+    padding: .5rem 1.25rem 2.5rem;
+  }
+
+  .voucher-shop .vshop-steps {
+    gap: .75rem;
+    margin-bottom: 2rem;
+  }
+
+  .voucher-shop .vshop-steps li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .6rem;
+    text-align: left;
+  }
+
+  .voucher-shop .vshop-panel {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .voucher-shop .vshop-heading {
+    margin-bottom: 1.75rem;
+    font-size: 1.65rem;
+    line-height: 1.35;
+  }
+
+  .voucher-shop .voucher-kind-switch,
+  .voucher-shop .voucher-form-grid,
+  .voucher-shop .voucher-delivery-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .voucher-shop .voucher-kind-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .voucher-shop .voucher-amount-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .voucher-shop .voucher-amount-options button {
+    height: 72px;
+  }
+
+  .voucher-shop .voucher-custom-value {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .75rem;
+  }
+
+  .voucher-shop .voucher-custom-input {
+    flex-basis: auto;
+    width: 100%;
+    min-height: 48px;
+    align-items: center;
+  }
+
+  .voucher-shop .voucher-treatment-options > button {
+    min-height: 108px;
+    padding: 1rem 3rem 3rem 1rem;
+  }
+
+  .voucher-shop .voucher-treatment-options strong {
+    display: block;
+    overflow: visible;
+    font-size: 1.05rem;
+  }
+
+  .voucher-shop .voucher-treatment-category {
+    font-size: .7rem;
+  }
+
+  .voucher-shop .voucher-treatment-options small {
+    font-size: .85rem;
+  }
+
+  .voucher-shop .voucher-treatment-price {
+    top: auto;
+    right: auto;
+    bottom: 1rem;
+    left: 1rem;
+    transform: none;
+  }
+
+  .voucher-shop .voucher-treatment-options > button > i {
+    top: 1rem;
+    transform: none;
+  }
+
+  .voucher-shop .vshop-nav {
+    position: static;
+    box-shadow: none;
+    gap: .9rem;
+    margin: 2rem -1.25rem 0;
+    padding: 1rem 1.25rem max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .voucher-shop .vshop-nav-end {
+    display: contents;
+  }
+
+  .voucher-shop .vshop-running {
+    grid-row: 1;
+    justify-content: space-between;
+  }
+
+  .voucher-shop .vshop-back,
+  .voucher-shop .vshop-submit {
+    grid-row: 2;
+    min-width: 0;
+    min-height: 56px;
+    padding: .9rem .7rem;
+    font-size: .875rem;
+    letter-spacing: .02em;
+  }
+
+  .voucher-shop .vshop-row {
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .voucher-shop .vshop-row > :first-child {
+    flex-shrink: 0;
+  }
+}

@@ -299,9 +299,7 @@ const STEPS = [
   ['Übersicht', 'Alles bereit zum Verschenken.'],
 ]
 
-// Drei Schritte statt einer langen Seite: alles gleichzeitig zu zeigen war
-// unuebersichtlich. Der Ablauf bleibt auf der Seite — kein Modal, keine
-// zweite Spalte, die um Aufmerksamkeit konkurriert.
+// Drei Schritte im selben Formular; das Layout passt sich der Breite an.
 export default function VoucherShop() {
   // Preise und Auswahl kommen aus dem Katalog, nicht mehr fest aus data.js.
   // Preise kommen aus derselben Tabelle, gegen die der Server beim Checkout
@@ -347,14 +345,25 @@ export default function VoucherShop() {
   const canGiftTreatment = treatments.length > 0
   const kind = canGiftTreatment && kindChoice === 'treatment' ? 'treatment' : 'value'
 
-  // Ob der Umschalter "Behandlung schenken" anbietet, ist eine andere Frage
-  // als ob gerade eine waehlbar ist: der Katalog startet leer und faellt
-  // erst nach dem Laden mit Inhalt ein. Waere hier canGiftTreatment
-  // verdrahtet, stuende beim ersten Bild jedes Aufrufs kurz "Gerade nicht
-  // verfuegbar" und spraenge dann um. Waehrend des Ladens gilt der Knopf
-  // deshalb als waehlbar; gesperrt wird er erst, wenn feststeht, dass es
-  // nichts zu waehlen gibt.
+  // Der Katalog startet leer und faellt erst nach dem Laden mit Inhalt ein.
+  // Waehrend des Ladens gilt "Behandlung schenken" als waehlbar — sonst
+  // stuende beim ersten Bild jedes Aufrufs kurz "Gerade nicht verfuegbar",
+  // und der Shop spraenge von einer auf zwei Spalten, sobald die Daten da
+  // sind.
   const treatmentsWaehlbar = catalog.loading || canGiftTreatment
+
+  // Ob der Umschalter ueberhaupt erscheint, ist noch einmal eine andere
+  // Frage — und sie haengt daran, WARUM keine Behandlungen da sind:
+  //
+  //   Abruf fehlgeschlagen  → zeigen, aber gesperrt. Das ist ein
+  //                           voruebergehender Zustand, und wer den Knopf
+  //                           sucht, soll lesen koennen, warum er nicht geht.
+  //   Abruf erfolgreich,
+  //   Katalog leer          → weglassen. Dann bietet der Salon schlicht
+  //                           keine Behandlungsgutscheine an; ein gesperrter
+  //                           Knopf wuerde ein Angebot behaupten, das es
+  //                           nicht gibt.
+  const zeigeKindSwitch = treatmentsWaehlbar || Boolean(catalog.error)
 
   // Gleiche Ueberlegung fuer die Behandlung selbst: wird die gewaehlte
   // ausgeblendet, greift die erste verbliebene, statt ins Leere zu zeigen.
@@ -476,8 +485,8 @@ export default function VoucherShop() {
           <h2 className="vshop-heading" ref={headingRef} tabIndex="-1">{STEPS[step][1]}</h2>
 
           {step === 0 && (
-            <>
-              {canGiftTreatment ? (
+            <div className={`vshop-selection${zeigeKindSwitch ? '' : ' vshop-selection-value-only'}`}>
+              {zeigeKindSwitch ? (
                 <div className="vshop-field-group">
                   <span className="vshop-label">Gutscheinart</span>
                   <VoucherKindSwitch value={kind} onChange={changeKind} treatmentsVerfuegbar={treatmentsWaehlbar} />
@@ -494,7 +503,7 @@ export default function VoucherShop() {
                   />
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {step === 1 && (
@@ -619,8 +628,6 @@ export default function VoucherShop() {
             </button>
           ) : null}
 
-          {/* Betrag unter dem Knopf statt daneben: nebeneinander lasen sich
-              Angabe und Handlung wie zwei gleichrangige Elemente. */}
           <div className="vshop-nav-end">
             {step < 2 ? (
               <button type="button" className="vshop-submit" onClick={goNext}>
