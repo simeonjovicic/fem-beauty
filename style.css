@@ -528,6 +528,26 @@ h2 em {
     color: var(--sand)
 }
 
+/* Der Gutschein-Knopf in der Hero. Das Symbol macht in einem Feld aus
+   Versalien auf den ersten Blick klar, dass hier etwas zu verschenken ist
+   — ohne den Knopf lauter zu machen als "Termin buchen", das die
+   wichtigere Handlung bleibt. inline-flex statt inline-block, sonst
+   sitzt das Symbol auf der Grundlinie statt mittig. */
+.hero-gift {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem
+}
+
+.hero-gift-ico {
+    display: grid;
+    place-items: center;
+    /* Etwas groesser als der Versaltext, sonst wirkt es verloren. */
+    font-size: 1.05rem;
+    /* Die Versalien tragen 0.2em Sperrung, das Symbol soll sie nicht erben. */
+    letter-spacing: normal
+}
+
 .link-arrow {
     font-size: .6rem;
     font-weight: 400;
@@ -802,6 +822,20 @@ h2 em {
     gap: .5rem;
     opacity: 0;
     animation: fadeIn 1s 1.6s ease forwards
+}
+
+/* Am Telefon schiebt sich der Hinweis ueber die Knoepfe und die
+   Bewertungszeile. Er kostet Platz, den der Bildschirm nicht hat, und
+   erklaert eine Geste, die dort ohnehin jede beherrscht. Auf dem
+   Schreibtisch bleibt er: dort ist Raum, und mit der Maus ist der Hinweis
+   tatsaechlich nuetzlich.
+
+   Steht bewusst hier statt im Sammelblock weiter unten — wer die Regel
+   sucht, sucht sie bei .hero-scroll. */
+@media (max-width: 768px) {
+    .hero-scroll {
+        display: none
+    }
 }
 
 @keyframes fadeIn {
@@ -3275,7 +3309,13 @@ button.reviews-src-pill {
     color: var(--warm-lt)
 }
 
-@media (max-width: 520px) {
+/* 600px statt der frueheren 520px. Weiter unten steht ein Sammelblock fuer
+   max-width:600px, der Kategorie und Beschreibung auf .37rem und .4rem
+   setzt — rund 6 Pixel. Diese Regeln hier sind spezifischer und heben das
+   auf, endeten aber bei 520px: dazwischen, also auf breiteren Telefonen
+   und im Querformat, blieb der unlesbare Zustand stehen. Beide Grenzen
+   liegen jetzt gleich. */
+@media (max-width: 600px) {
     .voucher-shop .voucher-kind-copy strong {
         font-size: .9rem;
         line-height: 1.2
@@ -3286,45 +3326,79 @@ button.reviews-src-pill {
         line-height: 1.3
     }
 
+    /* "Frei einloesbar" und "Preis automatisch" erklaeren am Telefon
+       nichts, was der Titel nicht schon sagt — sie zwingen die beiden
+       Karten aber in die Hoehe und den Titel in den Umbruch.
+
+       Ausgenommen der gesperrte Knopf: dort steht in derselben Zeile,
+       warum er nicht geht. Das ist die einzige Stelle, an der die
+       Unterzeile etwas traegt, das sonst niemand erfaehrt. */
+    .voucher-shop .voucher-kind-switch > button:not(:disabled) .voucher-kind-copy small {
+        display: none
+    }
+
+    .voucher-shop .voucher-kind-switch > button {
+        min-height: 0;
+        padding: .9rem .85rem
+    }
+
+    /* Die Liste war auch am Telefon zweispaltig. Damit vier Textebenen in
+       eine halbe Bildschirmbreite passten, schrumpften Kategorie und
+       Beschreibung auf .41rem und .46rem — rund 6,6 und 7,4 Pixel. Lesbar
+       war das nicht, und die Titel brachen mitten im Wort um.
+
+       Eine Spalte kostet Scrollweg und gibt dafuer alles zurueck: Titel
+       stehen in einer Zeile, die Beschreibung ist wieder lesbar, und der
+       Preis hat Abstand zum Text statt daneben zu kleben. */
     .voucher-shop .voucher-treatment-options {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
+        grid-template-columns: minmax(0, 1fr)
     }
 
     .voucher-shop .voucher-treatment-options > button,
     .voucher-shop .voucher-treatment-picker-compact .voucher-treatment-options > button {
-        min-height: 90px;
-        padding: .7rem 2.55rem .7rem .75rem
+        min-height: 0;
+        padding: .85rem 5.5rem .85rem .95rem
     }
 
     .voucher-shop .voucher-treatment-category {
-        margin-bottom: .2rem;
-        font-size: .41rem;
+        margin-bottom: .25rem;
+        font-size: .6rem;
         letter-spacing: .17em
     }
 
     .voucher-shop .voucher-treatment-options strong {
-        font-size: .9rem;
-        line-height: 1.25
+        font-size: .98rem;
+        line-height: 1.25;
+        /* In voller Breite passt jeder Titel in eine Zeile. */
+        -webkit-line-clamp: 2
     }
 
     .voucher-shop .voucher-treatment-options small {
-        margin-top: .18rem;
-        font-size: .46rem;
+        margin-top: .22rem;
+        font-size: .76rem;
         line-height: 1.35
     }
 
+    /* Preis und Haken stehen jetzt als Paar rechts auf halber Hoehe, statt
+       in zwei verschiedenen Ecken. In der niedrigeren Karte kaemen sie
+       einander sonst ins Gehege — und nebeneinander liest sich "105 € ✓"
+       ohnehin als eine Aussage. Das Innenmass rechts haelt beide frei. */
     .voucher-shop .voucher-treatment-price {
-        right: .65rem;
-        bottom: .58rem;
-        font-size: .72rem
+        top: 50%;
+        right: 3.1rem;
+        bottom: auto;
+        transform: translateY(-50%);
+        font-size: 1rem
     }
 
     .voucher-shop .voucher-treatment-options > button > i {
-        top: .58rem;
-        right: .58rem;
-        width: 17px;
-        height: 17px;
-        font-size: .62rem
+        top: 50%;
+        right: .95rem;
+        bottom: auto;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        font-size: .66rem
     }
 }
 
@@ -3918,6 +3992,19 @@ body.voucher-shop-visible .float-cta {
     border-color: var(--sand);
     background: #fffcf7;
     box-shadow: inset 0 -2px 0 var(--sand)
+}
+
+/* Nur erreichbar, wenn keine Behandlungen geladen wurden. Bewusst noch
+   lesbar statt fast unsichtbar: der Knopf soll erklaeren, warum er nicht
+   geht, und dafuer muss man ihn lesen koennen. */
+.voucher-kind-switch > button:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+    background: var(--cream)
+}
+
+.voucher-kind-switch > button:disabled .voucher-kind-copy small {
+    color: var(--sand)
 }
 
 .voucher-kind-icon,
@@ -5707,18 +5794,10 @@ body.voucher-shop-visible .float-cta {
     pointer-events: none;
 }
 
-/* Large decorative ampersand watermark */
-.owner-section::before {
-    content: '✦';
-    position: absolute;
-    bottom: -3rem;
-    right: 2rem;
-    font-size: 22rem;
-    color: rgba(201, 153, 94, .045);
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-}
+/* Hier stand ein 22rem grosser Vierzack als Wasserzeichen. Er trug nichts
+   zur Seite bei und ist inzwischen das Erkennungszeichen maschinell
+   erzeugter Gestaltung. Der Abschnitt traegt sich ueber Jennys Zitat und
+   das Portraet selbst. */
 
 .owner-inner {
     position: relative;
@@ -6043,14 +6122,17 @@ body.voucher-shop-visible .float-cta {
     position: relative
 }
 
+/* Vorher lag hier ein 44px-Raster. Es sollte an Kartenpapier erinnern,
+   las sich neben Playfair und den warmen Toenen aber technisch — nach
+   Bauplan statt nach Salon. Stattdessen ein weicher Sandschein, der die
+   Mitte hebt: dieselbe Geste, die der Rest der Seite schon verwendet. */
 .contact-map-placeholder::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image:
-        linear-gradient(rgba(201, 153, 94, .07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201, 153, 94, .07) 1px, transparent 1px);
-    background-size: 44px 44px;
+    background: radial-gradient(120% 88% at 50% 40%,
+            rgba(220, 196, 160, .24),
+            rgba(220, 196, 160, 0) 64%);
     pointer-events: none
 }
 
@@ -6189,16 +6271,47 @@ body.voucher-shop-visible .float-cta {
     margin-bottom: 2rem
 }
 
+/* Vorher standen hier fuenf Beschriftungspaare untereinander — richtig,
+   aber nicht unterscheidbar: Adresse, Telefon und Zeiten sahen gleich
+   aus, und dass man auf drei davon tippen kann, sah man ihnen nicht an.
+   Jetzt traegt jede Zeile ihr Symbol, und die anklickbaren heben sich
+   beim Zeigen ab. */
 .contact-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.2rem
+    gap: .7rem
 }
 
-.contact-details div {
+.cdet {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .7rem .85rem;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .3s var(--ease-out), background-color .3s var(--ease-out)
+}
+
+.cdet-ico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--sand-lt);
+    border-radius: 50%;
+    color: var(--sand);
+    font-size: 1.02rem;
+    transition: color .3s var(--ease-out), border-color .3s var(--ease-out)
+}
+
+.cdet-body {
     display: flex;
     flex-direction: column;
-    gap: .2rem
+    gap: .18rem;
+    min-width: 0
 }
 
 .contact-details strong {
@@ -6209,16 +6322,34 @@ body.voucher-shop-visible .float-cta {
     color: var(--sand)
 }
 
-.contact-details span,
-.contact-details a {
+.cdet-body>span {
     font-size: .84rem;
     color: var(--warm-lt);
-    text-decoration: none;
-    transition: color .3s
+    /* Lange Adressen brechen lieber um, als die Spalte zu sprengen. */
+    overflow-wrap: anywhere
 }
 
-.contact-details a:hover {
-    color: var(--sand)
+/* Nur die Zeilen, die wirklich etwas tun. a:hover statt .cdet:hover — die
+   beiden div-Zeilen sollen sich nicht anfuehlen, als koennte man sie
+   antippen. */
+a.cdet:hover,
+a.cdet:focus-visible {
+    background: rgba(255, 255, 255, .5);
+    border-color: var(--sand-lt)
+}
+
+a.cdet:hover .cdet-ico,
+a.cdet:focus-visible .cdet-ico {
+    color: var(--warm);
+    border-color: var(--sand)
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .cdet,
+    .cdet-ico {
+        transition: none
+    }
 }
 
 /* ═══ SEO FAQ (visually hidden, crawlable) ═══ */
@@ -7254,9 +7385,8 @@ footer {
         width: 100%
     }
 
-    .hero-scroll {
-        bottom: 1.5rem
-    }
+    /* .hero-scroll wird bereits bei 768px ausgeblendet — die Regel steht
+       oben bei seiner Definition. */
 
     .hero-title {
         font-size: clamp(2.4rem, 8vw, 3.5rem)
@@ -7278,7 +7408,13 @@ footer {
     /* Contact */
     .contact-details {
         grid-template-columns: 1fr;
-        gap: 1rem
+        gap: .35rem
+    }
+
+    /* Am Telefon sind das die Zeilen, die man tatsaechlich antippt —
+       deshalb hier durchgehend genug Flaeche dafuer. */
+    .cdet {
+        padding: .8rem .75rem
     }
 
     /* Team cards smaller */

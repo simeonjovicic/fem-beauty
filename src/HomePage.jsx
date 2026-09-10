@@ -99,9 +99,16 @@ function Hero() {
           <span className="hero-tag">Wien 1050 · Seit 2023</span>
           <h1 className="hero-title">Schönheit<br /><em>neu</em><br />definiert.</h1>
           <p className="hero-desc">Kosmetik, Head Spa & High-Tech Treatments — vereint in einem Salon.</p>
+          {/* Der zweite Knopf sprang frueher nur zu den Services — die
+              stehen aber ohnehin in der Navigation. Der Platz traegt jetzt
+              den Gutschein, das einzige Angebot der Seite, das jemand
+              kaufen kann, ohne einen Termin zu suchen. */}
           <div className="hero-btns">
             <BookingLink className="btn-p">Termin buchen</BookingLink>
-            <a href="#treatments" className="btn-o">Entdecken</a>
+            <a href="/gutscheine.html" className="btn-o hero-gift">
+              <span className="hero-gift-ico" aria-hidden="true"><GiftIcon /></span>
+              Gutschein verschenken
+            </a>
           </div>
           <HeroTrust />
         </div>
@@ -145,6 +152,63 @@ function GlobeIcon() {
     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="9" />
       <path d="M3 12h18M12 3c2.35 2.46 3.5 5.46 3.5 9S14.35 18.54 12 21M12 3C9.65 5.46 8.5 8.46 8.5 12S9.65 18.54 12 21" />
+    </svg>
+  )
+}
+
+function GiftIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3.5 11.5h17V20a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 20v-8.5Z" />
+      <path d="M2.8 7.5h18.4v4H2.8zM12 7.5v14" />
+      <path d="M12 7.5S10.8 3 8.6 3a2.2 2.2 0 0 0 0 4.5H12Zm0 0S13.2 3 15.4 3a2.2 2.2 0 0 1 0 4.5H12Z" />
+    </svg>
+  )
+}
+
+// Strichstaerke 1.7 und runde Enden wie bei GlobeIcon und CupIcon — die
+// Kontaktzeilen sollen nicht wie eingekaufte Symbole aussehen.
+function PinIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.8" />
+    </svg>
+  )
+}
+
+function PhoneIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6.5 3h3l1.5 4-2 1.3a12 12 0 0 0 5.7 5.7L16 12l4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 3.5 5.2 2 2 0 0 1 5.5 3Z" />
+    </svg>
+  )
+}
+
+function MailIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m3.8 7 7.1 5.2a2 2 0 0 0 2.2 0L20.2 7" />
+    </svg>
+  )
+}
+
+function ClockIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5.3l3.4 2" />
+    </svg>
+  )
+}
+
+function CameraIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="3.8" />
+      <circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none" />
     </svg>
   )
 }
@@ -951,12 +1015,51 @@ function Contact() {
         <h2>Bereit für<br /><em>dein Erlebnis?</em></h2>
         <div className="line anim-line" />
         <p>Alle Behandlungen beginnen mit einer persönlichen Beratung.</p>
+        {/* Anrufen, schreiben und Instagram sind Handlungen, nicht Angaben —
+            deshalb ist die ganze Zeile anklickbar, nicht nur der Text.
+            Adresse und Zeiten bleiben als <div>, weil es dort nichts zu
+            tun gibt; ein Link, der nichts oeffnet, ist ein Versprechen,
+            das die Seite nicht haelt. */}
         <div className="contact-details">
-          <div><strong>Adresse</strong><span>Ramperstorffergasse 51, 1050 Wien</span></div>
-          <div><strong>Telefon</strong><a href="tel:+436608866068">+43 660 8866068</a></div>
-          <div><strong>E-Mail</strong><a href="mailto:beauty@fembeauty.at">beauty@fembeauty.at</a></div>
-          <div><strong>Instagram</strong><a href="https://instagram.com/fem.vienna" target="_blank" rel="noopener noreferrer">@fem.vienna</a></div>
-          <div><strong>Zeiten</strong><span>Mo–Fr 09–19 · Sa 09–18</span></div>
+          <div className="cdet">
+            <span className="cdet-ico" aria-hidden="true"><PinIcon /></span>
+            <span className="cdet-body">
+              <strong>Adresse</strong>
+              <span>Ramperstorffergasse 51, 1050 Wien</span>
+            </span>
+          </div>
+
+          <a className="cdet" href="tel:+436608866068">
+            <span className="cdet-ico" aria-hidden="true"><PhoneIcon /></span>
+            <span className="cdet-body">
+              <strong>Telefon</strong>
+              <span>+43 660 8866068</span>
+            </span>
+          </a>
+
+          <a className="cdet" href="mailto:beauty@fembeauty.at">
+            <span className="cdet-ico" aria-hidden="true"><MailIcon /></span>
+            <span className="cdet-body">
+              <strong>E-Mail</strong>
+              <span>beauty@fembeauty.at</span>
+            </span>
+          </a>
+
+          <a className="cdet" href="https://instagram.com/fem.vienna" target="_blank" rel="noopener noreferrer">
+            <span className="cdet-ico" aria-hidden="true"><CameraIcon /></span>
+            <span className="cdet-body">
+              <strong>Instagram</strong>
+              <span>@fem.vienna</span>
+            </span>
+          </a>
+
+          <div className="cdet">
+            <span className="cdet-ico" aria-hidden="true"><ClockIcon /></span>
+            <span className="cdet-body">
+              <strong>Zeiten</strong>
+              <span>Mo–Fr 09–19 · Sa 09–18</span>
+            </span>
+          </div>
         </div>
         <BookingLink className="btn-p" style={{ marginTop: '2.5rem' }}>Jetzt über Treatwell buchen →</BookingLink>
       </div>

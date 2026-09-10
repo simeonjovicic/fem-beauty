@@ -181,19 +181,29 @@ function useAmountSelection({ presets, min, max }, initialAmount = 100) {
   }
 }
 
-function VoucherKindSwitch({ value, onChange, compact = false }) {
+// treatmentsVerfuegbar kommt von aussen, weil der Konfigurator ohnehin
+// schon darauf zurueckfaellt. Ohne diesen Hinweis bliebe der Knopf
+// sichtbar und klickbar, taete aber nichts — und niemand erfuehre,
+// warum. Ein Bedienelement, das nicht sagt, dass es gerade nicht kann,
+// laesst die Benutzerin den Fehler bei sich suchen.
+function VoucherKindSwitch({ value, onChange, treatmentsVerfuegbar = true, compact = false }) {
   const options = [
-    ['value', 'gift', 'Wertgutschein', 'Frei einlösbar'],
-    ['treatment', 'treatment', 'Behandlung schenken', 'Preis automatisch'],
+    ['value', 'gift', 'Wertgutschein', 'Frei einlösbar', true],
+    [
+      'treatment', 'treatment', 'Behandlung schenken',
+      treatmentsVerfuegbar ? 'Preis automatisch' : 'Gerade nicht verfügbar',
+      treatmentsVerfuegbar,
+    ],
   ]
 
   return (
     <div className={`voucher-kind-switch${compact ? ' voucher-kind-switch-compact' : ''}`} role="group" aria-label="Gutscheinart auswählen">
-      {options.map(([optionValue, icon, title, description]) => (
+      {options.map(([optionValue, icon, title, description, waehlbar]) => (
         <button
           type="button"
           className={value === optionValue ? 'selected' : undefined}
           aria-pressed={value === optionValue}
+          disabled={!waehlbar}
           onClick={() => onChange(optionValue)}
           key={optionValue}
         >
@@ -337,6 +347,15 @@ export default function VoucherShop() {
   const canGiftTreatment = treatments.length > 0
   const kind = canGiftTreatment && kindChoice === 'treatment' ? 'treatment' : 'value'
 
+  // Ob der Umschalter "Behandlung schenken" anbietet, ist eine andere Frage
+  // als ob gerade eine waehlbar ist: der Katalog startet leer und faellt
+  // erst nach dem Laden mit Inhalt ein. Waere hier canGiftTreatment
+  // verdrahtet, stuende beim ersten Bild jedes Aufrufs kurz "Gerade nicht
+  // verfuegbar" und spraenge dann um. Waehrend des Ladens gilt der Knopf
+  // deshalb als waehlbar; gesperrt wird er erst, wenn feststeht, dass es
+  // nichts zu waehlen gibt.
+  const treatmentsWaehlbar = catalog.loading || canGiftTreatment
+
   // Gleiche Ueberlegung fuer die Behandlung selbst: wird die gewaehlte
   // ausgeblendet, greift die erste verbliebene, statt ins Leere zu zeigen.
   const selectedTreatment = getTreatment(treatments, treatmentId)
@@ -461,7 +480,7 @@ export default function VoucherShop() {
               {canGiftTreatment ? (
                 <div className="vshop-field-group">
                   <span className="vshop-label">Gutscheinart</span>
-                  <VoucherKindSwitch value={kind} onChange={changeKind} />
+                  <VoucherKindSwitch value={kind} onChange={changeKind} treatmentsVerfuegbar={treatmentsWaehlbar} />
                 </div>
               ) : null}
               <div className="vshop-field-group">
