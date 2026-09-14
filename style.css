@@ -3518,7 +3518,9 @@ button.reviews-src-pill {
 }
 
 /* Nachzuegler aus der zweiten Messung. */
-.voucher-shop .voucher-custom-value label {
+/* Der Kindselektor haelt die Spezifitaet, die vorher das Element "label"
+   beisteuerte — sonst gewinnt der spaetere .68rem-Block weiter unten. */
+.voucher-shop .voucher-custom-value > .voucher-custom-caption {
     font-size: .95rem;
     letter-spacing: .01em;
     text-transform: none;
@@ -4260,6 +4262,9 @@ body.voucher-shop-visible .float-cta {
     border: 1px solid var(--sand-lt);
     border-radius: 8px;
     background: var(--white);
+    /* Die Zeile ist selbst das Label: ueberall klickbar, also ueberall der
+       Textcursor. Ein Pfeil wuerde eine Flaeche versprechen, die nichts tut. */
+    cursor: text;
     transition: border-color .3s, background .3s, box-shadow .3s
 }
 
@@ -4270,9 +4275,12 @@ body.voucher-shop-visible .float-cta {
     box-shadow: 0 0 0 3px rgba(201, 153, 94, .12)
 }
 
-.voucher-custom-value > label {
+.voucher-custom-value > .voucher-custom-caption {
     font-size: .68rem;
-    color: var(--warm-lt)
+    color: var(--warm-lt);
+    /* Ohne dies markiert ein Ziehen ueber die Beschriftung den Text,
+       statt den Klick ins Feld durchzureichen. */
+    user-select: none
 }
 
 .voucher-custom-input {

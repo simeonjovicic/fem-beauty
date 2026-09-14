@@ -233,8 +233,17 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
           </button>
         ))}
       </div>
-      <div className={`voucher-custom-value${selection.presetAmount === null ? ' active' : ''}`}>
-        <label htmlFor={`${idPrefix}-custom-amount`}>Oder eigener Betrag</label>
+      {/* Die ganze Zeile ist das Label — ein Klick irgendwo darin setzt den
+          Cursor ins Feld. Vorher war nur der 132px breite Kasten zu treffen.
+          Das erledigt der Browser nativ; deshalb kein onClick und kein Ref.
+          htmlFor bleibt trotz Umschliessung stehen: die ausdrueckliche
+          Verknuepfung traegt den Namen des Feldes. */}
+      <label
+        className={`voucher-custom-value${selection.presetAmount === null ? ' active' : ''}`}
+        htmlFor={`${idPrefix}-custom-amount`}
+      >
+        {/* span statt label: verschachtelte label sind ungueltig. */}
+        <span className="voucher-custom-caption">Oder eigener Betrag</span>
         <div className="voucher-custom-input">
           <input
             id={`${idPrefix}-custom-amount`}
@@ -251,7 +260,7 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
           />
           <span aria-hidden="true">€</span>
         </div>
-      </div>
+      </label>
       <p id={`${idPrefix}-amount-hint`} className={`voucher-amount-hint${selection.isValid || selection.amount === 0 ? '' : ' error'}`}>
         {selection.isValid || selection.amount === 0
           ? `Frei wählbar zwischen ${selection.min} € und ${selection.max} €.`
