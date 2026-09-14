@@ -3,164 +3,194 @@
   max-width: 1120px;
 }
 
-.voucher-shop .vshop-steps {
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+/* Ab hier nur noch fuer Tablet und Desktop. Auf dem Handy soll die alte
+   Gestaltung aus style.css gelten — sie steht dort unveraendert und wuerde
+   von diesen Regeln bloss ueberschrieben, weil ".voucher-shop X" (0-2-0)
+   das blosse "X" (0-1-0) schlaegt. Statt hier die alten Werte abzutippen
+   und doppelt zu pflegen, treten diese Regeln unterhalb 601px einfach
+   zurueck. Die Grenze liegt auf 601px, also genau ueber dem 600px-Block
+   von style.css, in dem die alte Handy-Fassung steht. */
+@media (min-width: 601px) {
+  .voucher-shop .vshop-steps {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .voucher-shop .vshop-steps li {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: .8rem;
+    padding-top: 1rem;
+  }
+
+  .voucher-shop .vshop-panel {
+    padding: clamp(1.5rem, 3.5vw, 3rem);
+    border-radius: 8px;
+  }
+
+  .voucher-shop .vshop-heading {
+    margin-bottom: 2rem;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+  }
+
+  /* Das zweispaltige Raster ist die Ueberarbeitung selbst. Auf dem Handy
+     ohne display:grid stapeln sich die Gruppen wie zuvor im Fluss. */
+  .vshop-selection {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .vshop-selection-value-only {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-.voucher-shop .vshop-steps li {
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: .8rem;
-  padding-top: 1rem;
+/* Ebenfalls erst ab 601px: im zweispaltigen Raster stehen die Gruppen
+   nebeneinander und brauchen keinen Abstand untereinander; auf dem Handy
+   stapeln sie sich und der Abstand aus style.css wird wieder gebraucht. */
+@media (min-width: 601px) {
+  .voucher-shop .vshop-field-group + .vshop-field-group {
+    margin-top: 0;
+  }
+
+  .voucher-shop .vshop-label,
+  .voucher-shop .voucher-amount-picker legend,
+  .voucher-shop .voucher-treatment-picker legend,
+  .voucher-shop .voucher-delivery-options legend {
+    margin-bottom: 1rem;
+    font-size: .95rem;
+    font-weight: 500;
+    letter-spacing: .01em;
+  }
 }
 
-.voucher-shop .vshop-panel {
-  padding: clamp(1.5rem, 3.5vw, 3rem);
-  border-radius: 8px;
-}
+/* Auch dieser Block tritt auf dem Handy zurueck — siehe oben. Betroffen ist
+   genau das, was die Referenz anders zeigt: Gutscheinart zweispaltig statt
+   gestapelt, die vier Betraege in einer Reihe statt im 2x2-Raster und der
+   eigene Betrag als eine Zeile statt uebereinander. */
+@media (min-width: 601px) {
+  .voucher-shop .voucher-kind-switch {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .85rem;
+    margin-bottom: 0;
+  }
 
-.voucher-shop .vshop-heading {
-  margin-bottom: 2rem;
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-}
+  .voucher-shop .voucher-kind-switch > button {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 86px;
+    padding: 1rem;
+    gap: .8rem;
+  }
 
-.vshop-selection {
-  display: grid;
-  grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr);
-  gap: 3rem;
-  align-items: start;
-}
+  .voucher-shop .voucher-kind-copy strong {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
 
-.vshop-selection-value-only {
-  grid-template-columns: minmax(0, 1fr);
-}
+  .voucher-shop .voucher-kind-copy {
+    text-align: left;
+  }
 
-.voucher-shop .vshop-field-group + .vshop-field-group {
-  margin-top: 0;
-}
+  /* Die Unterzeile ("Frei einloesbar") gehoert zur breiten Fassung; auf dem
+     Handy blendet style.css sie aus, damit die zwei Knoepfe nebeneinander
+     passen. */
+  .voucher-shop .voucher-kind-switch > button .voucher-kind-copy small,
+  .voucher-shop .voucher-kind-switch > button:not(:disabled) .voucher-kind-copy small {
+    display: block;
+    white-space: normal;
+    font-size: .875rem;
+    line-height: 1.5;
+  }
 
-.voucher-shop .vshop-label,
-.voucher-shop .voucher-amount-picker legend,
-.voucher-shop .voucher-treatment-picker legend,
-.voucher-shop .voucher-delivery-options legend {
-  margin-bottom: 1rem;
-  font-size: .95rem;
-  font-weight: 500;
-  letter-spacing: .01em;
-}
+  .voucher-shop .voucher-amount-options {
+    gap: .75rem;
+  }
 
-.voucher-shop .voucher-kind-switch {
-  grid-template-columns: minmax(0, 1fr);
-  gap: .85rem;
-  margin-bottom: 0;
-}
+  .voucher-shop .voucher-amount-options button {
+    height: 86px;
+    gap: .35rem;
+  }
 
-.voucher-shop .voucher-kind-switch > button {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  min-height: 86px;
-  padding: 1rem;
-  gap: .8rem;
-}
+  .voucher-shop .voucher-custom-value {
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+  }
 
-.voucher-shop .voucher-kind-copy strong {
-  font-size: 1rem;
-  line-height: 1.4;
-}
+  .voucher-shop .voucher-custom-input {
+    flex: 0 0 132px;
+  }
 
-.voucher-shop .voucher-kind-copy {
-  text-align: left;
-}
+  .voucher-shop .voucher-amount-hint {
+    margin-top: .85rem;
+    line-height: 1.6;
+  }
 
-.voucher-shop .voucher-kind-switch > button .voucher-kind-copy small,
-.voucher-shop .voucher-kind-switch > button:not(:disabled) .voucher-kind-copy small {
-  display: block;
-  white-space: normal;
-  font-size: .875rem;
-  line-height: 1.5;
-}
+  .voucher-shop .voucher-form-grid {
+    gap: 1.5rem;
+  }
 
-.voucher-shop .voucher-amount-options {
-  gap: .75rem;
-}
+  .voucher-shop .voucher-field {
+    gap: .7rem;
+  }
 
-.voucher-shop .voucher-amount-options button {
-  height: 86px;
-  gap: .35rem;
-}
+  .voucher-shop .voucher-field input {
+    height: 56px;
+  }
 
-.voucher-shop .voucher-custom-value {
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 1rem;
-}
+  .voucher-shop .voucher-field textarea {
+    min-height: 140px;
+  }
 
-.voucher-shop .voucher-custom-input {
-  flex: 0 0 132px;
-}
+  .voucher-shop .voucher-message-field,
+  .voucher-shop .voucher-delivery-options,
+  .voucher-shop .voucher-email-field {
+    margin-top: 1.75rem;
+  }
 
-.voucher-shop .voucher-amount-hint {
-  margin-top: .85rem;
-  line-height: 1.6;
-}
+  .voucher-shop .voucher-delivery-options {
+    gap: 1rem;
+  }
 
-.voucher-shop .voucher-form-grid {
-  gap: 1.5rem;
-}
+  .voucher-shop .voucher-delivery-options > button {
+    align-items: center;
+    min-height: 90px;
+    padding: 1.15rem;
+  }
 
-.voucher-shop .voucher-field {
-  gap: .7rem;
-}
+  /* Die Leiste im Fluss mit Trennlinie darueber — die Desktop-Fassung.
+     Auf dem Handy klebt sie stattdessen unten, und zwar durch den
+     600px-Block in style.css, der dort seit 0d4e427 unveraendert steht. */
+  .voucher-shop .vshop-nav {
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
 
-.voucher-shop .voucher-field input {
-  height: 56px;
-}
+  .voucher-shop .vshop-nav-end {
+    flex: 1;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
 
-.voucher-shop .voucher-field textarea {
-  min-height: 140px;
-}
+  .voucher-shop .vshop-nav.has-back .vshop-nav-end {
+    flex: 0 1 auto;
+    gap: 2rem;
+  }
 
-.voucher-shop .voucher-message-field,
-.voucher-shop .voucher-delivery-options,
-.voucher-shop .voucher-email-field {
-  margin-top: 1.75rem;
-}
-
-.voucher-shop .voucher-delivery-options {
-  gap: 1rem;
-}
-
-.voucher-shop .voucher-delivery-options > button {
-  align-items: center;
-  min-height: 90px;
-  padding: 1.15rem;
-}
-
-.voucher-shop .vshop-nav {
-  align-items: center;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--line);
-}
-
-.voucher-shop .vshop-nav-end {
-  flex: 1;
-  flex-direction: row-reverse;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.voucher-shop .vshop-nav.has-back .vshop-nav-end {
-  flex: 0 1 auto;
-  gap: 2rem;
-}
-
-.voucher-shop .vshop-submit {
-  min-width: 190px;
-  min-height: 56px;
-  padding: 1rem 1.5rem;
-  white-space: normal;
+  /* 190px Mindestbreite sprengen auf dem Handy das zweispaltige Raster der
+     klebenden Leiste — deshalb gilt auch das erst ab 601px. */
+  .voucher-shop .vshop-submit {
+    min-width: 190px;
+    min-height: 56px;
+    padding: 1rem 1.5rem;
+    white-space: normal;
+  }
 }
 
 .voucher-shop .vshop-row {
@@ -184,68 +214,17 @@
 }
 
 @media (max-width: 600px) {
-  .voucher-shop:has(.vshop) {
-    padding: .5rem 1.25rem 2.5rem;
-  }
+  /* Die Handy-Gestaltung von Schritt 1 — weisse Karte, Schrittleiste,
+     Ueberschrift, Gutscheinart, Betragsknoepfe und eigener Betrag — kommt
+     wieder komplett aus style.css. Die Ueberschreibungen, die hier standen,
+     sind entfallen; was die Ueberarbeitung an Breite braucht, steht jetzt
+     oben unter min-width:601px. */
 
-  .voucher-shop .vshop-steps {
-    gap: .75rem;
-    margin-bottom: 2rem;
-  }
-
-  .voucher-shop .vshop-steps li {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .6rem;
-    text-align: left;
-  }
-
-  .voucher-shop .vshop-panel {
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .voucher-shop .vshop-heading {
-    margin-bottom: 1.75rem;
-    font-size: 1.65rem;
-    line-height: 1.35;
-  }
-
-  .voucher-shop .voucher-kind-switch,
+  /* Formularraster von Schritt 2 bleibt einspaltig: dort geht es um
+     Eingabefelder, nicht um die Gestaltung aus der Referenz. */
   .voucher-shop .voucher-form-grid,
   .voucher-shop .voucher-delivery-options {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .voucher-shop .voucher-kind-icon {
-    display: grid;
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
-  }
-
-  .voucher-shop .voucher-amount-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .voucher-shop .voucher-amount-options button {
-    height: 72px;
-  }
-
-  .voucher-shop .voucher-custom-value {
-    flex-direction: column;
-    align-items: stretch;
-    gap: .75rem;
-  }
-
-  .voucher-shop .voucher-custom-input {
-    flex-basis: auto;
-    width: 100%;
-    min-height: 48px;
-    align-items: center;
   }
 
   .voucher-shop .voucher-treatment-options > button {
@@ -280,32 +259,11 @@
     transform: none;
   }
 
-  .voucher-shop .vshop-nav {
-    position: static;
-    box-shadow: none;
-    gap: .9rem;
-    margin: 2rem -1.25rem 0;
-    padding: 1rem 1.25rem max(1rem, env(safe-area-inset-bottom));
-  }
-
-  .voucher-shop .vshop-nav-end {
-    display: contents;
-  }
-
-  .voucher-shop .vshop-running {
-    grid-row: 1;
-    justify-content: space-between;
-  }
-
-  .voucher-shop .vshop-back,
-  .voucher-shop .vshop-submit {
-    grid-row: 2;
-    min-width: 0;
-    min-height: 56px;
-    padding: .9rem .7rem;
-    font-size: .875rem;
-    letter-spacing: .02em;
-  }
+  /* Zur klebenden Leiste steht hier bewusst nichts mehr. Sie liegt seit
+     0d4e427 unveraendert im 600px-Block von style.css; dieser Block hatte sie
+     nur mit position:static ueberschrieben, weil ".voucher-shop .vshop-nav"
+     (0-2-0) das blosse ".vshop-nav" (0-1-0) schlaegt. Ohne Gegenregel gilt
+     wieder das Original — Raster, Abstaende und Schatten inklusive. */
 
   .voucher-shop .vshop-row {
     gap: 1rem;
