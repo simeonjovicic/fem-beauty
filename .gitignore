@@ -15,3 +15,7 @@ dist/
 
 # Lokaler Wrangler-Zustand inkl. der D1-SQLite-Datei
 .wrangler/
+
+# Datenbank-Exporte: enthalten Kundennamen und E-Mail-Adressen.
+# Das Repo ist oeffentlich — diese Dateien duerfen es nie erreichen.
+backups/
