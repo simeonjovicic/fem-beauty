@@ -8,6 +8,7 @@ import {
   reverseRedemption,
 } from './admin/api.js'
 import { authenticate } from './admin/auth.js'
+import { exportCsv } from './admin/export.js'
 import { handleCheckout } from './checkout.js'
 import { allowedOrigin, corsHeaders, error, json, withCors } from './http.js'
 import { getBySession, getPdf } from './public.js'
@@ -54,6 +55,13 @@ async function handleAdmin(request, env, url) {
 
   if (path === '/api/admin/redemptions' && request.method === 'GET') {
     return listRedemptions(request, env)
+  }
+
+  // Der Monatsexport. Eigener Endpunkt statt eines Formats an der Liste:
+  // die Liste ist auf Anzeige ausgelegt und begrenzt, der Export auf
+  // Vollstaendigkeit innerhalb eines Zeitraums.
+  if (path === '/api/admin/export' && request.method === 'GET') {
+    return exportCsv(request, env)
   }
 
   if (path === '/api/admin/treatments') {

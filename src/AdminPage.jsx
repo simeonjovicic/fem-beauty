@@ -14,6 +14,7 @@ import { parseCode } from '../worker/src/codes.js'
 
 import {
   ApiError,
+  exportUrl,
   fetchMe,
   fetchRedemptions,
   fetchVouchers,
@@ -312,6 +313,17 @@ export default function AdminPage() {
             {me
               ? <>Angemeldet als <strong>{me.email}</strong></>
               : <span>Nicht angemeldet</span>}
+            {/* Abmelden raeumt nicht im Panel auf, sondern bei Cloudflare
+                Access — dort liegt die Sitzung, das Panel selbst hat keine.
+                Deshalb ein gewoehnlicher Link auf den Endpunkt der Domain
+                und kein Knopf mit eigener Logik.
+
+                Nur ausserhalb des Entwicklungsmodus: lokal gibt es keine
+                Access-Sitzung, der Link liefe ins Leere und weckte den
+                Eindruck, hier waere etwas abzumelden. */}
+            {me && !me.dev && (
+              <> · <a className="adm-logout" href="/cdn-cgi/access/logout">Abmelden</a></>
+            )}
           </p>
         </header>
 
@@ -359,6 +371,7 @@ export default function AdminPage() {
         ) : (
           <>
             <StatCards rows={rows} now={now} />
+            <ExportBar now={now} />
             <ListToolbar
               query={query}
               setQuery={setQuery}
@@ -484,6 +497,49 @@ function StatCards({ rows, now }) {
         <b>{euro(stats.fee)}</b>
         <small>geschätzt · {stats.feeRate.toFixed(2).replace('.', ',')}% im Schnitt</small>
       </article>
+    </div>
+  )
+}
+
+/**
+ * Monatsexport fuer die Buchhaltung.
+ *
+ * Zwei Dateien statt einer: Verkaeufe und Einloesungen sind
+ * verschiedene Vorgaenge mit verschiedenen Spalten, und in eine Tabelle
+ * gezwungen haette jede Zeile die Haelfte ihrer Felder leer.
+ *
+ * Die Auswahl reicht zwoelf Monate zurueck. Weiter zurueck braucht es
+ * die Adresse von Hand — ein Auswahlfeld, das mit jedem Monat laenger
+ * wird, hilft niemandem.
+ */
+function ExportBar({ now }) {
+  const months = useMemo(() => {
+    const heute = new Date(now)
+    return Array.from({ length: 12 }, (_, zurueck) => {
+      const m = new Date(heute.getFullYear(), heute.getMonth() - zurueck, 1)
+      return {
+        value: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`,
+        label: m.toLocaleDateString('de-AT', { month: 'long', year: 'numeric' }),
+      }
+    })
+  }, [now])
+
+  const [month, setMonth] = useState(months[0].value)
+
+  return (
+    <div className="adm-export">
+      <label htmlFor="adm-export-month">Export</label>
+      <select
+        id="adm-export-month"
+        value={month}
+        onChange={(event) => setMonth(event.target.value)}
+      >
+        {months.map((eintrag) => (
+          <option key={eintrag.value} value={eintrag.value}>{eintrag.label}</option>
+        ))}
+      </select>
+      <a href={exportUrl({ month, type: 'sales' })}>Verkäufe (CSV)</a>
+      <a href={exportUrl({ month, type: 'redemptions' })}>Einlösungen (CSV)</a>
     </div>
   )
 }

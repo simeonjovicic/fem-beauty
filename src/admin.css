@@ -124,6 +124,51 @@
     color: var(--warm);
 }
 
+.adm-logout {
+    color: var(--taupe);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.adm-logout:hover {
+    color: var(--warn);
+}
+
+/* Die Export-Zeile sitzt zwischen Kennzahlen und Liste: dort, wo der Blick
+   nach dem Monatsumsatz ohnehin schon ist. */
+.adm-export {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    font-size: .82rem;
+    color: var(--taupe);
+}
+
+.adm-export select {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 50px;
+    padding: .4rem .9rem;
+    font: 300 .82rem 'Outfit', sans-serif;
+    color: var(--warm);
+}
+
+.adm-export a {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 50px;
+    padding: .4rem .95rem;
+    color: var(--warm-lt);
+    transition: border-color .2s var(--ease), color .2s var(--ease);
+}
+
+.adm-export a:hover {
+    border-color: var(--sand-lt);
+    color: var(--warm);
+}
+
 .adm-back {
     margin-top: .4rem;
     font-size: .82rem;

@@ -106,3 +106,18 @@ export function reverseRedemption(redemptionId, { note, idempotencyKey }) {
 }
 
 export { ApiError }
+
+/**
+ * Adresse des CSV-Exports.
+ *
+ * Bewusst eine Adresse und kein fetch mit Blob: der Browser laedt die
+ * Datei ueber eine gewoehnliche Navigation, schickt das Access-Cookie
+ * mit und wertet content-disposition selbst aus. Der Umweg ueber fetch
+ * braechte nur eine zweite Stelle, an der die Anmeldung scheitern kann —
+ * und ein abgelaufenes Access-Cookie faende dort keine Anmeldeseite mehr,
+ * sondern bloss einen Fehler ohne Ausweg.
+ */
+export function exportUrl({ month, type = 'sales' }) {
+  const params = new URLSearchParams({ month, type })
+  return `${API_BASE}/api/admin/export?${params}`
+}
