@@ -12,12 +12,12 @@
 // kein harmloser Doppelklick.
 
 import { toBase64 } from './base64.js'
-import { buildVoucherEmail, emailPlan } from './email.js'
+import { buildVoucherEmail, emailPlan, STUDIO_EMAIL } from './email.js'
 import { buildVoucherPdf } from './pdf.js'
 
 const ENDPOINT = 'https://api.resend.com/emails'
 
-async function sendOne(env, { to, subject, html, text, attachment, idempotencyKey }) {
+async function sendOne(env, { to, subject, html, text, attachment, replyTo, idempotencyKey }) {
   const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
@@ -29,7 +29,7 @@ async function sendOne(env, { to, subject, html, text, attachment, idempotencyKe
     },
     body: JSON.stringify({
       from: env.MAIL_FROM,
-      reply_to: env.MAIL_REPLY_TO || undefined,
+      reply_to: replyTo || env.MAIL_REPLY_TO || undefined,
       to,
       subject,
       html,
@@ -51,12 +51,21 @@ async function sendOne(env, { to, subject, html, text, attachment, idempotencyKe
  * Wirft nie. Was schiefging, landet in `email_last_error`; was gelang, in
  * `email_sent_at`. Beide Spalten stehen seit dem ersten Schema bereit.
  *
- * @returns {Promise<{sent: number, error: string|null}>}
+ * `sent` und `error` beschreiben ausschliesslich den Versand an die
+ * Kundin — das Panel zeigt sie so an. `notified` sagt, ob die
+ * Verkaufsmeldung ans Studio rausging.
+ *
+ * @returns {Promise<{sent: number, error: string|null, notified: boolean}>}
  */
 export async function sendVoucherEmails(env, voucher) {
   const now = new Date().toISOString()
   let sent = 0
   let error = null
+  // Ausserhalb des Blocks, damit die Verkaufsmeldung das PDF auch dann
+  // noch anhaengen kann, wenn der Versand an die Kundin danach scheiterte.
+  // Genau dann ist die Meldung am wertvollsten: das Studio erfaehrt vom
+  // Kauf und hat den Gutschein zum Weiterleiten gleich dabei.
+  let attachment = null
 
   try {
     // Fehlt die Einrichtung, ist das kein Sonderfall, sondern ein Grund
@@ -68,11 +77,11 @@ export async function sendVoucherEmails(env, voucher) {
       throw new Error('nicht eingerichtet: RESEND_API_KEY oder MAIL_FROM fehlt')
     }
 
-    // Einmal erzeugt, an beide Mails gehängt: das PDF ist für Käuferin und
-    // Beschenkte dasselbe Dokument.
+    // Einmal erzeugt, an alle Mails gehängt: das PDF ist für Käuferin,
+    // Beschenkte und Studio dasselbe Dokument.
     const base = (env.PUBLIC_SITE_URL || 'https://fembeauty.at').replace(/\/+$/, '')
     const pdf = await buildVoucherPdf(voucher, `${base}/v/${voucher.token}`)
-    const attachment = {
+    attachment = {
       filename: `Gutschein-${voucher.code}.pdf`,
       content: toBase64(pdf),
       content_type: 'application/pdf',
@@ -106,5 +115,45 @@ export async function sendVoucherEmails(env, voucher) {
     console.error('mail: Zustand nicht gespeichert —', err.message)
   }
 
-  return { sent, error }
+  // Zuletzt und ausserhalb von email_sent_at/email_last_error: die
+  // Verkaufsmeldung geht ans Studio, nicht an die Kundin. Scheitert sie,
+  // hat die Kundin ihren Gutschein trotzdem — das darf im Panel nicht wie
+  // ein fehlgeschlagener Kundenversand aussehen.
+  const notified = await sendStudioNotice(env, voucher, attachment)
+
+  return { sent, error, notified }
+}
+
+/**
+ * Meldet den Verkauf ans Studio.
+ *
+ * Wirft nie und schreibt nichts in die Datenbank. Ein leeres MAIL_NOTIFY
+ * schaltet die Meldung ab — ohne Fehler, das ist eine Einstellung und
+ * keine Panne.
+ *
+ * @returns {Promise<boolean>} ob eine Meldung rausging
+ */
+async function sendStudioNotice(env, voucher, attachment) {
+  // Nicht `?? STUDIO_EMAIL`: eine ausdruecklich leer gesetzte Variable ist
+  // die Abschaltung. Nur eine gar nicht gesetzte faellt auf die
+  // Studioadresse aus email.js zurueck.
+  const to = env.MAIL_NOTIFY === undefined ? STUDIO_EMAIL : env.MAIL_NOTIFY
+  if (!to) return false
+  if (!env.RESEND_API_KEY || !env.MAIL_FROM) return false
+
+  try {
+    const mail = buildVoucherEmail(voucher, { variant: 'studio', notifyEmail: to })
+    await sendOne(env, {
+      ...mail,
+      attachment: attachment ?? undefined,
+      // Ein Klick auf Antworten schreibt der Kaeuferin, nicht dem eigenen
+      // Postfach — MAIL_REPLY_TO ist hier genau die falsche Adresse.
+      replyTo: voucher.buyer_email || undefined,
+      idempotencyKey: `voucher-${voucher.id}-studio`,
+    })
+    return true
+  } catch (err) {
+    console.warn('mail: Verkaufsmeldung nicht zugestellt —', err.message)
+    return false
+  }
 }

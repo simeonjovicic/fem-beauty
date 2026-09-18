@@ -18,3 +18,8 @@ STRIPE_WEBHOOK_SECRET=whsec_kommt_von_der_stripe_cli
 # Ohne diesen Schluessel entsteht der Gutschein weiterhin, es geht nur keine
 # Mail raus; der Grund landet dann in email_last_error.
 RESEND_API_KEY=re_dein_key_hier
+
+# Verkaufsmeldung ans Studio. Steht als Vorgabe in wrangler.jsonc
+# (beauty@fembeauty.at). Lokal leer setzen, damit Testkaeufe nicht im
+# echten Postfach landen.
+MAIL_NOTIFY=

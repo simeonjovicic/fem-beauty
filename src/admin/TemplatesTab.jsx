@@ -19,7 +19,8 @@ import { euro } from './format'
 const VIEWS = [
   ['gift', 'Geschenk-E-Mail', 'An die beschenkte Person'],
   ['receipt', 'Kaufbestätigung', 'An die Käuferin'],
-  ['pdf', 'Gutschein-PDF', 'Anhang beider E-Mails'],
+  ['studio', 'Verkaufsmeldung', 'An das Studio, nach jedem Kauf'],
+  ['pdf', 'Gutschein-PDF', 'Anhang aller E-Mails'],
 ]
 
 const WIDTHS = [['desktop', 'Desktop', 640], ['mobile', 'Telefon', 380]]
@@ -47,7 +48,10 @@ export default function TemplatesTab() {
 
   const voucher = samples.find((sample) => sample.id === voucherId) ?? samples[0]
   const plan = emailPlan(voucher)
-  const sent = plan.some((entry) => entry.variant === view)
+  // emailPlan entscheidet nur ueber die Kundenmails. Die Verkaufsmeldung
+  // haengt nicht am Gutschein, sondern an MAIL_NOTIFY — sie geht bei jedem
+  // Kauf raus, solange die Variable gesetzt ist.
+  const sent = view === 'studio' || plan.some((entry) => entry.variant === view)
 
   // Blob-URLs bleiben am Dokument hängen, bis sie freigegeben werden. Der
   // Ref hält die zuletzt vergebene, damit auch die letzte beim Verlassen

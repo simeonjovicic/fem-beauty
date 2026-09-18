@@ -1,6 +1,6 @@
-// Die beiden E-Mails rund um einen Gutscheinkauf.
+// Die E-Mails rund um einen Gutscheinkauf.
 //
-// Zwei Varianten, weil zwei verschiedene Menschen zwei verschiedene Dinge
+// Drei Varianten, weil drei verschiedene Menschen drei verschiedene Dinge
 // brauchen:
 //
 //   'gift'    geht an die beschenkte Person. Sie will kein Beleg-Layout
@@ -11,7 +11,11 @@
 //   'receipt' geht an die Käuferin. Sie will das Gegenteil: was wurde
 //             gekauft, was hat es gekostet, wohin ist es gegangen.
 //
-// Beide hängen dasselbe PDF an. Bei delivery='download' entfällt 'gift'
+//   'studio'  geht ans Studio und meldet den Verkauf. Kein Geschenk und
+//             kein Beleg, sondern eine Notiz: was ging raus, an wen, für
+//             wie viel — und der Code dazu.
+//
+// Alle drei hängen dasselbe PDF an. Bei delivery='download' entfällt 'gift'
 // und die Käuferin bekommt den Gutschein selbst.
 //
 // Warum das Layout so altmodisch aussieht: E-Mail-Clients sind kein
@@ -69,9 +73,20 @@ function spacedCode(code) {
   return esc(code).replace(/-/g, '&#8209;')
 }
 
+// Workers laufen in UTC. Ohne timeZone zeigte ein Kauf um 01:30 Wiener Zeit
+// den Vortag an — auf der Kaufbestaetigung ebenso wie in der Verkaufsmeldung.
+const ZONE = 'Europe/Vienna'
+
 function longDate(iso) {
   return new Date(iso).toLocaleDateString('de-AT', {
-    day: '2-digit', month: 'long', year: 'numeric',
+    day: '2-digit', month: 'long', year: 'numeric', timeZone: ZONE,
+  })
+}
+
+function dateTime(iso) {
+  return new Date(iso).toLocaleString('de-AT', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', timeZone: ZONE,
   })
 }
 
@@ -475,6 +490,144 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
 }
 
 // ────────────────────────────────────────────────────────────
+// Die interne Mail
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Verkaufsmeldung ans Studio.
+ *
+ * Stripe meldet zwar die Zahlung, aber nicht, welcher Code daraus
+ * entstanden ist, an wen er ging und was daraufstand. Genau das steht
+ * hier — knapp genug, um am Telefon in der Vorschau lesbar zu sein.
+ *
+ * Bewusst ohne Geschenkkarte und ohne „So löst du ein": das ist kein
+ * Gutschein, sondern ein Beleg. Das PDF hängt trotzdem an, damit ein
+ * „ist bei mir nichts angekommen" mit einer Weiterleitung erledigt ist.
+ */
+function studioEmail(voucher) {
+  const rate = (voucher.vat_rate_bp ?? 2000) / 10000
+  const net = Math.round(voucher.original_amount_cents / (1 + rate))
+  const vat = voucher.original_amount_cents - net
+
+  const toWhom = voucher.delivery === 'email' && voucher.delivery_email
+    ? `Per E-Mail an ${esc(voucher.delivery_email)}`
+    : 'Als PDF an die Käuferin'
+
+  const rows = [
+    ['Art', voucher.kind === 'treatment' ? 'Behandlungsgutschein' : 'Wertgutschein'],
+    voucher.kind === 'treatment' ? ['Behandlung', esc(voucher.treatment_label)] : null,
+    ['Code', spacedCode(voucher.code)],
+    // mailto statt nur Text: aus der Meldung heraus antworten, ohne die
+    // Adresse aus dem Postfach zu kopieren.
+    ['Käuferin', voucher.buyer_email
+      ? `<a href="mailto:${esc(voucher.buyer_email)}" style="color:${BRAND.sand};text-decoration:none;">${esc(voucher.buyer_email)}</a>`
+      : '—'],
+    ['Für', voucher.recipient_name ? esc(voucher.recipient_name) : '—'],
+    ['Von', voucher.sender_name ? esc(voucher.sender_name) : '—'],
+    ['Zustellung', toWhom],
+    ['Verkauft', dateTime(voucher.issued_at)],
+  ].filter(Boolean).map(([key, value]) => `
+    <tr>
+      <td style="padding:9px 0;font-family:${SANS};font-size:13px;color:${BRAND.taupe};">${key}</td>
+      <td align="right" style="padding:9px 0;font-family:${SANS};font-size:13px;color:${BRAND.warm};">${value}</td>
+    </tr>`).join('')
+
+  const amount = `
+  <tr>
+    <td align="center" style="padding:0 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="background-color:${BRAND.cream};border-radius:2px;">
+        <tr>
+          <td align="center" style="padding:26px 20px 24px;">
+            <div style="font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.taupe};">
+              EINGENOMMEN
+            </div>
+            <div class="fem-value" style="padding-top:8px;font-family:${SERIF};font-size:40px;line-height:1;color:${BRAND.warm};">
+              ${money(voucher.original_amount_cents)}
+            </div>
+            <div style="padding-top:10px;font-family:${SANS};font-size:12px;color:${BRAND.warmLt};">
+              enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %) · netto ${money(net)}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>`
+
+  const summary = `
+  <tr>
+    <td style="padding:22px 34px 0;" class="fem-pad">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
+    </td>
+  </tr>`
+
+  const dedication = voucher.message
+    ? `
+  <tr>
+    <td style="padding:22px 34px 0;" class="fem-pad">
+      <div style="font-family:${SANS};font-size:10px;letter-spacing:1.5px;color:${BRAND.taupe};padding-bottom:8px;">
+        WIDMUNG
+      </div>
+      <div style="font-family:${SERIF};font-style:italic;font-size:15px;line-height:1.6;color:${BRAND.warm};">
+        „${esc(String(voucher.message).trim())}“
+      </div>
+    </td>
+  </tr>`
+    : ''
+
+  // Die Zahlungskennung ist der Faden zurück zu Stripe — ohne sie muss man
+  // im Dashboard über Betrag und Uhrzeit suchen.
+  const trailer = `
+  <tr>
+    <td style="padding:30px 34px 40px;" class="fem-pad">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td height="1" style="height:1px;line-height:1px;font-size:0;
+            background-color:${BRAND.line};padding:0;">&nbsp;</td></tr>
+      </table>
+      <div style="padding-top:20px;font-family:${SANS};font-size:11px;line-height:1.7;color:${BRAND.taupe};">
+        Automatische Meldung von fembeauty.at — keine Antwort nötig.
+        Antworten gehen an die Käuferin.<br>
+        ${voucher.stripe_payment_intent ? `Zahlung ${esc(voucher.stripe_payment_intent)}` : ''}
+      </div>
+    </td>
+  </tr>`
+
+  const what = voucher.kind === 'treatment'
+    ? esc(voucher.treatment_label || 'Behandlung')
+    : 'Wertgutschein'
+
+  const body = `
+    ${header('VERKAUF')}
+    <tr>
+      <td align="center" style="padding:0 34px 26px;" class="fem-pad">
+        <div style="font-family:${SERIF};font-size:24px;line-height:1.35;color:${BRAND.warm};">
+          Ein Gutschein wurde gekauft.
+        </div>
+        <div style="padding-top:10px;font-family:${SANS};font-size:14px;line-height:1.65;color:${BRAND.warmLt};">
+          ${what} · Der Versand an die Kundin ist bereits raus.
+        </div>
+      </td>
+    </tr>
+    ${amount}
+    ${summary}
+    ${dedication}
+    ${button('Im Panel öffnen', `${STUDIO.site}/admin`)}
+    ${trailer}`
+
+  const subject = `Verkauf · ${money(voucher.original_amount_cents)} · ${voucher.code}`
+
+  return {
+    subject,
+    html: shell({
+      title: subject,
+      preheader: `${what} · ${voucher.recipient_name ? `für ${voucher.recipient_name} · ` : ''}${voucher.buyer_email || 'unbekannt'}`,
+      body,
+    }),
+    text: studioText(voucher, { net, vat, rate }),
+  }
+}
+
+// ────────────────────────────────────────────────────────────
 // Nur-Text
 // ────────────────────────────────────────────────────────────
 // Kein Zierrat: diese Fassung liest, wer HTML abgeschaltet hat oder einen
@@ -542,18 +695,53 @@ function receiptText(voucher, { net, vat, rate, selfPurchase }) {
   ].join('\n')
 }
 
+function studioText(voucher, { net, vat, rate }) {
+  return [
+    'Ein Gutschein wurde gekauft.',
+    '',
+    voucher.kind === 'treatment'
+      ? `Behandlungsgutschein: ${voucher.treatment_label}`
+      : 'Wertgutschein',
+    `Betrag: ${money(voucher.original_amount_cents)}`,
+    `enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %), netto ${money(net)}`,
+    `Code: ${voucher.code}`,
+    '',
+    `Käuferin: ${voucher.buyer_email || '—'}`,
+    `Für: ${voucher.recipient_name || '—'}`,
+    `Von: ${voucher.sender_name || '—'}`,
+    voucher.delivery === 'email' && voucher.delivery_email
+      ? `Zustellung: per E-Mail an ${voucher.delivery_email}`
+      : 'Zustellung: als PDF an die Käuferin',
+    `Verkauft: ${dateTime(voucher.issued_at)}`,
+    ...(voucher.message ? ['', `Widmung: „${String(voucher.message).trim()}"`] : []),
+    '',
+    `Im Panel öffnen: ${STUDIO.site}/admin`,
+    ...(voucher.stripe_payment_intent ? [`Zahlung: ${voucher.stripe_payment_intent}`] : []),
+    '',
+    'Automatische Meldung — der Versand an die Kundin ist bereits raus.',
+  ].join('\n')
+}
+
 // ────────────────────────────────────────────────────────────
 
-export const EMAIL_VARIANTS = ['gift', 'receipt']
+export const EMAIL_VARIANTS = ['gift', 'receipt', 'studio']
+
+/** Voreinstellung fuer die Verkaufsmeldung, wenn MAIL_NOTIFY nicht gesetzt ist. */
+export const STUDIO_EMAIL = STUDIO.email
 
 /**
  * @param {object} voucher   Zeile aus `vouchers`
  * @param {object} options
- * @param {'gift'|'receipt'} options.variant
- * @param {string} options.bookingUrl
+ * @param {'gift'|'receipt'|'studio'} options.variant
+ * @param {string} [options.bookingUrl]
+ * @param {string} [options.notifyEmail]  Empfaenger der Verkaufsmeldung.
  * @returns {{ to: string, subject: string, html: string, text: string }}
  */
-export function buildVoucherEmail(voucher, { variant, bookingUrl }) {
+export function buildVoucherEmail(voucher, { variant, bookingUrl, notifyEmail } = {}) {
+  if (variant === 'studio') {
+    return { to: notifyEmail || STUDIO_EMAIL, ...studioEmail(voucher) }
+  }
+
   const selfPurchase = Boolean(
     voucher.delivery_email && voucher.buyer_email
     && voucher.delivery_email.toLowerCase() === voucher.buyer_email.toLowerCase(),

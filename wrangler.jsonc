@@ -114,6 +114,12 @@
     // sollen trotzdem im gelesenen Postfach landen — dafuer MAIL_REPLY_TO.
     "MAIL_FROM": "FEM Beauty Wien <gutschein@fembeauty.at>",
     "MAIL_REPLY_TO": "beauty@fembeauty.at",
+
+    // Verkaufsmeldung: nach jedem bezahlten Gutschein geht eine Notiz
+    // hierher — Betrag, Code, Käuferin, Zustellung, PDF im Anhang.
+    // Leer lassen schaltet sie ab. Mehrere Adressen sind nicht vorgesehen;
+    // dafuer im Postfach eine Weiterleitung einrichten.
+    "MAIL_NOTIFY": "beauty@fembeauty.at",
     "BOOKING_URL": "https://trea.tw/uc3hWqqxxVC9uu2Yj"
   }
 
