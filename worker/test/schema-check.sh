@@ -55,6 +55,15 @@ rejects "unbekannte Gutscheinart"       "INSERT INTO vouchers (id,code,token,kin
 rejects "storniert ohne voided_at"      "INSERT INTO vouchers (id,code,token,kind,original_amount_cents,vat_rate_bp,delivery,buyer_email,stripe_session_id,issued_at,status) VALUES ('v9','FEM-GGGGG-GGGGG','tok_9','value',10000,2000,'download','a@b.at','cs_9','2026-08-06T10:00:00.000Z','voided');"
 
 echo
+echo "── Aktionsrabatt ──"
+eq      "ohne Angabe kein Rabatt"       "SELECT discount_cents FROM vouchers WHERE id='v1';" "0"
+ok      "Black Week: 120 Wert, 20 Rabatt" "INSERT INTO vouchers (id,code,token,kind,original_amount_cents,discount_cents,promotion,vat_rate_bp,delivery,buyer_email,stripe_session_id,issued_at) VALUES ('v10','FEM-JJJJJ-JJJJJ','tok_10','value',12000,2000,'Black Week',2000,'download','a@b.at','cs_10','2026-11-25T10:00:00.000Z');"
+rejects "Rabatt in Höhe des Nennwerts"  "INSERT INTO vouchers (id,code,token,kind,original_amount_cents,discount_cents,vat_rate_bp,delivery,buyer_email,stripe_session_id,issued_at) VALUES ('v11','FEM-KKKKK-KKKKK','tok_11','value',12000,12000,2000,'download','a@b.at','cs_11','2026-11-25T10:00:00.000Z');"
+rejects "negativer Rabatt"              "INSERT INTO vouchers (id,code,token,kind,original_amount_cents,discount_cents,vat_rate_bp,delivery,buyer_email,stripe_session_id,issued_at) VALUES ('v12','FEM-MMMMM-MMMMM','tok_12','value',12000,-100,2000,'download','a@b.at','cs_12','2026-11-25T10:00:00.000Z');"
+# Eingeloest wird gegen den Nennwert, nicht gegen den bezahlten Betrag.
+eq      "Saldo eines Aktionsgutscheins" "SELECT balance_cents FROM voucher_balances WHERE id='v10';" "12000"
+
+echo
 echo "── Kontobuch ──"
 ok      "erste Abbuchung 30,00"   "INSERT INTO redemptions (id,voucher_id,amount_cents,redeemed_at,staff_id,idempotency_key) VALUES ('r1','v1',3000,'2026-08-06T11:00:00.000Z','jenny@fem.at','k-1');"
 ok      "zweite Abbuchung 25,00"  "INSERT INTO redemptions (id,voucher_id,amount_cents,redeemed_at,staff_id,idempotency_key) VALUES ('r2','v1',2500,'2026-08-06T12:00:00.000Z','vicky@fem.at','k-2');"

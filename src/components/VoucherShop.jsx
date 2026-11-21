@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { VOUCHER_MAX_MESSAGE_LENGTH } from '../data'
 import { API_BASE } from '../config'
-import { shopTreatments, useCatalog } from '../voucherCatalog'
+import { bonusCentsFor, shopTreatments, useCatalog } from '../voucherCatalog'
 
 const MAX_MESSAGE_LENGTH = VOUCHER_MAX_MESSAGE_LENGTH
 
@@ -36,6 +36,14 @@ const CHECKOUT_ERRORS = {
   recipient_required: 'Bitte trage den Namen der beschenkten Person ein.',
   delivery_email_invalid: 'Bitte trage eine gültige E-Mail-Adresse ein.',
   message_too_long: 'Die Nachricht ist zu lang.',
+  promotion_changed: 'Die Aktion ist gerade zu Ende gegangen — der Bonus gilt nicht mehr. '
+    + 'Der Betrag ist unverändert; bitte prüfe ihn und versuche es noch einmal.',
+}
+
+// "30.11." aus "2026-11-30" — fuer den Hinweis, bis wann die Aktion laeuft.
+function shortDate(isoDate) {
+  const [, month, day] = isoDate.split('-')
+  return `${Number(day)}.${Number(month)}.`
 }
 
 function checkoutError(reason) {
@@ -216,22 +224,45 @@ function VoucherKindSwitch({ value, onChange, treatmentsVerfuegbar = true, compa
   )
 }
 
-function AmountPicker({ selection, idPrefix, compact = false }) {
+// Die Knoepfe zeigen, was man bezahlt; der Bonus steht darunter. Andersherum
+// — 120 auf dem Knopf, 100 als Kleingedrucktes — waere am Ende ein anderer
+// Betrag an der Kasse als der, den man angetippt hat.
+function AmountPicker({ selection, idPrefix, promotion = null, compact = false }) {
+  const bonusFor = (euro) => bonusCentsFor(promotion, Math.round(euro * 100)) / 100
+  const customBonus = selection.presetAmount === null && selection.isValid
+    ? bonusFor(selection.amount)
+    : 0
+
   return (
     <fieldset className={`voucher-amount-picker${compact ? ' voucher-amount-picker-compact' : ''}`}>
       <legend>Gutscheinwert auswählen</legend>
-      <div className="voucher-amount-options">
-        {selection.presets.map((value) => (
-          <button
-            type="button"
-            className={selection.presetAmount === value ? 'selected' : undefined}
-            aria-pressed={selection.presetAmount === value}
-            onClick={() => selection.selectPreset(value)}
-            key={value}
-          >
-            <strong>{value}</strong><span>€</span>
-          </button>
-        ))}
+      {promotion && (
+        <p className="voucher-promo">
+          <strong>{promotion.name} · bis {shortDate(promotion.endDate)}</strong>
+          <span>
+            {promotion.tiers
+              .map((tier) => `${tier.payCents / 100} € zahlen, ${(tier.payCents + tier.bonusCents) / 100} € schenken`)
+              .join(' · ')}
+          </span>
+        </p>
+      )}
+      <div className={`voucher-amount-options${promotion ? ' voucher-amount-options-promo' : ''}`}>
+        {selection.presets.map((value) => {
+          const bonus = bonusFor(value)
+          return (
+            <button
+              type="button"
+              className={selection.presetAmount === value ? 'selected' : undefined}
+              aria-pressed={selection.presetAmount === value}
+              aria-label={bonus ? `${value} €, Gutschein über ${value + bonus} €` : undefined}
+              onClick={() => selection.selectPreset(value)}
+              key={value}
+            >
+              <strong>{value}</strong><span>€</span>
+              {bonus ? <small className="voucher-amount-bonus">+{bonus} € Bonus</small> : null}
+            </button>
+          )
+        })}
       </div>
       {/* Die ganze Zeile ist das Label — ein Klick irgendwo darin setzt den
           Cursor ins Feld. Vorher war nur der 132px breite Kasten zu treffen.
@@ -262,9 +293,13 @@ function AmountPicker({ selection, idPrefix, compact = false }) {
         </div>
       </label>
       <p id={`${idPrefix}-amount-hint`} className={`voucher-amount-hint${selection.isValid || selection.amount === 0 ? '' : ' error'}`}>
-        {selection.isValid || selection.amount === 0
-          ? `Frei wählbar zwischen ${selection.min} € und ${selection.max} €.`
-          : `Bitte einen Betrag zwischen ${selection.min} € und ${selection.max} € wählen.`}
+        {/* Wer 100 von Hand eintippt, bekommt den Bonus genauso — das soll
+            hier stehen, nicht erst in der Uebersicht auffallen. */}
+        {customBonus
+          ? `Mit ${customBonus} € Bonus: Gutschein über ${selection.amount + customBonus} €.`
+          : selection.isValid || selection.amount === 0
+            ? `Frei wählbar zwischen ${selection.min} € und ${selection.max} €.`
+            : `Bitte einen Betrag zwischen ${selection.min} € und ${selection.max} € wählen.`}
       </p>
     </fieldset>
   )
@@ -381,6 +416,13 @@ export default function VoucherShop() {
     ? selectedTreatment.price
     : amountSelection.amount
 
+  // Aktionsbonus — nur auf Wertgutscheine, nur auf die Aktionsbeträge.
+  // effectiveAmount bleibt, was bezahlt wird; der Gutschein lautet auf mehr.
+  const bonusCents = kind === 'value'
+    ? bonusCentsFor(catalog.promotion, Math.round(amountSelection.amount * 100))
+    : 0
+  const voucherValue = effectiveAmount + bonusCents / 100
+
   // Beim Schrittwechsel auf die Ueberschrift fokussieren, damit Screenreader
   // den neuen Abschnitt ansagen. Nicht beim ersten Aufbau — sonst springt die
   // Seite direkt nach dem Laden.
@@ -453,6 +495,10 @@ export default function VoucherShop() {
           message,
           delivery,
           deliveryEmail: delivery === 'email' ? email : '',
+          // Welcher Bonus hier angezeigt wurde. Der Server vergibt ihn
+          // selbst; stimmt er nicht mehr, sagt er es, statt still ohne
+          // Bonus zu verkaufen.
+          bonusCents,
         }),
       })
 
@@ -460,6 +506,9 @@ export default function VoucherShop() {
       if (!response.ok || !data.url) {
         setProcessing(false)
         setError(checkoutError(data.reason))
+        // Die Aktion ist vorbei: frisch laden, damit Knöpfe und Übersicht
+        // den Bonus nicht weiter versprechen.
+        if (data.reason === 'promotion_changed') catalog.reload({ fresh: true })
         window.requestAnimationFrame(() => errorRef.current?.focus({ preventScroll: true }))
         return
       }
@@ -503,7 +552,7 @@ export default function VoucherShop() {
               ) : null}
               <div className="vshop-field-group">
                 {kind === 'value' ? (
-                  <AmountPicker selection={amountSelection} idPrefix="vshop" />
+                  <AmountPicker selection={amountSelection} idPrefix="vshop" promotion={catalog.promotion} />
                 ) : (
                   <TreatmentPicker
                     treatments={treatments}
@@ -612,6 +661,18 @@ export default function VoucherShop() {
                   <span>Widmung</span>
                   <span>„{message}“</span>
                 </div>
+              )}
+              {bonusCents > 0 && (
+                <>
+                  <div className="vshop-row">
+                    <span>Gutscheinwert</span>
+                    <span>{formatCurrency(voucherValue)}</span>
+                  </div>
+                  <div className="vshop-row vshop-row-bonus">
+                    <span>{catalog.promotion.name}-Bonus</span>
+                    <span>{formatCurrency(bonusCents / 100)} geschenkt</span>
+                  </div>
+                </>
               )}
               <div className="vshop-row vshop-total">
                 <strong>Zu zahlen</strong>

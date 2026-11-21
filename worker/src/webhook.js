@@ -16,14 +16,29 @@ import { createVoucherForSession, voidVoucher } from './vouchers.js'
  * Der Betrag kommt dabei ausdrücklich NICHT aus den Metadaten, sondern aus
  * amount_total — also aus dem, was tatsächlich bezahlt wurde. Ein Gutschein
  * über den bezahlten Betrag ist immer richtig, egal was im Transport stand.
+ *
+ * Bei einer Aktion kommt der Rabatt dazu, ebenfalls aus Stripes Summen:
+ * 100 € bezahlt plus 20 € Rabatt ergibt einen Gutschein über 120 €. Der
+ * Rabatt kann nur von uns stammen — der Checkout lässt keine eigenen
+ * Rabattcodes zu. Ein unplausibler Wert fällt auf null zurück: dann
+ * bekommt die Kundin wenigstens, was sie bezahlt hat, statt dass der
+ * Webhook an der Datenbank scheitert und Stripe ihn tagelang wiederholt.
  */
 function orderFromSession(session) {
   const meta = session.metadata ?? {}
+  const rabatt = session.total_details?.amount_discount ?? 0
+  const discountCents = Number.isSafeInteger(rabatt) && rabatt > 0 ? rabatt : 0
+  if (rabatt !== discountCents) {
+    console.error('webhook: unbrauchbarer Rabatt', session.id, rabatt)
+  }
+
   return {
     kind: meta.kind === 'treatment' ? 'treatment' : 'value',
     treatmentId: meta.treatment_id || null,
     treatmentLabel: meta.treatment_label || null,
-    amountCents: session.amount_total,
+    amountCents: session.amount_total + discountCents,
+    discountCents,
+    promotion: discountCents > 0 ? (meta.promotion || null) : null,
     currency: session.currency ?? 'eur',
     vatRateBp: Number(meta.vat_rate_bp) || VAT_RATE_BP,
     recipient: meta.recipient ?? '',
@@ -38,7 +53,9 @@ function orderFromSession(session) {
 async function issueVoucher(env, session, now) {
   const order = orderFromSession(session)
 
-  if (!Number.isSafeInteger(order.amountCents) || order.amountCents <= 0) {
+  // Bezahlt muss etwas sein: ein Rabatt in Höhe des Nennwerts wäre ein
+  // geschenkter Gutschein, und den legt die Datenbank ohnehin nicht an.
+  if (!Number.isSafeInteger(order.amountCents) || order.amountCents - order.discountCents <= 0) {
     // Kein Retry-Grund — wiederholen würde nichts ändern.
     console.error('webhook: unbrauchbarer amount_total', session.id, session.amount_total)
     return { skipped: 'invalid_amount' }
@@ -62,7 +79,7 @@ async function issueVoucher(env, session, now) {
   const declared = Number(session.metadata?.amount_cents)
   if (Number.isFinite(declared) && declared !== order.amountCents) {
     console.warn(
-      `webhook: Betrag weicht ab für ${session.id} — Metadaten ${declared}, bezahlt ${order.amountCents}`,
+      `webhook: Betrag weicht ab für ${session.id} — Metadaten ${declared}, Nennwert ${order.amountCents}`,
     )
   }
 

@@ -9,14 +9,22 @@
 
 import { listTreatments, loadLimits, treatmentLabel } from './catalog.js'
 import { error, json } from './http.js'
+import { loadPromotion, publicPromotion } from './promotion.js'
 
 const MAX_PRICE_CENTS = 100000 // 1.000 € — eine Behandlung darüber ist ein Tippfehler.
 
 /** Öffentliche Sicht für den Shop: nur was sichtbar ist, ohne Verwaltungsfelder. */
 export async function getPublicTreatments(env) {
-  const [rows, limits] = await Promise.all([listTreatments(env.DB, 'shop'), loadLimits(env.DB)])
+  const [rows, limits, promotion] = await Promise.all([
+    listTreatments(env.DB, 'shop'),
+    loadLimits(env.DB),
+    loadPromotion(env.DB),
+  ])
   return json({
     limits,
+    // Nur eine laufende Aktion, sonst null. Anzeige — den Bonus selbst
+    // vergibt der Checkout, unabhängig davon, was hier stand.
+    promotion: publicPromotion(promotion, new Date().toISOString()),
     treatments: rows.map((row) => ({
       id: row.id,
       category: row.category,

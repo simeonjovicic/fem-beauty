@@ -6,6 +6,8 @@
 // Spalte, und ohne BOM werden aus Umlauten Fragezeichen.
 
 import { error } from '../http.js'
+import { paidCents } from '../ledger.js'
+import { startOfDay, ZONE } from '../vienna.js'
 
 const SEP = ';'
 const BOM = '\uFEFF'
@@ -14,37 +16,8 @@ const BOM = '\uFEFF'
 // steht in der Datenbank als 30. September, 22:30 UTC. Liefe die
 // Monatsgrenze auf UTC, fiele dieser Verkauf in den September — also in
 // einen Monat, der womoeglich schon abgeschlossen beim Steuerberater liegt.
-const ZONE = 'Europe/Vienna'
-
-const PARTS = new Intl.DateTimeFormat('en-GB', {
-  timeZone: ZONE,
-  hourCycle: 'h23',
-  year: 'numeric', month: '2-digit', day: '2-digit',
-  hour: '2-digit', minute: '2-digit', second: '2-digit',
-})
-
-/** Verschiebung Wiens gegenueber UTC zu einem Zeitpunkt, in Millisekunden. */
-function zoneOffset(ms) {
-  const parts = {}
-  for (const part of PARTS.formatToParts(new Date(ms))) parts[part.type] = part.value
-  const asUtc = Date.UTC(
-    Number(parts.year), Number(parts.month) - 1, Number(parts.day),
-    Number(parts.hour), Number(parts.minute), Number(parts.second),
-  )
-  return asUtc - ms
-}
-
-/**
- * Der Augenblick, in dem in Wien ein bestimmter Monat beginnt.
- *
- * Zweimal gerechnet, weil die Verschiebung selbst vom Zeitpunkt abhaengt:
- * die erste Naeherung kann noch in der falschen Haelfte der Zeitumstellung
- * liegen, die zweite korrigiert sie. Ein dritter Durchgang aendert nichts.
- */
 function startOfMonth(year, month) {
-  const naiv = Date.UTC(year, month - 1, 1)
-  const einmal = naiv - zoneOffset(naiv)
-  return new Date(naiv - zoneOffset(einmal)).toISOString()
+  return startOfDay(year, month, 1)
 }
 
 /**
@@ -120,16 +93,22 @@ function zeile(felder) {
  * Empfaengerin, Absender und Nachricht fehlen absichtlich: fuer die
  * Buchhaltung braucht es sie nicht, und was nicht exportiert wird, kann
  * auch nicht in einem Mailanhang verloren gehen.
+ *
+ * Nennwert und Brutto sind zwei Spalten, seit es Aktionen gibt: ein
+ * Gutschein ueber 120 EUR, mit 20 EUR Rabatt fuer 100 EUR verkauft, steht
+ * mit Nennwert 120, Rabatt 20 und Brutto 100 da. Umsatz und USt rechnen
+ * vom Brutto — so hat es die Steuerberaterin vorgegeben. Restwert und
+ * Eingeloest beziehen sich auf den Nennwert, denn den loest die Kundin ein.
  */
 export function buildSalesCsv(rows) {
   const kopf = [
-    'Datum', 'Code', 'Art', 'Behandlung', 'Brutto EUR', 'USt-Satz %',
-    'USt EUR', 'Netto EUR', 'Status', 'Zustellung', 'Käufer-E-Mail',
-    'Eingelöst EUR', 'Restwert EUR', 'Stripe-Session',
+    'Datum', 'Code', 'Art', 'Behandlung', 'Nennwert EUR', 'Rabatt EUR',
+    'Brutto EUR', 'USt-Satz %', 'USt EUR', 'Netto EUR', 'Status', 'Zustellung',
+    'Käufer-E-Mail', 'Eingelöst EUR', 'Restwert EUR', 'Aktion', 'Stripe-Session',
   ]
 
   const zeilen = rows.map((row) => {
-    const brutto = row.original_amount_cents
+    const brutto = paidCents(row)
     const netto = Math.round(brutto / (1 + row.vat_rate_bp / 10000))
 
     return zeile([
@@ -137,6 +116,8 @@ export function buildSalesCsv(rows) {
       csvText(row.code),
       csvText(ART[row.kind] ?? row.kind),
       csvText(row.treatment_label ?? ''),
+      csvAmount(row.original_amount_cents),
+      csvAmount(row.discount_cents ?? 0),
       csvAmount(brutto),
       // Basispunkte verhalten sich zum Prozent wie Cent zum Euro: 2000 bp
       // sind 20,00 %. Deshalb dieselbe Formatierung, ohne Vorwegteilung —
@@ -149,6 +130,7 @@ export function buildSalesCsv(rows) {
       csvText(row.buyer_email),
       csvAmount(row.redeemed_cents),
       csvAmount(row.balance_cents),
+      csvText(row.promotion ?? ''),
       csvText(row.stripe_session_id),
     ])
   })

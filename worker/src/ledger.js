@@ -27,6 +27,19 @@ export function redeemedCents(redemptions) {
   return total
 }
 
+/**
+ * Was die Kundin tatsaechlich bezahlt hat — der Umsatz.
+ *
+ * Nicht dasselbe wie der Ursprungsbetrag: bei einer Aktion wird der
+ * Gutschein ueber 120 € ausgestellt und mit 20 € Rabatt fuer 100 €
+ * verkauft. Eingeloest wird gegen den Nennwert, versteuert wird, was
+ * bezahlt wurde. Gutscheine von vor den Aktionen kennen kein
+ * discount_cents — bei ihnen ist beides dasselbe.
+ */
+export function paidCents(voucher) {
+  return voucher.original_amount_cents - (voucher.discount_cents ?? 0)
+}
+
 /** Restwert = Ursprungsbetrag minus Kontobuch. */
 export function balanceCents(voucher, redemptions) {
   assertSafeCents(voucher.original_amount_cents, 'original_amount_cents')

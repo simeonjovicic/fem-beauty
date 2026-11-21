@@ -11,6 +11,7 @@ import { authenticate } from './admin/auth.js'
 import { exportCsv } from './admin/export.js'
 import { handleCheckout } from './checkout.js'
 import { allowedOrigin, corsHeaders, error, json, withCors } from './http.js'
+import { getAdminPromotion, updatePromotion } from './promotion.js'
 import { getBySession, getPdf } from './public.js'
 import {
   createTreatment,
@@ -72,6 +73,14 @@ async function handleAdmin(request, env, url) {
 
   if (path === '/api/admin/limits' && request.method === 'PATCH') {
     return updateLimits(request, env)
+  }
+
+  // Die Gutschein-Aktion. Mit Stripe, weil das Panel sehen soll, ob die
+  // Rabatt-Coupons dort bereitstehen — und weil Speichern sie anlegt.
+  if (path === '/api/admin/promotion') {
+    if (request.method === 'GET') return getAdminPromotion(env, createStripe(env))
+    if (request.method === 'PATCH') return updatePromotion(request, env, createStripe(env))
+    return error('method_not_allowed', 405)
   }
 
   const treatment = path.match(/^\/api\/admin\/treatments\/([^/]+)$/)

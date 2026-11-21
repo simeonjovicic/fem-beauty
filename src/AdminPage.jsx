@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // ESM ohne Worker-Abhaengigkeiten und laufen im Browser unveraendert.
 import {
   balanceCents,
+  paidCents,
   stateFromBalance,
   validateRedemption,
   validateReversal,
@@ -32,24 +33,28 @@ import {
   stateTone,
 } from './admin/format'
 import PricesTab from './admin/PricesTab'
+import PromotionTab from './admin/PromotionTab'
 import TemplatesTab from './admin/TemplatesTab'
 
 // Erst hier importiert, nicht in main.jsx: die Seite haengt an einem
 // lazy()-Import, damit das Panel-CSS nicht im Bundle der Startseite landet.
 import './admin.css'
 
-// Drei Bereiche, weil drei verschiedene Anlässe: an der Kassa wird
-// eingelöst, am Schreibtisch werden Preise gepflegt, und die Vorlagen sieht
-// man sich einmal an, bevor sie rausgehen.
+// Vier Bereiche, weil vier verschiedene Anlässe: an der Kassa wird
+// eingelöst, am Schreibtisch werden Preise gepflegt, eine Aktion stellt man
+// ein paar Mal im Jahr ein, und die Vorlagen sieht man sich einmal an,
+// bevor sie rausgehen.
 const TABS = [
   ['vouchers', 'Gutscheine'],
   ['prices', 'Preise'],
+  ['promotion', 'Aktion'],
   ['templates', 'Vorlagen'],
 ]
 
 const TAB_TITLES = {
   vouchers: 'Gutschein-Übersicht',
   prices: 'Preise & Behandlungen',
+  promotion: 'Gutschein-Aktion',
   templates: 'E-Mail & PDF',
 }
 
@@ -57,7 +62,7 @@ const TAB_TITLES = {
 // Gutscheinliste wirft — beim Pflegen von Preisen laedt man oefter neu, als
 // einem lieb ist. Fragment und nicht Pfad: die Seite wird statisch
 // ausgeliefert und kennt keine Unterrouten.
-const TAB_HASH = { vouchers: '', prices: '#preise', templates: '#vorlagen' }
+const TAB_HASH = { vouchers: '', prices: '#preise', promotion: '#aktion', templates: '#vorlagen' }
 
 function tabFromHash() {
   const entry = Object.entries(TAB_HASH)
@@ -341,6 +346,7 @@ export default function AdminPage() {
         </nav>
 
         {tab === 'prices' ? <PricesTab /> : null}
+        {tab === 'promotion' ? <PromotionTab /> : null}
         {tab === 'templates' ? <TemplatesTab /> : null}
 
         {/* Ein Ladefehler darf nicht als leere Liste erscheinen — „keine
@@ -430,9 +436,11 @@ function StatCards({ rows, now }) {
     const thisMonth = monthRange(now, 0)
     const lastMonth = monthRange(now, -1)
 
+    // Bezahlt, nicht Nennwert: ein Aktionsgutschein ueber 120 € brachte
+    // 100 €, und nur die gingen durch Stripe — auch die Gebuehr rechnet davon.
     const soldIn = (range) => rows
       .filter((row) => row.voucher.status === 'active' && inRange(row.voucher.issued_at, range))
-      .reduce((sum, row) => sum + row.voucher.original_amount_cents, 0)
+      .reduce((sum, row) => sum + paidCents(row.voucher), 0)
 
     const soldCount = rows.filter(
       (row) => row.voucher.status === 'active' && inRange(row.voucher.issued_at, thisMonth),
@@ -679,6 +687,14 @@ function VoucherDetail({ row, flash, setFlash, onRedeem, onReverse }) {
             <div>
               <b>Gutschein gekauft</b>
               <small>{dateTime(voucher.issued_at)} · Stripe</small>
+              {/* Sonst fragt sich an der Kassa jemand, warum Stripe 100 €
+                  meldet und der Gutschein 120 € hat. */}
+              {voucher.discount_cents > 0 && (
+                <small>
+                  bezahlt {euro(paidCents(voucher))} · {euro(voucher.discount_cents)} Bonus
+                  {voucher.promotion ? ` (${voucher.promotion})` : ''}
+                </small>
+              )}
             </div>
             <span className="adm-plus">{euroSigned(voucher.original_amount_cents)}</span>
           </li>

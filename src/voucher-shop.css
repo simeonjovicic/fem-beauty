@@ -274,3 +274,50 @@
     flex-shrink: 0;
   }
 }
+
+/* ─── Gutschein-Aktion (etwa Black Week) ───────────────────────
+   Steht nur da, solange der Server eine laufende Aktion meldet. Gilt auf
+   allen Breiten, deshalb ausserhalb der 601px-Bloecke oben. */
+.voucher-shop .voucher-promo {
+  display: grid;
+  gap: .2rem;
+  margin: 0 0 .9rem;
+  padding: .8rem 1rem;
+  border-left: 2px solid var(--sand);
+  border-radius: 4px;
+  background: var(--cream);
+  color: var(--warm-lt);
+  font-size: .85rem;
+  line-height: 1.5;
+}
+
+.voucher-shop .voucher-promo strong {
+  color: var(--warm);
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+/* Die Aktion hat drei Betraege, das Raster ist auf vier gebaut — ohne
+   Anpassung bliebe rechts ein leeres Feld. auto-fit nimmt, was da ist. */
+.voucher-shop .voucher-amount-options-promo {
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+}
+
+/* Zweite Zeile im Knopf: flex-basis 100% schiebt sie unter Zahl und
+   Eurozeichen, die Knoepfe sind ohnehin flex-wrap. */
+.voucher-shop .voucher-amount-bonus {
+  flex-basis: 100%;
+  color: var(--sand);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+.voucher-shop .voucher-amount-options button.selected .voucher-amount-bonus {
+  color: var(--sand-lt);
+}
+
+.voucher-shop .vshop-row-bonus > :last-child {
+  color: var(--sand);
+}

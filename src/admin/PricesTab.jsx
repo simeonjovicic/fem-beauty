@@ -25,34 +25,12 @@ import {
   saveCatalog,
   useAdminCatalog,
 } from '../voucherCatalog'
-import { euro } from './format'
+import { euro, toCents, toInput } from './format'
 
 // Ein Behandlungspreis über 2.000 € ist im Studio kein Preis, sondern ein
 // Tippfehler mit einer Null zu viel. Lieber hier abfangen als im Checkout.
 const MAX_PRICE_CENTS = 200000
 const MIN_PRICE_CENTS = 100
-
-/**
- * Euro-Eingabe zu Cent.
- *
- * Nimmt Komma wie Punkt: auf einer österreichischen Tastatur wird „89,50"
- * getippt, aus einer Kalkulationstabelle kopiert kommt „89.50".
- *
- * @returns {number|null} null, wenn die Eingabe keine Zahl ist
- */
-function toCents(text) {
-  const cleaned = String(text).trim().replace(/\s|€/g, '').replace(',', '.')
-  if (!cleaned || !/^\d+(\.\d{0,2})?$/.test(cleaned)) return null
-  return Math.round(Number(cleaned) * 100)
-}
-
-/** Cent zurück ins Eingabefeld — ohne Währungszeichen, das tippt niemand mit. */
-function toInput(cents) {
-  return (cents / 100).toLocaleString('de-AT', {
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function label(treatment) {
   return [treatment.title, treatment.variant].filter(Boolean).join(' · ')
@@ -452,7 +430,8 @@ function PricesEditor({ catalog }) {
   )
 }
 
-function MoneyInput({ value, onChange, id }) {
+// Auch im Aktions-Reiter benutzt — dort dieselbe Eingabe fuer Kaufbetrag und Bonus.
+export function MoneyInput({ value, onChange, id }) {
   return (
     <span className="adm-money">
       <input

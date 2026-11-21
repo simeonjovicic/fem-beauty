@@ -95,6 +95,11 @@ function VoucherReady({ voucher }) {
         {voucher.recipient
           ? <>Für <strong>{voucher.recipient}</strong> über <strong>{currency.format(voucher.amountCents / 100)}</strong>.</>
           : <>Über <strong>{currency.format(voucher.amountCents / 100)}</strong>.</>}
+        {/* Der Bonus steckt im Betrag oben schon drin — hier nur gesagt,
+            damit 120 € nach einer Zahlung von 100 € nicht wie ein Fehler aussehen. */}
+        {voucher.discountCents > 0 && (
+          <> Inklusive {currency.format(voucher.discountCents / 100)} {voucher.promotion ?? 'Aktions'}-Bonus.</>
+        )}
         {voucher.kind === 'treatment' && voucher.treatmentLabel && <> — {voucher.treatmentLabel}.</>}
       </p>
 

@@ -81,26 +81,58 @@ const verkauf = {
 test('die Verkaufsdatei teilt Brutto in Netto und USt auf', () => {
   const [kopf, zeile] = buildSalesCsv([verkauf]).split('\r\n')
 
-  assert.match(kopf, /^Datum;Code;Art;Behandlung;Brutto EUR/)
+  assert.match(kopf, /^Datum;Code;Art;Behandlung;Nennwert EUR;Rabatt EUR;Brutto EUR/)
 
   const felder = zeile.split(';')
   assert.equal(felder[0], '12.09.2026')
-  assert.equal(felder[4], '105,00')  // brutto
-  assert.equal(felder[5], '20,00')   // satz
-  assert.equal(felder[6], '17,50')   // ust
-  assert.equal(felder[7], '87,50')   // netto
+  assert.equal(felder[4], '105,00')  // nennwert
+  assert.equal(felder[5], '0,00')    // rabatt — Gutschein von vor den Aktionen
+  assert.equal(felder[6], '105,00')  // brutto
+  assert.equal(felder[7], '20,00')   // satz
+  assert.equal(felder[8], '17,50')   // ust
+  assert.equal(felder[9], '87,50')   // netto
+})
+
+test('ein Aktionsgutschein versteuert den bezahlten Betrag, nicht den Nennwert', () => {
+  // Black Week: 100 EUR bezahlt, Gutschein ueber 120 EUR. Die
+  // Steuerberaterin will 100 EUR als Umsatz sehen.
+  const felder = buildSalesCsv([{
+    ...verkauf,
+    kind: 'value',
+    treatment_label: null,
+    original_amount_cents: 12000,
+    discount_cents: 2000,
+    promotion: 'Black Week',
+    redeemed_cents: 0,
+    balance_cents: 12000,
+  }]).split('\r\n')[1].split(';')
+
+  assert.equal(felder[4], '120,00')  // nennwert
+  assert.equal(felder[5], '20,00')   // rabatt
+  assert.equal(felder[6], '100,00')  // brutto = umsatz
+  assert.equal(felder[8], '16,67')   // ust aus 100, nicht aus 120
+  assert.equal(felder[9], '83,33')   // netto
+  assert.equal(felder[14], '120,00') // restwert — eingeloest wird der Nennwert
+  assert.equal(felder[15], 'Black Week')
 })
 
 test('Netto und USt ergeben zusammen wieder den bezahlten Betrag', () => {
   // Auch dort, wo die Division nicht aufgeht: 1,00 EUR bei 20 % sind
   // 0,83 netto und 0,17 Steuer — nicht 0,84 und 0,17.
   for (const brutto of [100, 101, 999, 4999, 10500, 12345]) {
-    const felder = buildSalesCsv([{ ...verkauf, original_amount_cents: brutto, balance_cents: brutto }])
-      .split('\r\n')[1].split(';')
+    for (const rabatt of [0, 1, 50]) {
+      const nennwert = brutto + rabatt
+      const felder = buildSalesCsv([{
+        ...verkauf,
+        original_amount_cents: nennwert,
+        discount_cents: rabatt,
+        balance_cents: nennwert,
+      }]).split('\r\n')[1].split(';')
 
-    const ust = Number(felder[6].replace(',', '.'))
-    const netto = Number(felder[7].replace(',', '.'))
-    assert.equal(Math.round((ust + netto) * 100), brutto, `${brutto} geht nicht auf`)
+      const ust = Number(felder[8].replace(',', '.'))
+      const netto = Number(felder[9].replace(',', '.'))
+      assert.equal(Math.round((ust + netto) * 100), brutto, `${brutto} (Rabatt ${rabatt}) geht nicht auf`)
+    }
   }
 })
 

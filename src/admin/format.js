@@ -20,6 +20,28 @@ export function euro(cents) {
   })}`
 }
 
+/**
+ * Euro-Eingabe zu Cent.
+ *
+ * Nimmt Komma wie Punkt: auf einer österreichischen Tastatur wird „89,50"
+ * getippt, aus einer Kalkulationstabelle kopiert kommt „89.50".
+ *
+ * @returns {number|null} null, wenn die Eingabe keine Zahl ist
+ */
+export function toCents(text) {
+  const cleaned = String(text).trim().replace(/\s|€/g, '').replace(',', '.')
+  if (!cleaned || !/^\d+(\.\d{0,2})?$/.test(cleaned)) return null
+  return Math.round(Number(cleaned) * 100)
+}
+
+/** Cent zurück ins Eingabefeld — ohne Währungszeichen, das tippt niemand mit. */
+export function toInput(cents) {
+  return (cents / 100).toLocaleString('de-AT', {
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  })
+}
+
 /** Wie euro(), aber mit sichtbarem Plus — fuer den Verlauf. */
 export function euroSigned(cents) {
   return cents > 0 ? `+${euro(cents)}` : euro(cents)

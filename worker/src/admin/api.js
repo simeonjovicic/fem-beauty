@@ -83,14 +83,17 @@ export async function listRedemptions(request, env) {
 }
 
 export async function getStats(env) {
+  // Verkauft heisst bezahlt: ein Aktionsgutschein ueber 120 € brachte 100 €.
+  // Offen und eingeloest bleiben beim Nennwert — den schuldet der Salon.
   const row = await env.DB.prepare(
     `SELECT
-       COUNT(*)                                                          AS total,
-       COALESCE(SUM(original_amount_cents), 0)                           AS sold_cents,
-       COALESCE(SUM(CASE WHEN status = 'active' THEN balance_cents END), 0) AS outstanding_cents,
-       COALESCE(SUM(CASE WHEN status = 'active' THEN redeemed_cents END), 0) AS redeemed_cents,
-       COALESCE(SUM(CASE WHEN status <> 'active' THEN 1 END), 0)         AS refunded_count
-     FROM voucher_balances`,
+       COUNT(*)                                                              AS total,
+       COALESCE(SUM(v.original_amount_cents - v.discount_cents), 0)          AS sold_cents,
+       COALESCE(SUM(CASE WHEN b.status = 'active' THEN b.balance_cents END), 0)  AS outstanding_cents,
+       COALESCE(SUM(CASE WHEN b.status = 'active' THEN b.redeemed_cents END), 0) AS redeemed_cents,
+       COALESCE(SUM(CASE WHEN b.status <> 'active' THEN 1 END), 0)           AS refunded_count
+     FROM voucher_balances b
+     JOIN vouchers v ON v.id = b.id`,
   ).first()
 
   return json({

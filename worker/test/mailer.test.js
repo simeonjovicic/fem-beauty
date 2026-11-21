@@ -127,6 +127,57 @@ test('Kauf fuer sich selbst meldet den Zustellweg richtig', () => {
   assert.ok(text.includes('als PDF an die Käuferin'))
 })
 
+// ── Aktionsrabatt ────────────────────────────────────────────────
+//
+// Black Week: 100 € bezahlt, Gutschein ueber 120 €. Beleg und Meldung
+// muessen den bezahlten Betrag als Umsatz zeigen und die USt davon
+// rechnen — der Nennwert steht daneben, nicht an seiner Stelle.
+
+const aktion = {
+  ...verkauf,
+  original_amount_cents: 12000,
+  discount_cents: 2000,
+  promotion: 'Black Week',
+}
+
+test('die Kaufbestaetigung rechnet Nennwert minus Rabatt', () => {
+  const { html, text } = buildVoucherEmail(aktion, { variant: 'receipt' })
+
+  assert.match(text, /Gutscheinwert: €\s120,00/)
+  assert.match(text, /Rabatt Black Week: −€\s20,00/)
+  assert.match(text, /Bezahlt: €\s100,00/)
+  // 20 % aus 100 €, nicht aus 120 €.
+  assert.match(text, /enthält €\s16,67 USt/)
+  assert.ok(html.includes('Rabatt Black Week'))
+  assert.ok(html.includes('16,67'))
+  assert.ok(!html.includes('20,00 USt'))
+})
+
+test('die Verkaufsmeldung nennt das Eingenommene und den Gutscheinwert', () => {
+  const { subject, html, text } = buildVoucherEmail(aktion, { variant: 'studio' })
+
+  assert.match(subject, /100,00 \(Wert €\s120,00\)/)
+  assert.match(text, /Eingenommen: €\s100,00/)
+  assert.match(text, /enthält €\s16,67 USt/)
+  assert.match(html, /Gutscheinwert €\s120,00/)
+})
+
+test('die Geschenkmail zeigt den vollen Gutscheinwert und keinen Rabatt', () => {
+  // Die Beschenkte bekommt einen Gutschein ueber 120 €. Was die
+  // Kaeuferin dafuer bezahlt hat, geht sie nichts an.
+  const { html, text } = buildVoucherEmail(aktion, { variant: 'gift' })
+  assert.ok(text.includes('120,00'))
+  assert.ok(!text.includes('Rabatt'))
+  assert.ok(!html.includes('Rabatt'))
+})
+
+test('ohne Rabatt bleibt der Beleg wie vorher', () => {
+  const { text } = buildVoucherEmail(verkauf, { variant: 'receipt' })
+  assert.ok(!text.includes('Gutscheinwert:'))
+  assert.ok(!text.includes('Rabatt'))
+  assert.match(text, /Bezahlt: €\s120,00/)
+})
+
 // ── Base64 fuer den Anhang ───────────────────────────────────────
 
 test('grosse Anhaenge sprengen den Aufrufstapel nicht', () => {

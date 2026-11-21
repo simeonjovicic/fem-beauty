@@ -60,6 +60,10 @@ export async function createVoucherForSession(db, { sessionId, paymentIntentId, 
       treatment_id: order.treatmentId,
       treatment_label: order.treatmentLabel,
       original_amount_cents: order.amountCents,
+      // Aktionsrabatt: der Gutschein gilt über den Nennwert, bezahlt und
+      // versteuert ist der Nennwert abzüglich dieses Betrags.
+      discount_cents: order.discountCents ?? 0,
+      promotion: order.promotion ?? null,
       currency: order.currency.toUpperCase(),
       vat_rate_bp: order.vatRateBp,
       tax_point: 'sale',
@@ -82,16 +86,18 @@ export async function createVoucherForSession(db, { sessionId, paymentIntentId, 
         .prepare(
           `INSERT INTO vouchers (
              id, code, token, kind, treatment_id, treatment_label,
-             original_amount_cents, currency, vat_rate_bp, tax_point, status,
+             original_amount_cents, discount_cents, promotion,
+             currency, vat_rate_bp, tax_point, status,
              recipient_name, sender_name, message, delivery, delivery_email,
              buyer_email, stripe_session_id, stripe_payment_intent,
              issued_at, expires_at
-           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         )
         .bind(
           voucher.id, voucher.code, voucher.token, voucher.kind,
           voucher.treatment_id, voucher.treatment_label,
-          voucher.original_amount_cents, voucher.currency, voucher.vat_rate_bp,
+          voucher.original_amount_cents, voucher.discount_cents, voucher.promotion,
+          voucher.currency, voucher.vat_rate_bp,
           voucher.tax_point, voucher.status,
           voucher.recipient_name, voucher.sender_name, voucher.message,
           voucher.delivery, voucher.delivery_email,

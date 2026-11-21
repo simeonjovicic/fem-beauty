@@ -13,6 +13,9 @@ function publicView(voucher) {
     kind: voucher.kind,
     treatmentLabel: voucher.treatment_label,
     amountCents: voucher.original_amount_cents,
+    // Bei einer Aktion: der Bonus, der im Gutscheinwert schon steckt.
+    discountCents: voucher.discount_cents ?? 0,
+    promotion: voucher.promotion ?? null,
     recipient: voucher.recipient_name,
     sender: voucher.sender_name,
     message: voucher.message,

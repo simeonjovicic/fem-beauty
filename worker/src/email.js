@@ -25,6 +25,8 @@
 // Farbe inline. Der <style>-Block ganz oben ist reine Zugabe für Clients,
 // die ihn behalten — ohne ihn muss die Mail vollständig funktionieren.
 
+import { paidCents } from './ledger.js'
+
 const BRAND = {
   paper: '#fdfbf8',
   cream: '#f5f0ea',
@@ -66,6 +68,25 @@ function esc(value) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+/**
+ * Bezahlter Betrag und die darin enthaltene USt.
+ *
+ * Vom bezahlten Betrag, nicht vom Nennwert: ein Black-Week-Gutschein über
+ * 120 € kostet 100 €, und versteuert werden die 100 €. Ohne Aktion ist
+ * beides dieselbe Zahl.
+ */
+function taxOf(voucher) {
+  const paid = paidCents(voucher)
+  const rate = (voucher.vat_rate_bp ?? 2000) / 10000
+  const net = Math.round(paid / (1 + rate))
+  return { paid, net, vat: paid - net, rate }
+}
+
+/** Die Abzugszeile auf Beleg und Meldung — dasselbe Wort wie bei Stripe. */
+function discountLabel(voucher) {
+  return voucher.promotion ? `Rabatt ${voucher.promotion}` : 'Rabatt'
 }
 
 /** Der Code in Vierergruppen bleibt am Telefon lesbar und beim Abtippen ruhig. */
@@ -402,9 +423,16 @@ function giftEmail(voucher, { bookingUrl }) {
 }
 
 function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
-  const rate = (voucher.vat_rate_bp ?? 2000) / 10000
-  const net = Math.round(voucher.original_amount_cents / (1 + rate))
-  const vat = voucher.original_amount_cents - net
+  const { paid, net, vat, rate } = taxOf(voucher)
+
+  // Bei einer Aktion steht der Rechenweg direkt über "Bezahlt": Nennwert,
+  // Rabatt, Ergebnis — wie auf Stripes Bezahlseite eben auch.
+  const discountRows = voucher.discount_cents > 0
+    ? [
+      ['Gutscheinwert', money(voucher.original_amount_cents)],
+      [esc(discountLabel(voucher)), `&minus;${money(voucher.discount_cents)}`],
+    ]
+    : []
 
   const rows = [
     ['Gutscheinart', voucher.kind === 'treatment' ? 'Behandlungsgutschein' : 'Wertgutschein'],
@@ -418,6 +446,7 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
       ? `Per E-Mail an ${esc(voucher.delivery_email)}`
       : 'Als PDF in dieser E-Mail'],
     ['Code', spacedCode(voucher.code)],
+    ...discountRows,
   ].filter(Boolean).map(([key, value]) => `
     <tr>
       <td style="padding:9px 0;font-family:${SANS};font-size:13px;color:${BRAND.taupe};">${key}</td>
@@ -436,7 +465,7 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
             <strong style="font-weight:600;">Bezahlt</strong>
           </td>
           <td align="right" style="padding:16px 0 0;font-family:${SANS};font-size:16px;color:${BRAND.warm};">
-            <strong style="font-weight:600;">${money(voucher.original_amount_cents)}</strong>
+            <strong style="font-weight:600;">${money(paid)}</strong>
           </td>
         </tr>
         <tr>
@@ -482,10 +511,10 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
     subject,
     html: shell({
       title: subject,
-      preheader: `${money(voucher.original_amount_cents)} · ${voucher.code} · PDF im Anhang.`,
+      preheader: `${money(paid)} · ${voucher.code} · PDF im Anhang.`,
       body,
     }),
-    text: receiptText(voucher, { net, vat, rate, selfPurchase }),
+    text: receiptText(voucher, { paid, net, vat, rate, selfPurchase }),
   }
 }
 
@@ -505,9 +534,17 @@ function receiptEmail(voucher, { bookingUrl, selfPurchase }) {
  * „ist bei mir nichts angekommen" mit einer Weiterleitung erledigt ist.
  */
 function studioEmail(voucher) {
-  const rate = (voucher.vat_rate_bp ?? 2000) / 10000
-  const net = Math.round(voucher.original_amount_cents / (1 + rate))
-  const vat = voucher.original_amount_cents - net
+  const { paid, net, vat, rate } = taxOf(voucher)
+
+  // "Eingenommen" ist der bezahlte Betrag. Bei einer Aktion steht darunter,
+  // worüber der Gutschein tatsächlich lautet — das ist der Betrag, den die
+  // Kundin später an der Kassa vorlegt.
+  const valueLine = voucher.discount_cents > 0
+    ? `
+            <div style="padding-top:6px;font-family:${SANS};font-size:12px;color:${BRAND.warmLt};">
+              Gutscheinwert ${money(voucher.original_amount_cents)} · ${esc(discountLabel(voucher))} &minus;${money(voucher.discount_cents)}
+            </div>`
+    : ''
 
   const toWhom = voucher.delivery === 'email' && voucher.delivery_email
     ? `Per E-Mail an ${esc(voucher.delivery_email)}`
@@ -543,11 +580,11 @@ function studioEmail(voucher) {
               EINGENOMMEN
             </div>
             <div class="fem-value" style="padding-top:8px;font-family:${SERIF};font-size:40px;line-height:1;color:${BRAND.warm};">
-              ${money(voucher.original_amount_cents)}
+              ${money(paid)}
             </div>
             <div style="padding-top:10px;font-family:${SANS};font-size:12px;color:${BRAND.warmLt};">
               enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %) · netto ${money(net)}
-            </div>
+            </div>${valueLine}
           </td>
         </tr>
       </table>
@@ -614,7 +651,9 @@ function studioEmail(voucher) {
     ${button('Im Panel öffnen', `${STUDIO.site}/admin`)}
     ${trailer}`
 
-  const subject = `Verkauf · ${money(voucher.original_amount_cents)} · ${voucher.code}`
+  const subject = voucher.discount_cents > 0
+    ? `Verkauf · ${money(paid)} (Wert ${money(voucher.original_amount_cents)}) · ${voucher.code}`
+    : `Verkauf · ${money(paid)} · ${voucher.code}`
 
   return {
     subject,
@@ -623,7 +662,7 @@ function studioEmail(voucher) {
       preheader: `${what} · ${voucher.recipient_name ? `für ${voucher.recipient_name} · ` : ''}${voucher.buyer_email || 'unbekannt'}`,
       body,
     }),
-    text: studioText(voucher, { net, vat, rate }),
+    text: studioText(voucher, { paid, net, vat, rate }),
   }
 }
 
@@ -671,14 +710,26 @@ function giftText(voucher, bookingUrl) {
   ].join('\n')
 }
 
-function receiptText(voucher, { net, vat, rate, selfPurchase }) {
+// Nennwert und Rabatt als eigene Zeilen, nur wenn es einen Rabatt gibt.
+// Eingespreizt wie die Widmung in giftText — aus demselben Grund.
+function discountText(voucher) {
+  return voucher.discount_cents > 0
+    ? [
+      `Gutscheinwert: ${money(voucher.original_amount_cents)}`,
+      `${discountLabel(voucher)}: −${money(voucher.discount_cents)}`,
+    ]
+    : []
+}
+
+function receiptText(voucher, { paid, net, vat, rate, selfPurchase }) {
   return [
     'Danke für deinen Einkauf.',
     '',
     voucher.kind === 'treatment'
       ? `Behandlungsgutschein: ${voucher.treatment_label}`
       : 'Wertgutschein',
-    `Betrag: ${money(voucher.original_amount_cents)}`,
+    ...discountText(voucher),
+    `Bezahlt: ${money(paid)}`,
     `enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %), netto ${money(net)}`,
     `Code: ${voucher.code}`,
     `Gekauft am: ${longDate(voucher.issued_at)}`,
@@ -695,14 +746,15 @@ function receiptText(voucher, { net, vat, rate, selfPurchase }) {
   ].join('\n')
 }
 
-function studioText(voucher, { net, vat, rate }) {
+function studioText(voucher, { paid, net, vat, rate }) {
   return [
     'Ein Gutschein wurde gekauft.',
     '',
     voucher.kind === 'treatment'
       ? `Behandlungsgutschein: ${voucher.treatment_label}`
       : 'Wertgutschein',
-    `Betrag: ${money(voucher.original_amount_cents)}`,
+    ...discountText(voucher),
+    `Eingenommen: ${money(paid)}`,
     `enthält ${money(vat)} USt (${(rate * 100).toFixed(0)} %), netto ${money(net)}`,
     `Code: ${voucher.code}`,
     '',

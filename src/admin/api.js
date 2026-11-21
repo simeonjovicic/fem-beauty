@@ -29,6 +29,20 @@ const MESSAGES = {
   expired: 'Dieser Gutschein ist abgelaufen.',
   voided: 'Dieser Gutschein wurde storniert.',
   refunded: 'Dieser Gutschein wurde rückerstattet.',
+  // Aktion — die Prüfungen aus worker/src/promotion.js.
+  name_required: 'Bitte der Aktion einen Namen geben.',
+  name_too_long: 'Der Name ist zu lang (höchstens 30 Zeichen).',
+  start_invalid: 'Bitte ein gültiges Startdatum wählen.',
+  end_invalid: 'Bitte ein gültiges Enddatum wählen.',
+  end_before_start: 'Das Ende liegt vor dem Start.',
+  tiers_required: 'Mindestens eine Stufe ist nötig.',
+  too_many_tiers: 'Höchstens sechs Stufen.',
+  pay_invalid: 'Ein Kaufbetrag ist ungültig.',
+  pay_too_high: 'Ein Kaufbetrag liegt über 1.000 €.',
+  pay_duplicate: 'Zwei Stufen haben denselben Kaufbetrag.',
+  bonus_invalid: 'Ein Bonus ist ungültig.',
+  bonus_too_high: 'Der Bonus muss unter dem Kaufbetrag liegen.',
+  stripe_coupon_failed: 'Stripe hat die Rabatte nicht angelegt — die Aktion ist nicht gespeichert.',
   already_reversed: 'Diese Buchung wurde bereits zurückgenommen.',
   target_is_reversal: 'Eine Gegenbuchung lässt sich nicht zurücknehmen.',
   concurrent_modification: 'Jemand anderes hat gerade gebucht — bitte neu laden.',
@@ -102,6 +116,19 @@ export function reverseRedemption(redemptionId, { note, idempotencyKey }) {
   return request(`/api/admin/redemptions/${encodeURIComponent(redemptionId)}/reverse`, {
     method: 'POST',
     body: JSON.stringify({ note, idempotencyKey }),
+  })
+}
+
+/** Die Gutschein-Aktion samt Zustand bei Stripe und bisherigem Verkauf. */
+export function fetchPromotion() {
+  return request('/api/admin/promotion')
+}
+
+/** Speichert die Aktion. Eingeschaltet legt der Worker dabei die Stripe-Coupons an. */
+export function savePromotion(promotion) {
+  return request('/api/admin/promotion', {
+    method: 'PATCH',
+    body: JSON.stringify(promotion),
   })
 }
 

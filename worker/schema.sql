@@ -84,6 +84,17 @@ CREATE TABLE IF NOT EXISTS vouchers (
   treatment_label       TEXT,
 
   original_amount_cents INTEGER NOT NULL CHECK (original_amount_cents > 0),
+  -- Aktionsrabatt, etwa Black Week: Gutschein über 120 €, verkauft für
+  -- 100 €. original_amount_cents bleibt der Nennwert — gegen ihn wird
+  -- eingelöst. Bezahlt und versteuert ist original_amount_cents minus
+  -- discount_cents. So hat es die Steuerberaterin vorgegeben: Gutschein
+  -- mit dem Nennbetrag, Rabatt bei der Zahlung, Umsatz ist der Rest.
+  --
+  -- Auf einer bestehenden Datenbank per worker/migrations/ nachgezogen.
+  discount_cents        INTEGER NOT NULL DEFAULT 0
+                                CHECK (discount_cents >= 0 AND discount_cents < original_amount_cents),
+  -- Name der Aktion zum Kaufzeitpunkt, als Schnappschuss wie treatment_label.
+  promotion             TEXT,
   currency              TEXT    NOT NULL DEFAULT 'EUR',
 
   -- Steuersatz in Basispunkten zum Verkaufszeitpunkt (2000 = 20,00 %).

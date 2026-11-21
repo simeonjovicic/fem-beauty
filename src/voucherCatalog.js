@@ -28,8 +28,11 @@ const FALLBACK_LIMITS = { minCents: 2500, maxCents: 50000 }
 
 export const PRESETS_CENTS = [5000, 10000, 15000, 20000]
 
-async function get(path) {
-  const response = await fetch(`${API_BASE}${path}`, { credentials: 'include' })
+async function get(path, fresh = false) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    ...(fresh ? { cache: 'no-cache' } : {}),
+  })
   const data = await response.json().catch(() => ({}))
   if (!response.ok) throw new Error(data.reason ?? 'Katalog nicht geladen')
   return data
@@ -51,14 +54,20 @@ function fromRow(row) {
 function useCatalogFrom(path) {
   const [treatments, setTreatments] = useState([])
   const [limits, setLimits] = useState(FALLBACK_LIMITS)
+  // Eine laufende Gutschein-Aktion, nur vom öffentlichen Endpunkt.
+  const [promotion, setPromotion] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const reload = useCallback(async () => {
+  // `fresh` am Browser-Cache vorbei: der Endpunkt darf eine Minute gecacht
+  // werden, und genau diese Minute zeigte nach dem Ende einer Aktion noch
+  // ihren Bonus, wenn der Shop nach der Absage des Servers neu lädt.
+  const reload = useCallback(async (options) => {
     try {
-      const data = await get(path)
+      const data = await get(path, options?.fresh === true)
       setTreatments((data.treatments ?? []).map(fromRow))
       setLimits(data.limits ?? FALLBACK_LIMITS)
+      setPromotion(data.promotion ?? null)
       setError(null)
     } catch (err) {
       setError(err.message)
@@ -78,13 +87,26 @@ function useCatalogFrom(path) {
     treatments,
     minCents: limits.minCents,
     maxCents: limits.maxCents,
-    presetsCents: PRESETS_CENTS.filter(
-      (cents) => cents >= limits.minCents && cents <= limits.maxCents,
-    ),
+    // Während einer Aktion sind die Aktionsbeträge die Schnellwahl — wer
+    // 150 € antippt, bekommt keinen Bonus und soll das nicht erst an der
+    // Kasse merken.
+    presetsCents: (promotion ? promotion.tiers.map((tier) => tier.payCents) : PRESETS_CENTS)
+      .filter((cents) => cents >= limits.minCents && cents <= limits.maxCents),
+    promotion,
     loading,
     error,
     reload,
-  }), [treatments, limits, loading, error, reload])
+  }), [treatments, limits, promotion, loading, error, reload])
+}
+
+/**
+ * Der Bonus, den eine laufende Aktion auf diesen Kaufbetrag gibt, in Cent.
+ *
+ * Nur Anzeige — der Server rechnet beim Checkout selbst und gibt den Bonus
+ * auch dann, wenn der Shop ihn nicht angezeigt hat.
+ */
+export function bonusCentsFor(promotion, amountCents) {
+  return promotion?.tiers.find((tier) => tier.payCents === amountCents)?.bonusCents ?? 0
 }
 
 /** Der Katalog für den Shop. */
