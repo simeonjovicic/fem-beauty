@@ -300,7 +300,7 @@ export default function AdminPage() {
 
   return (
     <div className="adm">
-      <MockBanner tab={tab} dev={me?.dev} />
+      <MockBanner dev={me?.dev} />
 
       <div className="adm-wrap">
         <header className="adm-head">
@@ -394,30 +394,17 @@ export default function AdminPage() {
   )
 }
 
-// Der Hinweis muss stimmen, sonst richtet er Schaden an. Gebuchte Betraege
-// verschwinden beim Neuladen — gespeicherte Preise nicht, die liegen im
-// localStorage und wirken im Shop. Ein Banner, das beides gleich beschreibt,
-// waere an einer der beiden Stellen eine Falschaussage.
 /**
  * Warnbalken. Zeigt nur noch an, was tatsaechlich noch nicht echt ist.
  *
- * Gutscheine und Buchungen kommen inzwischen aus der Datenbank — was hier
- * frueher stand ("alle Zahlen erfunden") waere jetzt falsch und damit
- * schlimmer als kein Hinweis. Uebrig bleiben zwei echte Vorbehalte.
+ * Der Hinweis muss stimmen, sonst richtet er Schaden an. Frueher standen
+ * hier "alle Zahlen erfunden" und ein Entwurfs-Hinweis im Preise-Reiter —
+ * beides wurde falsch, als Gutscheine, Buchungen und Preise in die
+ * Datenbank zogen. Der Preise-Hinweis behauptete danach noch, Stripe buche
+ * die alten Preise ab, obwohl es laengst die neuen tat. Uebrig bleibt ein
+ * echter Vorbehalt: der Entwicklungsmodus ohne Zugangsschutz.
  */
-function MockBanner({ tab, dev }) {
-  if (tab === 'prices') {
-    return (
-      <div className="adm-mock" role="status">
-        <strong>Entwurf</strong>
-        <span>
-          Preise wirken sofort im Gutschein-Shop und bleiben in diesem Browser
-          gespeichert. Was Stripe abbucht, ändern sie noch nicht.
-        </span>
-      </div>
-    )
-  }
-
+function MockBanner({ dev }) {
   if (!dev) return null
 
   return (
